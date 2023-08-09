@@ -1,8 +1,9 @@
 <?php
 
-use App\Http\Controllers\WanLinYunController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\NBController;
+use App\Http\Controllers\WanLinYunController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,3 +28,6 @@ Route::post('/offline', [WanLinYunController::class, 'offline']);
 Route::post('/iccid', [WanLinYunController::class, 'iccid']);
 
 Route::post('/wly/remoteControl/{chipcode}/{clientId}/{runTime}/{switchState}', [WanLinYunController::class, 'remoteControl']);
+
+Route::get('/nbWarm', [NBController::class, 'NbWarm']);
+Route::post('/nbWarm', [NBController::class, 'received']);
