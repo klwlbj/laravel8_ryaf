@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Log;
 
 class NBController extends BaseController
 {
-    public function NbWarm(Request $request)
+    public function nbWarm(Request $request)
     {
         $params = $request->query();
 
@@ -23,7 +23,7 @@ class NBController extends BaseController
         Log::info('failed:' . json_encode($params));
     }
 
-    public function received(Request $request)
+    public function hkReceived(Request $request)
     {
         $data      = $request->input();
         $msg       = $data['msg'];
@@ -55,19 +55,59 @@ class NBController extends BaseController
                     $imei      = $msg['imei']; // 编号
                     $pid       = $msg['pid']; // 产品id
                     $dsId      = $msg['ds_id'] ?? ''; // 数据 点id
-                    $value = $msg['value']; // 具体数据部分，为设备上传至平台或触发的相关数据
-                    $this->handleValue($value);
+                    $value     = $msg['value']; // 具体数据部分，为设备上传至平台或触发的相关数据
+                    $array     = $this->parseString($value);
+                    Log::info('hk_array:' . json_encode($array));
+
                     break;
             }
+        }
+    }
 
+    public function nbReceived(Request $request)
+    {
+        $data      = $request->input();
+        $msg       = $data['msg'];
+        $nonce     = $data['nonce'];
+        $signature = $data['signature'];
 
+        if ($this->checkSign($msg, $nonce, $signature)) {
+            Log::info('data:' . json_encode($data));
+
+            // 解密处理
+            $msg = $this->aesDecrypt(base64_decode($msg));
+            Log::info('msg2:' . $msg);
+
+            $msg = json_decode($msg, true);
+            Log::info('msg:' . json_encode($msg));
+
+            $type = $msg['type']; // 固定值:数据点数据1 或 生命周期数据2
+
+            switch ($type) {
+                case 2:
+                    $devName   = $msg['dev_name']; //设备名
+                    $pid       = $msg['pid']; // 产品id
+                    $status    = $msg['status']; // 设备状态，1:在线；2:离线
+                    $eventTime = $msg['at']; // 设备上报的时间戳
+                    break;
+                case 1:
+                    $devName   = $msg['dev_name']; //设备名
+                    $eventTime = $msg['at']; // 设备上报的时间戳
+                    $imei      = $msg['imei']; // 编号
+                    $pid       = $msg['pid']; // 产品id
+                    $dsId      = $msg['ds_id'] ?? ''; // 数据 点id
+                    $value     = $msg['value']; // 具体数据部分，为设备上传至平台或触发的相关数据
+                    $this->handleNbValue($value);
+                    break;
+            }
 
             return response()->json(['message' => 'Success']);
         }
         Log::info('failed:' . json_encode($data));
     }
 
-    private function handleValue($value){
+    private function handleNbValue($value)
+    {
         $value = $this->parseStringToArray($value);
         Log::info('value:' . json_encode($value));
 
@@ -161,5 +201,86 @@ class NBController extends BaseController
     private function aesDecrypt($encryptedData)
     {
         return openssl_decrypt($encryptedData, 'AES-128-CBC', env('NB_KEY'), OPENSSL_RAW_DATA, env('NB_KEY'));
+    }
+
+    private function hexToStr($hex)
+    {
+        $string = '';
+        for ($i = 0; $i < strlen($hex) - 1; $i += 2) {
+            $string .= chr(hexdec($hex[$i] . $hex[$i + 1]));
+        }
+
+        return trim($string);
+    }
+
+    private function parseString(string $string)
+    {
+        $parsedData = [];
+
+        $substrArray = [
+            // ['字段名','字段长度','字段是否需要解析']
+            // ['start', 2, false],
+            ['byMessageId', 2, false],
+            ['byFixedSign', 2, false],
+            ['byDevType', 2, false],
+            ['byMac', 12, false],
+            ['byTime', 8, true],
+            ['byDevTypeEx', 2, false],
+            ['wPCI', 4, true],
+            ['bySnr', 2, true],
+            ['byEcl', 2, true],
+            ['wRsrp', 4, true],
+            ['dwUpHeaderLen', 8, true],
+            ['dwPackageNo', 8, false],
+            ['byQCCID', 40, true],
+            ['byIMEI', 40, true],
+            ['byIMSI', 40, true],
+            ['byNBModuleVersion', 48, false],
+            ['dwCID', 8, false],
+            ['dwLAC', 8, false],
+            ['bySoftwareVersion', 40, true],
+            ['byHardwareVersion', 40, true],
+            ['byDeviceModel', 40, true],
+            ['byProtocolVersion', 20, true],
+        ];
+
+        foreach ($substrArray as $value) {
+            static $offset = 0;
+            if ($value[2] === true) {
+                switch ($value[0]) {
+                    case 'byTime':
+                        $parsedData[$value[0]] = date('Y-m-d H:i:s', hexdec($value[1]));
+                        break;
+                    case 'wPCI':
+                    case 'bySnr':
+                    case 'byEcl':
+                        $parsedData[$value[0]] = hexdec($value[1]);
+                        break;
+
+                    case 'wRsrp':
+                        $parsedData[$value[0]] = hexdec($value[1]) - 65536;
+                        break;
+                    case 'dwUpHeaderLen':
+                        $parsedData[$value[0]] = $value[1];
+                        break;
+                    default:
+                        $parsedData[$value[0]] = $this->hexToStr(substr($string, $offset, $value[1]));
+                        break;
+                }
+            } else {
+                $parsedData[$value[0]] = substr($string, $offset, $value[1]);
+            }
+            $offset += $value[1];
+        }
+
+        return $parsedData;
+    }
+
+    public function analyze()
+    {
+        $string = '060182e0ca3c0195de64ddd65800007a0600ffa8000000be00000000383938363034453431393233373130333138373238363135363130353631333132373800000000003436303038363437393330313837320000000000424332363059434e46415230314130325f484b00000000000d17875c00001d176275696c6432333035313100000000000000000056312e30000000000000000000000000000000004e502d46593330302d4e00000000000000000000312e352e3000000000000007000000001f';
+
+        $array = $this->parseString($string);
+        var_dump($array);
     }
 }

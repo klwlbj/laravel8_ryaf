@@ -29,5 +29,9 @@ Route::post('/iccid', [WanLinYunController::class, 'iccid']);
 
 Route::post('/wly/remoteControl/{chipcode}/{clientId}/{runTime}/{switchState}', [WanLinYunController::class, 'remoteControl']);
 
-Route::get('/nbWarm', [NBController::class, 'NbWarm']);
-Route::post('/nbWarm', [NBController::class, 'received']);
+Route::get('/nbWarm', [NBController::class, 'nbWarm']);
+Route::get('/hkWarm', [NBController::class, 'nbWarm']);
+Route::post('/nbWarm', [NBController::class, 'nbReceived']);
+Route::post('/hkWarm', [NBController::class, 'hkReceived']);
+
+Route::get('/analyze',[NBController::class, 'analyze']);
