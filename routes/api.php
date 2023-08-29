@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NBController;
+use App\Http\Controllers\CTWingController;
+use App\Http\Controllers\OneNetController;
 use App\Http\Controllers\WanLinYunController;
 
 /*
@@ -29,9 +31,39 @@ Route::post('/iccid', [WanLinYunController::class, 'iccid']);
 
 Route::post('/wly/remoteControl/{chipcode}/{clientId}/{runTime}/{switchState}', [WanLinYunController::class, 'remoteControl']);
 
+// 移动onenet
+Route::get('/getSign', [OneNetController::class, 'echoSign']);
+Route::get('/loadResource', [OneNetController::class, 'loadResource']);
+Route::get('/cacheCommands', [OneNetController::class, 'cacheCommands']);
+Route::get('/cacheCommand/{uuid}', [OneNetController::class, 'cacheCommand']);
+Route::get('/cancelCacheCommand/{uuid}', [OneNetController::class, 'cancelCacheCommand']);
+Route::get('/cancelAllCacheCommand', [OneNetController::class, 'cancelAllCacheCommand']);
+Route::get('/issueCacheCommand/{args}', [OneNetController::class, 'issueCacheCommand']);
+Route::get('/writeResource/{args}/{dwPackageNo}', [OneNetController::class, 'writeResource']);
+Route::get('/logQuery/{uuid}', [OneNetController::class, 'logQuery']);
+
+// 电信ctwing
+// 事件上报
+Route::get('/ctwing/queryDeviceEventList/{productId}/{deviceId}', [CTWingController::class, 'queryDeviceEventList']);
+Route::get('/ctwing/queryDeviceEventTotal/{productId}/{deviceId}', [CTWingController::class, 'queryDeviceEventTotal']);
+// http消息订阅
+Route::get('/ctwing/getSubscriptionsList/{productId}/{pageNow}/{pageSize}', [CTWingController::class, 'getSubscriptionsList']);
+Route::get('/ctwing/getSubscription/{productId}/{subId}', [CTWingController::class, 'getSubscription']);
+Route::get('/ctwing/deleteSubscription/{productId}/{subId}/{subLevel}', [CTWingController::class, 'deleteSubscription']);
+Route::get('/ctwing/createSubscription/{productId}/{deviceId}/{subUrl}/{subLevel}', [CTWingController::class, 'createSubscription']);
+// 指令下发
+Route::get('/ctwing/queryCommandList/{productId}/{deviceId}', [CTWingController::class, 'queryCommandList']);
+Route::get('/ctwing/queryCommand/{productId}/{deviceId}/{commandId}', [CTWingController::class, 'queryCommand']);
+Route::get('/ctwing/cancelCommand/{productId}/{deviceId}/{commandId}', [CTWingController::class, 'cancelCommand']);
+Route::get('/ctwing/cancelAllCommand/{productId}/{deviceId}', [CTWingController::class, 'cancelAllCommand']);
+Route::get('/ctwing/createCommandLwm2mProfile/{productId}/{deviceId}/{command}/{dwPackageNo}', [CTWingController::class, 'createCommandLwm2mProfile']);
+
+// http回调
 Route::get('/nbWarm', [NBController::class, 'nbWarm']);
 Route::get('/hkWarm', [NBController::class, 'nbWarm']);
 Route::post('/nbWarm', [NBController::class, 'nbReceived']);
 Route::post('/hkWarm', [NBController::class, 'hkReceived']);
+Route::post('/hkCTWingWarm', [NBController::class, 'hkCTWingWarm']);
 
-Route::get('/analyze',[NBController::class, 'analyze']);
+// 海康指令测试
+Route::get('/analyze', [NBController::class, 'analyze']);
