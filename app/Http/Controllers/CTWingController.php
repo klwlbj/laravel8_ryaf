@@ -6,75 +6,75 @@ use App\Utils\CTWing;
 
 class CTWingController extends BaseController
 {
-    public function queryDeviceEventList($productId, $deviceId)
+    public function queryDeviceEventList($productId, $deviceId, $masterKey)
     {
         $client = new CTWing();
-        return $client->queryDeviceEventList($productId, $deviceId);
+        return $client->queryDeviceEventList($productId, $deviceId, $masterKey);
     }
 
-    public function queryDeviceEventTotal($productId, $deviceId)
+    public function queryDeviceEventTotal($productId, $deviceId, $masterKey)
     {
         $client = new CTWing();
-        return $client->queryDeviceEventTotal($productId, $deviceId);
+        return $client->queryDeviceEventTotal($productId, $deviceId, $masterKey);
     }
 
-    public function queryCommandList($productId, $deviceId)
+    public function queryCommandList($productId, $deviceId, $masterKey)
     {
         $client = new CTWing();
-        return $client->queryCommandList($productId, $deviceId);
+        return $client->queryCommandList($productId, $deviceId, $masterKey);
     }
 
-    public function queryCommand($productId, $deviceId, $commandId)
+    public function queryCommand($productId, $deviceId, $masterKey, $commandId)
     {
         $client = new CTWing();
-        return $client->queryCommand($productId, $deviceId, $commandId);
+        return $client->queryCommand($productId, $deviceId, $masterKey, $commandId);
     }
 
-    public function cancelCommand($productId, $deviceId, $commandId)
+    public function cancelCommand($productId, $deviceId, $masterKey, $commandId)
     {
         $client = new CTWing();
-        return $client->cancelCommand($productId, $deviceId, $commandId);
+        return $client->cancelCommand($productId, $deviceId, $masterKey, $commandId);
     }
 
-    public function cancelAllCommand($productId, $deviceId)
+    public function cancelAllCommand($productId, $deviceId, $masterKey)
     {
         $client = new CTWing();
-        return $client->cancelAllCommand($productId, $deviceId);
+        return $client->cancelAllCommand($productId, $deviceId, $masterKey);
     }
 
-/*    public function createCommand($productId, $deviceId, $args)
+    public function createCommand($productId, $deviceId, $masterKey, $command, $dwPackageNo)
     {
         $client = new CTWing();
-        return $client->createCommand($productId, $deviceId, $args);
-    }*/
-
-    public function createCommandLwm2mProfile($productId, $deviceId, $command, $dwPackageNo)
-    {
-        $client = new CTWing();
-        return $client->createCommandLwm2mProfile($productId, $deviceId, $command, $dwPackageNo);
+        return $client->createCommand($productId, $deviceId, $masterKey, $command, $dwPackageNo);
     }
 
-    public function getSubscriptionsList($productId, $pageNow, $pageSize)
+    public function createCommandLwm2mProfile($productId, $deviceId, $masterKey, $command, $dwPackageNo)
     {
         $client = new CTWing();
-        return $client->getSubscriptionsList($productId, $pageNow, $pageSize);
+        return $client->createCommandLwm2mProfile($productId, $deviceId, $masterKey, $command, $dwPackageNo);
     }
 
-    public function getSubscription($productId, $subId)
+    public function getSubscriptionsList($productId, $masterKey, $pageNow, $pageSize)
     {
         $client = new CTWing();
-        return $client->getSubscription($productId, $subId);
+        return $client->getSubscriptionsList($productId, $masterKey, $pageNow, $pageSize);
     }
 
-    public function deleteSubscription($productId, $subId, $subLevel)
+    public function getSubscription($productId, $masterKey, $subId)
     {
         $client = new CTWing();
-        return $client->deleteSubscription($productId, $subId, $subLevel);
+        return $client->getSubscription($productId, $masterKey, $subId);
     }
 
-    public function createSubscription($productId, $deviceId, $subUrl, $subLevel)
+    public function deleteSubscription($productId, $masterKey, $subId, $subLevel)
     {
         $client = new CTWing();
-        return $client->createSubscription($productId, $deviceId, $subUrl, $subLevel);
+        return $client->deleteSubscription($productId, $masterKey, $subId, $subLevel);
+    }
+
+    public function createSubscription($productId, $deviceId, $masterKey, $subUrl, $subLevel)
+    {
+        $client = new CTWing();
+        return $client->createSubscription($productId, $deviceId, $masterKey, $subUrl, $subLevel);
     }
 }

@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Utils\Apis;
+
 use App\Utils\Apis\Core\AepSdkCore;
-
-
 
 class Aep_modbus_device_management
 {
@@ -14,20 +14,20 @@ class Aep_modbus_device_management
     //  描述:body,具体参考平台api说明
     public static function UpdateDevice($appKey, $appSecret, $MasterKey, $deviceId, $body)
     {
-        $path="/aep_modbus_device_management/modbus/device";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_modbus_device_management/modbus/device";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["deviceId"]=$deviceId;
+        $param             = [];
+        $param["deviceId"] = $deviceId;
 
-        $version ="20200404012440";
+        $version = "20200404012440";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "PUT");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -37,16 +37,16 @@ class Aep_modbus_device_management
     //  描述:body,具体参考平台api说明
     public static function CreateDevice($appKey, $appSecret, $body)
     {
-        $path="/aep_modbus_device_management/modbus/device";
-        $headers=null;
-        $param=null;
-        $version ="20200404012437";
+        $path    = "/aep_modbus_device_management/modbus/device";
+        $headers = null;
+        $param   = null;
+        $version = "20200404012437";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -60,21 +60,21 @@ class Aep_modbus_device_management
     //  描述:
     public static function QueryDevice($appKey, $appSecret, $MasterKey, $deviceId, $productId)
     {
-        $path="/aep_modbus_device_management/modbus/device";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_modbus_device_management/modbus/device";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["deviceId"]=$deviceId;
-        $param["productId"]=$productId;
+        $param              = [];
+        $param["deviceId"]  = $deviceId;
+        $param["productId"] = $productId;
 
-        $version ="20200404012435";
+        $version = "20200404012435";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -92,23 +92,23 @@ class Aep_modbus_device_management
     //  描述:
     public static function QueryDeviceList($appKey, $appSecret, $MasterKey, $productId, $searchValue = "", $pageNow = "", $pageSize = "")
     {
-        $path="/aep_modbus_device_management/modbus/devices";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_modbus_device_management/modbus/devices";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["productId"]=$productId;
-        $param["searchValue"]=$searchValue;
-        $param["pageNow"]=$pageNow;
-        $param["pageSize"]=$pageSize;
+        $param                = [];
+        $param["productId"]   = $productId;
+        $param["searchValue"] = $searchValue;
+        $param["pageNow"]     = $pageNow;
+        $param["pageSize"]    = $pageSize;
 
-        $version ="20200404012428";
+        $version = "20200404012428";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -122,21 +122,21 @@ class Aep_modbus_device_management
     //  描述:
     public static function DeleteDevice($appKey, $appSecret, $MasterKey, $productId, $deviceIds)
     {
-        $path="/aep_modbus_device_management/modbus/device";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_modbus_device_management/modbus/device";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["productId"]=$productId;
-        $param["deviceIds"]=$deviceIds;
+        $param              = [];
+        $param["productId"] = $productId;
+        $param["deviceIds"] = $deviceIds;
 
-        $version ="20200404012425";
+        $version = "20200404012425";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "DELETE");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -148,22 +148,20 @@ class Aep_modbus_device_management
     //  描述:body,具体参考平台api说明
     public static function ListDeviceInfo($appKey, $appSecret, $MasterKey, $body)
     {
-        $path="/aep_modbus_device_management/listByDeviceIds";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_modbus_device_management/listByDeviceIds";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20210828063614";
+        $param   = null;
+        $version = "20210828063614";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
     }
-
-
 }

@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Utils\Apis;
+
 use App\Utils\Apis\Core\AepSdkCore;
-
-
 
 class Aep_product_management
 {
@@ -10,18 +10,18 @@ class Aep_product_management
     //  描述:
     public static function QueryProduct($appKey, $appSecret, $productId)
     {
-        $path="/aep_product_management/product";
-        $headers=null;
-        $param=array();
-        $param["productId"]=$productId;
+        $path               = "/aep_product_management/product";
+        $headers            = null;
+        $param              = [];
+        $param["productId"] = $productId;
 
-        $version ="20181031202055";
+        $version = "20181031202055";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -35,20 +35,20 @@ class Aep_product_management
     //  描述:每页记录数
     public static function QueryProductList($appKey, $appSecret, $searchValue = "", $pageNow = "", $pageSize = "")
     {
-        $path="/aep_product_management/products";
-        $headers=null;
-        $param=array();
-        $param["searchValue"]=$searchValue;
-        $param["pageNow"]=$pageNow;
-        $param["pageSize"]=$pageSize;
+        $path                 = "/aep_product_management/products";
+        $headers              = null;
+        $param                = [];
+        $param["searchValue"] = $searchValue;
+        $param["pageNow"]     = $pageNow;
+        $param["pageSize"]    = $pageSize;
 
-        $version ="20190507004824";
+        $version = "20190507004824";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -60,20 +60,20 @@ class Aep_product_management
     //  描述:
     public static function DeleteProduct($appKey, $appSecret, $MasterKey, $productId)
     {
-        $path="/aep_product_management/product";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_product_management/product";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["productId"]=$productId;
+        $param              = [];
+        $param["productId"] = $productId;
 
-        $version ="20181031202029";
+        $version = "20181031202029";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "DELETE");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -83,16 +83,16 @@ class Aep_product_management
     //  描述:body,具体参考平台api说明
     public static function CreateProduct($appKey, $appSecret, $body)
     {
-        $path="/aep_product_management/product";
-        $headers=null;
-        $param=null;
-        $version ="20220924042921";
+        $path    = "/aep_product_management/product";
+        $headers = null;
+        $param   = null;
+        $version = "20220924042921";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -102,20 +102,18 @@ class Aep_product_management
     //  描述:body,具体参考平台api说明
     public static function UpdateProduct($appKey, $appSecret, $body)
     {
-        $path="/aep_product_management/product";
-        $headers=null;
-        $param=null;
-        $version ="20220924043504";
+        $path    = "/aep_product_management/product";
+        $headers = null;
+        $param   = null;
+        $version = "20220924043504";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "PUT");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
     }
-
-
 }

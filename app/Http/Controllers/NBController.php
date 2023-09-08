@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Utils\CTWing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -58,11 +59,31 @@ class NBController extends BaseController
 
         $value = $serviceData['msg'] ?? ''; // 16进制字符串
         $imei  = $serviceData['IMEI'] ?? '';
-        if(!empty($value)){
+        if (!empty($value)) {
             $array = $this->parseString(strtolower($value));
             // 解析后处理todo
             Log::info('hk_ctwing_array:' . json_encode($array));
+        }
+        return response('', 200);
+    }
 
+    /**
+     * 电信海康烟感4G回调地址
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
+    public function hkCTWing4GWarm(Request $request)
+    {
+        $jsonData = $request->all();
+        Log::info('ctwingWarm 4G:' . json_encode($jsonData));
+        $jsonData = json_decode(json_encode($jsonData), true);
+
+        $value = $jsonData['payload']['msg'] ?? ''; // 16进制字符串
+        $imei  = $serviceData['IMEI'] ?? '';
+        if (!empty($value)) {
+            $array = $this->parseString(strtolower($value));
+            // 解析后处理todo
+            Log::info('hk_ctwing_array 4G:' . json_encode($array));
         }
         return response('', 200);
     }
@@ -386,7 +407,6 @@ class NBController extends BaseController
             } else {
                 $parsedData[$value[0]] = substr($string, $offset, $value[1]);
             }
-            // echo $value[0].":".$parsedData[$value[0]]."<br>";
             $offset += $value[1];
         }
 
@@ -395,6 +415,7 @@ class NBController extends BaseController
 
     public function analyze()
     {
+        // return (new CTWing())->testSum();
         $string = '030182E0CA3C0156BE64EDB1210000051100FFB2000000BE00000000383938363131323232323430323233393934383738363135363130353630363031383800000000003436303131333232343133393632330000000000424332363059434E4141523032413031000000000000000007543D50000076506275696C6432333032313400000000000000000056312E30000000000000000000000000000000004E502D46593331302D4E00000000000000000000312E302E300000000000001102000013006000010061000100620000000000000000AD';
 
         // echo strtolower($string);die;

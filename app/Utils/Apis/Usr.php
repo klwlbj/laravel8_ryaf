@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Utils\Apis;
+
 use App\Utils\Apis\Core\AepSdkCore;
-
-
 
 class Usr
 {
@@ -16,25 +16,23 @@ class Usr
     //  描述:API版本信息 TODO
     public static function SdkDownload($appKey, $appSecret, $file_name, $application_id, $sdk_type = "", $api_version = "")
     {
-        $path="/usr/sdk/download";
-        $headers=null;
-        $param=array();
-        $param["sdk_type"]=$sdk_type;
-        $param["file_name"]=$file_name;
-        $param["application_id"]=$application_id;
-        $param["api_version"]=$api_version;
+        $path                    = "/usr/sdk/download";
+        $headers                 = null;
+        $param                   = [];
+        $param["sdk_type"]       = $sdk_type;
+        $param["file_name"]      = $file_name;
+        $param["application_id"] = $application_id;
+        $param["api_version"]    = $api_version;
 
-        $version ="20180000000000";
+        $version = "20180000000000";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
     }
-
-
 }

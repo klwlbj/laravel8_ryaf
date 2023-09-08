@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Utils\Apis;
+
 use App\Utils\Apis\Core\AepSdkCore;
-
-
 
 class Aep_subscribe_north
 {
@@ -14,21 +14,21 @@ class Aep_subscribe_north
     //  描述:产品MasterKey
     public static function GetSubscription($appKey, $appSecret, $subId, $productId, $MasterKey)
     {
-        $path="/aep_subscribe_north/subscription";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_subscribe_north/subscription";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["subId"]=$subId;
-        $param["productId"]=$productId;
+        $param              = [];
+        $param["subId"]     = $subId;
+        $param["productId"] = $productId;
 
-        $version ="20220624171733";
+        $version = "20220624171733";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -50,25 +50,25 @@ class Aep_subscribe_north
     //  描述:
     public static function GetSubscriptionsList($appKey, $appSecret, $productId, $pageNow, $pageSize, $MasterKey, $subType = "", $searchValue = "", $deviceGroupId = "")
     {
-        $path="/aep_subscribe_north/subscribes";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_subscribe_north/subscribes";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["productId"]=$productId;
-        $param["pageNow"]=$pageNow;
-        $param["pageSize"]=$pageSize;
-        $param["subType"]=$subType;
-        $param["searchValue"]=$searchValue;
-        $param["deviceGroupId"]=$deviceGroupId;
+        $param                  = [];
+        $param["productId"]     = $productId;
+        $param["pageNow"]       = $pageNow;
+        $param["pageSize"]      = $pageSize;
+        $param["subType"]       = $subType;
+        $param["searchValue"]   = $searchValue;
+        $param["deviceGroupId"] = $deviceGroupId;
 
-        $version ="20220624163719";
+        $version = "20220624163719";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -86,23 +86,23 @@ class Aep_subscribe_north
     //  描述:产品MasterKey
     public static function DeleteSubscription($appKey, $appSecret, $subId, $productId, $subLevel, $MasterKey, $deviceId = "")
     {
-        $path="/aep_subscribe_north/subscription";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_subscribe_north/subscription";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["subId"]=$subId;
-        $param["deviceId"]=$deviceId;
-        $param["productId"]=$productId;
-        $param["subLevel"]=$subLevel;
+        $param              = [];
+        $param["subId"]     = $subId;
+        $param["deviceId"]  = $deviceId;
+        $param["productId"] = $productId;
+        $param["subLevel"]  = $subLevel;
 
-        $version ="20181031202023";
+        $version = "20181031202023";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "DELETE");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -114,22 +114,20 @@ class Aep_subscribe_north
     //  描述:body,具体参考平台api说明
     public static function CreateSubscription($appKey, $appSecret, $MasterKey, $body)
     {
-        $path="/aep_subscribe_north/subscription";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_subscribe_north/subscription";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20181031202018";
+        $param   = null;
+        $version = "20181031202018";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
     }
-
-
 }

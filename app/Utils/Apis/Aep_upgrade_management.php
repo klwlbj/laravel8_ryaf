@@ -1,5 +1,7 @@
 <?php
+
 namespace App\Utils\Apis;
+
 use App\Utils\Apis\Core\AepSdkCore;
 
 class Aep_upgrade_management
@@ -12,21 +14,21 @@ class Aep_upgrade_management
     //  描述:MasterKey
     public static function QueryRemoteUpgradeDetail($appKey, $appSecret, $id, $productId, $MasterKey = "")
     {
-        $path="/aep_upgrade_management/detail";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_upgrade_management/detail";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["id"]=$id;
-        $param["productId"]=$productId;
+        $param              = [];
+        $param["id"]        = $id;
+        $param["productId"] = $productId;
 
-        $version ="20190615001517";
+        $version = "20190615001517";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -40,21 +42,21 @@ class Aep_upgrade_management
     //  描述:MasterKey
     public static function QueryRemoteUpgradeTask($appKey, $appSecret, $id, $productId, $MasterKey = "")
     {
-        $path="/aep_upgrade_management/task";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_upgrade_management/task";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["id"]=$id;
-        $param["productId"]=$productId;
+        $param              = [];
+        $param["id"]        = $id;
+        $param["productId"] = $productId;
 
-        $version ="20190615001509";
+        $version = "20190615001509";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -68,20 +70,20 @@ class Aep_upgrade_management
     //  描述:body,具体参考平台api说明
     public static function ControlRemoteUpgradeTask($appKey, $appSecret, $id, $body, $MasterKey = "")
     {
-        $path="/aep_upgrade_management/control";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_upgrade_management/control";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["id"]=$id;
+        $param       = [];
+        $param["id"] = $id;
 
-        $version ="20190615001456";
+        $version = "20190615001456";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "PUT");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -111,29 +113,29 @@ class Aep_upgrade_management
     //  描述:根据群组id精确查询
     public static function QueryRemoteUpradeDeviceList($appKey, $appSecret, $productId, $isSelectDevice, $id = "", $pageNow = "", $pageSize = "", $MasterKey = "", $deviceIdSearch = "", $deviceNameSearch = "", $imeiSearch = "", $deviceNoSearch = "", $deviceGroupIdSearch = "")
     {
-        $path="/aep_upgrade_management/devices";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_upgrade_management/devices";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["id"]=$id;
-        $param["productId"]=$productId;
-        $param["isSelectDevice"]=$isSelectDevice;
-        $param["pageNow"]=$pageNow;
-        $param["pageSize"]=$pageSize;
-        $param["deviceIdSearch"]=$deviceIdSearch;
-        $param["deviceNameSearch"]=$deviceNameSearch;
-        $param["imeiSearch"]=$imeiSearch;
-        $param["deviceNoSearch"]=$deviceNoSearch;
-        $param["deviceGroupIdSearch"]=$deviceGroupIdSearch;
+        $param                        = [];
+        $param["id"]                  = $id;
+        $param["productId"]           = $productId;
+        $param["isSelectDevice"]      = $isSelectDevice;
+        $param["pageNow"]             = $pageNow;
+        $param["pageSize"]            = $pageSize;
+        $param["deviceIdSearch"]      = $deviceIdSearch;
+        $param["deviceNameSearch"]    = $deviceNameSearch;
+        $param["imeiSearch"]          = $imeiSearch;
+        $param["deviceNoSearch"]      = $deviceNoSearch;
+        $param["deviceGroupIdSearch"] = $deviceGroupIdSearch;
 
-        $version ="20190615001451";
+        $version = "20190615001451";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -149,22 +151,22 @@ class Aep_upgrade_management
     //  描述:MasterKey
     public static function DeleteRemoteUpgradeTask($appKey, $appSecret, $id, $productId, $updateBy = "", $MasterKey = "")
     {
-        $path="/aep_upgrade_management/task";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_upgrade_management/task";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["id"]=$id;
-        $param["productId"]=$productId;
-        $param["updateBy"]=$updateBy;
+        $param              = [];
+        $param["id"]        = $id;
+        $param["productId"] = $productId;
+        $param["updateBy"]  = $updateBy;
 
-        $version ="20190615001444";
+        $version = "20190615001444";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "DELETE");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -182,23 +184,23 @@ class Aep_upgrade_management
     //  描述:查询条件，支持主任务名称模糊查询
     public static function QueryRemoteUpgradeTaskList($appKey, $appSecret, $productId, $pageNow = "", $pageSize = "", $MasterKey = "", $searchValue = "")
     {
-        $path="/aep_upgrade_management/tasks";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_upgrade_management/tasks";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["productId"]=$productId;
-        $param["pageNow"]=$pageNow;
-        $param["pageSize"]=$pageSize;
-        $param["searchValue"]=$searchValue;
+        $param                = [];
+        $param["productId"]   = $productId;
+        $param["pageNow"]     = $pageNow;
+        $param["pageSize"]    = $pageSize;
+        $param["searchValue"] = $searchValue;
 
-        $version ="20190615001440";
+        $version = "20190615001440";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -212,20 +214,20 @@ class Aep_upgrade_management
     //  描述:body,具体参考平台api说明
     public static function ModifyRemoteUpgradeTask($appKey, $appSecret, $id, $body, $MasterKey = "")
     {
-        $path="/aep_upgrade_management/task";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_upgrade_management/task";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["id"]=$id;
+        $param       = [];
+        $param["id"] = $id;
 
-        $version ="20190615001433";
+        $version = "20190615001433";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "PUT");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -237,18 +239,18 @@ class Aep_upgrade_management
     //  描述:body,具体参考平台api说明
     public static function CreateRemoteUpgradeTask($appKey, $appSecret, $body, $MasterKey = "")
     {
-        $path="/aep_upgrade_management/task";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_upgrade_management/task";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20190615001416";
+        $param   = null;
+        $version = "20190615001416";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -260,18 +262,18 @@ class Aep_upgrade_management
     //  描述:body,具体参考平台api说明
     public static function OperationalRemoteUpgradeTask($appKey, $appSecret, $body, $MasterKey = "")
     {
-        $path="/aep_upgrade_management/operational";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_upgrade_management/operational";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20190615001412";
+        $param   = null;
+        $version = "20190615001412";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -295,29 +297,27 @@ class Aep_upgrade_management
     //  描述:MasterKey
     public static function QueryRemoteUpgradeSubtasks($appKey, $appSecret, $id, $productId, $taskStatus = "", $searchValue = "", $pageNow = "", $pageSize = "", $MasterKey = "")
     {
-        $path="/aep_upgrade_management/details";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_upgrade_management/details";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["id"]=$id;
-        $param["productId"]=$productId;
-        $param["taskStatus"]=$taskStatus;
-        $param["searchValue"]=$searchValue;
-        $param["pageNow"]=$pageNow;
-        $param["pageSize"]=$pageSize;
+        $param                = [];
+        $param["id"]          = $id;
+        $param["productId"]   = $productId;
+        $param["taskStatus"]  = $taskStatus;
+        $param["searchValue"] = $searchValue;
+        $param["pageNow"]     = $pageNow;
+        $param["pageSize"]    = $pageSize;
 
-        $version ="20190615001406";
+        $version = "20190615001406";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
     }
-
-
 }

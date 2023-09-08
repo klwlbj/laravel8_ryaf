@@ -44,19 +44,20 @@ Route::get('/logQuery/{uuid}', [OneNetController::class, 'logQuery']);
 
 // 电信ctwing
 // 事件上报
-Route::get('/ctwing/queryDeviceEventList/{productId}/{deviceId}', [CTWingController::class, 'queryDeviceEventList']);
-Route::get('/ctwing/queryDeviceEventTotal/{productId}/{deviceId}', [CTWingController::class, 'queryDeviceEventTotal']);
+Route::get('/ctwing/queryDeviceEventList/{productId}/{deviceId}/{masterKey}', [CTWingController::class, 'queryDeviceEventList']);
+Route::get('/ctwing/queryDeviceEventTotal/{productId}/{deviceId}/{masterKey}', [CTWingController::class, 'queryDeviceEventTotal']);
 // http消息订阅
-Route::get('/ctwing/getSubscriptionsList/{productId}/{pageNow}/{pageSize}', [CTWingController::class, 'getSubscriptionsList']);
-Route::get('/ctwing/getSubscription/{productId}/{subId}', [CTWingController::class, 'getSubscription']);
-Route::get('/ctwing/deleteSubscription/{productId}/{subId}/{subLevel}', [CTWingController::class, 'deleteSubscription']);
-Route::get('/ctwing/createSubscription/{productId}/{deviceId}/{subUrl}/{subLevel}', [CTWingController::class, 'createSubscription']);
+Route::get('/ctwing/getSubscriptionsList/{productId}/{masterKey}/{pageNow}/{pageSize}', [CTWingController::class, 'getSubscriptionsList']);
+Route::get('/ctwing/getSubscription/{productId}/{masterKey}/{subId}', [CTWingController::class, 'getSubscription']);
+Route::get('/ctwing/deleteSubscription/{productId}/{subId}/{masterKey}/{subLevel}', [CTWingController::class, 'deleteSubscription']);
+Route::get('/ctwing/createSubscription/{productId}/{deviceId}/{masterKey}/{subUrl}/{subLevel}', [CTWingController::class, 'createSubscription']);
 // 指令下发
-Route::get('/ctwing/queryCommandList/{productId}/{deviceId}', [CTWingController::class, 'queryCommandList']);
-Route::get('/ctwing/queryCommand/{productId}/{deviceId}/{commandId}', [CTWingController::class, 'queryCommand']);
-Route::get('/ctwing/cancelCommand/{productId}/{deviceId}/{commandId}', [CTWingController::class, 'cancelCommand']);
-Route::get('/ctwing/cancelAllCommand/{productId}/{deviceId}', [CTWingController::class, 'cancelAllCommand']);
-Route::get('/ctwing/createCommandLwm2mProfile/{productId}/{deviceId}/{command}/{dwPackageNo}', [CTWingController::class, 'createCommandLwm2mProfile']);
+Route::get('/ctwing/queryCommandList/{productId}/{deviceId}/{masterKey}', [CTWingController::class, 'queryCommandList']);
+Route::get('/ctwing/queryCommand/{productId}/{deviceId}/{masterKey}/{commandId}', [CTWingController::class, 'queryCommand']);
+Route::get('/ctwing/cancelCommand/{productId}/{deviceId}/{masterKey}/{commandId}', [CTWingController::class, 'cancelCommand']);
+Route::get('/ctwing/cancelAllCommand/{productId}/{deviceId}/{masterKey}', [CTWingController::class, 'cancelAllCommand']);
+Route::get('/ctwing/createCommandLwm2mProfile/{productId}/{deviceId}/{masterKey}/{command}/{dwPackageNo}', [CTWingController::class, 'createCommandLwm2mProfile']);
+Route::get('/ctwing/createCommand/{productId}/{deviceId}/{masterKey}/{command}/{dwPackageNo}', [CTWingController::class, 'createCommand']);
 
 // http回调
 Route::get('/nbWarm', [NBController::class, 'nbWarm']);
@@ -64,6 +65,7 @@ Route::get('/hkWarm', [NBController::class, 'nbWarm']);
 Route::post('/nbWarm', [NBController::class, 'nbReceived']);
 Route::post('/hkWarm', [NBController::class, 'hkReceived']);
 Route::post('/hkCTWingWarm', [NBController::class, 'hkCTWingWarm']);
+Route::post('/hkCTWing4GWarm', [NBController::class, 'hkCTWing4GWarm']);
 
-// 海康指令测试
+// 海康指令解析测试
 Route::get('/analyze', [NBController::class, 'analyze']);

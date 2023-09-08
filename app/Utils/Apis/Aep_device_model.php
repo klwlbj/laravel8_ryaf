@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Utils\Apis;
+
 use App\Utils\Apis\Core\AepSdkCore;
-
-
 
 class Aep_device_model
 {
@@ -18,23 +18,23 @@ class Aep_device_model
     //  描述:每页记录数
     public static function QueryPropertyList($appKey, $appSecret, $MasterKey, $productId, $searchValue = "", $pageNow = "", $pageSize = "")
     {
-        $path="/aep_device_model/dm/app/model/properties";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_model/dm/app/model/properties";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["productId"]=$productId;
-        $param["searchValue"]=$searchValue;
-        $param["pageNow"]=$pageNow;
-        $param["pageSize"]=$pageSize;
+        $param                = [];
+        $param["productId"]   = $productId;
+        $param["searchValue"] = $searchValue;
+        $param["pageNow"]     = $pageNow;
+        $param["pageSize"]    = $pageSize;
 
-        $version ="20190712223330";
+        $version = "20190712223330";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -61,28 +61,26 @@ class Aep_device_model
     //  描述:每页记录数
     public static function QueryServiceList($appKey, $appSecret, $MasterKey, $productId, $searchValue = "", $serviceType = "", $pageNow = "", $pageSize = "")
     {
-        $path="/aep_device_model/dm/app/model/services";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_model/dm/app/model/services";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["productId"]=$productId;
-        $param["searchValue"]=$searchValue;
-        $param["serviceType"]=$serviceType;
-        $param["pageNow"]=$pageNow;
-        $param["pageSize"]=$pageSize;
+        $param                = [];
+        $param["productId"]   = $productId;
+        $param["searchValue"] = $searchValue;
+        $param["serviceType"] = $serviceType;
+        $param["pageNow"]     = $pageNow;
+        $param["pageSize"]    = $pageSize;
 
-        $version ="20190712224233";
+        $version = "20190712224233";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
     }
-
-
 }

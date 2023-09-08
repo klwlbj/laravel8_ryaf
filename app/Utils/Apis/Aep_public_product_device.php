@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Utils\Apis;
+
 use App\Utils\Apis\Core\AepSdkCore;
-
-
 
 class Aep_public_product_device
 {
@@ -12,22 +12,20 @@ class Aep_public_product_device
     //  描述:body,具体参考平台api说明
     public static function QueryDeviceToken($appKey, $appSecret, $MasterKey, $body)
     {
-        $path="/aep_public_product_device/queryDeviceToken";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_public_product_device/queryDeviceToken";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20230330172346";
+        $param   = null;
+        $version = "20230330172346";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
     }
-
-
 }

@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Utils\Apis;
+
 use App\Utils\Apis\Core\AepSdkCore;
-
-
 
 class Aep_device_management
 {
@@ -24,23 +24,23 @@ class Aep_device_management
     //  描述:每页记录数,最大100
     public static function QueryDeviceList($appKey, $appSecret, $MasterKey, $productId, $searchValue = "", $pageNow = "", $pageSize = "")
     {
-        $path="/aep_device_management/devices";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_management/devices";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["productId"]=$productId;
-        $param["searchValue"]=$searchValue;
-        $param["pageNow"]=$pageNow;
-        $param["pageSize"]=$pageSize;
+        $param                = [];
+        $param["productId"]   = $productId;
+        $param["searchValue"] = $searchValue;
+        $param["pageNow"]     = $pageNow;
+        $param["pageSize"]    = $pageSize;
 
-        $version ="20190507012134";
+        $version = "20190507012134";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -54,21 +54,21 @@ class Aep_device_management
     //  描述:
     public static function QueryDevice($appKey, $appSecret, $MasterKey, $deviceId, $productId)
     {
-        $path="/aep_device_management/device";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_management/device";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["deviceId"]=$deviceId;
-        $param["productId"]=$productId;
+        $param              = [];
+        $param["deviceId"]  = $deviceId;
+        $param["productId"] = $productId;
 
-        $version ="20181031202139";
+        $version = "20181031202139";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -82,21 +82,21 @@ class Aep_device_management
     //  描述:可以删除多个设备（最多支持200个设备）。多个设备id，中间以逗号 "," 隔开 。样例：05979394b88a45b0842de729c03d99af,06106b8e1d5a458399326e003bcf05b4
     public static function DeleteDevice($appKey, $appSecret, $MasterKey, $productId, $deviceIds)
     {
-        $path="/aep_device_management/device";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_management/device";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["productId"]=$productId;
-        $param["deviceIds"]=$deviceIds;
+        $param              = [];
+        $param["productId"] = $productId;
+        $param["deviceIds"] = $deviceIds;
 
-        $version ="20181031202131";
+        $version = "20181031202131";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "DELETE");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -110,20 +110,20 @@ class Aep_device_management
     //  描述:body,具体参考平台api说明
     public static function UpdateDevice($appKey, $appSecret, $MasterKey, $deviceId, $body)
     {
-        $path="/aep_device_management/device";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_management/device";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["deviceId"]=$deviceId;
+        $param             = [];
+        $param["deviceId"] = $deviceId;
 
-        $version ="20181031202122";
+        $version = "20181031202122";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "PUT");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -135,18 +135,18 @@ class Aep_device_management
     //  描述:body,具体参考平台api说明
     public static function CreateDevice($appKey, $appSecret, $MasterKey, $body)
     {
-        $path="/aep_device_management/device";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_management/device";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20181031202117";
+        $param   = null;
+        $version = "20181031202117";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -158,18 +158,18 @@ class Aep_device_management
     //  描述:body,具体参考平台api说明
     public static function BindDevice($appKey, $appSecret, $MasterKey, $body)
     {
-        $path="/aep_device_management/bindDevice";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_management/bindDevice";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20191024140057";
+        $param   = null;
+        $version = "20191024140057";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -181,18 +181,18 @@ class Aep_device_management
     //  描述:body,具体参考平台api说明
     public static function UnbindDevice($appKey, $appSecret, $MasterKey, $body)
     {
-        $path="/aep_device_management/unbindDevice";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_management/unbindDevice";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20191024140103";
+        $param   = null;
+        $version = "20191024140103";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -202,18 +202,18 @@ class Aep_device_management
     //  描述:
     public static function QueryProductInfoByImei($appKey, $appSecret, $imei)
     {
-        $path="/aep_device_management/device/getProductInfoFormApiByImei";
-        $headers=null;
-        $param=array();
-        $param["imei"]=$imei;
+        $path          = "/aep_device_management/device/getProductInfoFormApiByImei";
+        $headers       = null;
+        $param         = [];
+        $param["imei"] = $imei;
 
-        $version ="20191213161859";
+        $version = "20191213161859";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -225,18 +225,18 @@ class Aep_device_management
     //  描述:body,具体参考平台api说明
     public static function ListDeviceInfo($appKey, $appSecret, $MasterKey, $body)
     {
-        $path="/aep_device_management/listByDeviceIds";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_management/listByDeviceIds";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20210828062945";
+        $param   = null;
+        $version = "20210828062945";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -248,18 +248,18 @@ class Aep_device_management
     //  描述:body,具体参考平台api说明
     public static function DeleteDeviceByPost($appKey, $appSecret, $MasterKey, $body)
     {
-        $path="/aep_device_management/deleteDevice";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_management/deleteDevice";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20211009132842";
+        $param   = null;
+        $version = "20211009132842";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -271,18 +271,18 @@ class Aep_device_management
     //  描述:body,具体参考平台api说明
     public static function ListDeviceActiveStatus($appKey, $appSecret, $MasterKey, $body)
     {
-        $path="/aep_device_management/listActiveStatus";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_management/listActiveStatus";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20211010063104";
+        $param   = null;
+        $version = "20211010063104";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -294,22 +294,20 @@ class Aep_device_management
     //  描述:body,具体参考平台api说明
     public static function BatchCreateDevice($appKey, $appSecret, $MasterKey, $body)
     {
-        $path="/aep_device_management/batchDevice";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_management/batchDevice";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20230330043852";
+        $param   = null;
+        $version = "20230330043852";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
     }
-
-
 }

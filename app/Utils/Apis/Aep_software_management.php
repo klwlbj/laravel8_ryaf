@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Utils\Apis;
+
 use App\Utils\Apis\Core\AepSdkCore;
-
-
 
 class Aep_software_management
 {
@@ -14,20 +14,20 @@ class Aep_software_management
     //  描述:body,具体参考平台api说明
     public static function UpdateSoftware($appKey, $appSecret, $id, $MasterKey, $body)
     {
-        $path="/aep_software_management/software";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_software_management/software";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["id"]=$id;
+        $param       = [];
+        $param["id"] = $id;
 
-        $version ="20200529232851";
+        $version = "20200529232851";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "PUT");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -41,21 +41,21 @@ class Aep_software_management
     //  描述:MasterKey,在产品概况中可以查询
     public static function DeleteSoftware($appKey, $appSecret, $id, $productId, $MasterKey)
     {
-        $path="/aep_software_management/software";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_software_management/software";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["id"]=$id;
-        $param["productId"]=$productId;
+        $param              = [];
+        $param["id"]        = $id;
+        $param["productId"] = $productId;
 
-        $version ="20200529232809";
+        $version = "20200529232809";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "DELETE");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -69,21 +69,21 @@ class Aep_software_management
     //  描述:MasterKey，可在产品概况中查看
     public static function QuerySoftware($appKey, $appSecret, $id, $productId, $MasterKey)
     {
-        $path="/aep_software_management/software";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_software_management/software";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["id"]=$id;
-        $param["productId"]=$productId;
+        $param              = [];
+        $param["id"]        = $id;
+        $param["productId"] = $productId;
 
-        $version ="20200529232806";
+        $version = "20200529232806";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -101,27 +101,25 @@ class Aep_software_management
     //  描述:MasterKey，可以在产品概况中查看
     public static function QuerySoftwareList($appKey, $appSecret, $productId, $MasterKey, $searchValue = "", $pageNow = "", $pageSize = "")
     {
-        $path="/aep_software_management/softwares";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_software_management/softwares";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["productId"]=$productId;
-        $param["searchValue"]=$searchValue;
-        $param["pageNow"]=$pageNow;
-        $param["pageSize"]=$pageSize;
+        $param                = [];
+        $param["productId"]   = $productId;
+        $param["searchValue"] = $searchValue;
+        $param["pageNow"]     = $pageNow;
+        $param["pageSize"]    = $pageSize;
 
-        $version ="20200529232801";
+        $version = "20200529232801";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
     }
-
-
 }

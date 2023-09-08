@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Utils\Apis;
+
 use App\Utils\Apis\Core\AepSdkCore;
-
-
 
 class Aep_standard_management
 {
@@ -12,23 +12,21 @@ class Aep_standard_management
     //  描述:三级分类Id
     public static function QueryStandardModel($appKey, $appSecret, $thirdType, $standardVersion = "")
     {
-        $path="/aep_standard_management/standardModel";
-        $headers=null;
-        $param=array();
-        $param["standardVersion"]=$standardVersion;
-        $param["thirdType"]=$thirdType;
+        $path                     = "/aep_standard_management/standardModel";
+        $headers                  = null;
+        $param                    = [];
+        $param["standardVersion"] = $standardVersion;
+        $param["thirdType"]       = $thirdType;
 
-        $version ="20190713033424";
+        $version = "20190713033424";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
     }
-
-
 }

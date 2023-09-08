@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Utils\Apis;
+
 use App\Utils\Apis\Core\AepSdkCore;
-
-
 
 class Aep_device_command
 {
@@ -12,18 +12,18 @@ class Aep_device_command
     //  描述:body,具体参考平台api说明
     public static function CreateCommand($appKey, $appSecret, $MasterKey, $body)
     {
-        $path="/aep_device_command/command";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_command/command";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20190712225145";
+        $param   = null;
+        $version = "20190712225145";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "POST");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -45,25 +45,25 @@ class Aep_device_command
     //  描述:每页记录数，最大40
     public static function QueryCommandList($appKey, $appSecret, $MasterKey, $productId, $deviceId, $startTime = "", $endTime = "", $pageNow = "", $pageSize = "")
     {
-        $path="/aep_device_command/commands";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_command/commands";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["productId"]=$productId;
-        $param["deviceId"]=$deviceId;
-        $param["startTime"]=$startTime;
-        $param["endTime"]=$endTime;
-        $param["pageNow"]=$pageNow;
-        $param["pageSize"]=$pageSize;
+        $param              = [];
+        $param["productId"] = $productId;
+        $param["deviceId"]  = $deviceId;
+        $param["startTime"] = $startTime;
+        $param["endTime"]   = $endTime;
+        $param["pageNow"]   = $pageNow;
+        $param["pageSize"]  = $pageSize;
 
-        $version ="20200814163736";
+        $version = "20200814163736";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -79,22 +79,22 @@ class Aep_device_command
     //  描述:设备ID
     public static function QueryCommand($appKey, $appSecret, $MasterKey, $commandId, $productId, $deviceId)
     {
-        $path="/aep_device_command/command";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_command/command";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["commandId"]=$commandId;
-        $param["productId"]=$productId;
-        $param["deviceId"]=$deviceId;
+        $param              = [];
+        $param["commandId"] = $commandId;
+        $param["productId"] = $productId;
+        $param["deviceId"]  = $deviceId;
 
-        $version ="20190712225241";
+        $version = "20190712225241";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -106,22 +106,20 @@ class Aep_device_command
     //  描述:body,具体参考平台api说明
     public static function CancelCommand($appKey, $appSecret, $MasterKey, $body)
     {
-        $path="/aep_device_command/cancelCommand";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_device_command/cancelCommand";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=null;
-        $version ="20190615023142";
+        $param   = null;
+        $version = "20190615023142";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "PUT");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
     }
-
-
 }

@@ -25,7 +25,8 @@ class OneNetController extends BaseController
     }
 
     public function cacheCommand($uuid)
-    {$client = new OneNet();
+    {
+        $client = new OneNet();
         return $client->cacheCommand($uuid);
     }
 
@@ -40,10 +41,11 @@ class OneNetController extends BaseController
         $client = new OneNet();
         return $client->issueCacheCommand($args);
     }
+
     public function writeResource($command, $dwPackageNo)
     {
         $client = new OneNet();
-        return $client->writeResource($command,$dwPackageNo);
+        return $client->writeResource($command, $dwPackageNo);
     }
 
     public function cancelCacheCommand($uuid)

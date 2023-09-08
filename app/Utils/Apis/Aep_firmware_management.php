@@ -1,8 +1,8 @@
 <?php
+
 namespace App\Utils\Apis;
+
 use App\Utils\Apis\Core\AepSdkCore;
-
-
 
 class Aep_firmware_management
 {
@@ -14,20 +14,20 @@ class Aep_firmware_management
     //  描述:body,具体参考平台api说明
     public static function UpdateFirmware($appKey, $appSecret, $id, $body, $MasterKey = "")
     {
-        $path="/aep_firmware_management/firmware";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_firmware_management/firmware";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["id"]=$id;
+        $param       = [];
+        $param["id"] = $id;
 
-        $version ="20190615001705";
+        $version = "20190615001705";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, $body, $version, $application, $secret, "PUT");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -45,23 +45,23 @@ class Aep_firmware_management
     //  描述:
     public static function QueryFirmwareList($appKey, $appSecret, $productId, $searchValue = "", $pageNow = "", $pageSize = "", $MasterKey = "")
     {
-        $path="/aep_firmware_management/firmwares";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_firmware_management/firmwares";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["productId"]=$productId;
-        $param["searchValue"]=$searchValue;
-        $param["pageNow"]=$pageNow;
-        $param["pageSize"]=$pageSize;
+        $param                = [];
+        $param["productId"]   = $productId;
+        $param["searchValue"] = $searchValue;
+        $param["pageNow"]     = $pageNow;
+        $param["pageSize"]    = $pageSize;
 
-        $version ="20190615001608";
+        $version = "20190615001608";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -75,21 +75,21 @@ class Aep_firmware_management
     //  描述:MasterKey
     public static function QueryFirmware($appKey, $appSecret, $id, $productId, $MasterKey = "")
     {
-        $path="/aep_firmware_management/firmware";
-        $headers=array();
-        $headers["MasterKey"]=$MasterKey;
+        $path                 = "/aep_firmware_management/firmware";
+        $headers              = [];
+        $headers["MasterKey"] = $MasterKey;
 
-        $param=array();
-        $param["id"]=$id;
-        $param["productId"]=$productId;
+        $param              = [];
+        $param["id"]        = $id;
+        $param["productId"] = $productId;
 
-        $version ="20190618151645";
+        $version = "20190618151645";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -105,25 +105,23 @@ class Aep_firmware_management
     //  描述:MasterKey
     public static function DeleteFirmware($appKey, $appSecret, $id, $productId, $updateBy = "", $MasterKey = "")
     {
-        $path="/aep_firmware_management/firmware";
-        $headers=null;
-        $param=array();
-        $param["id"]=$id;
-        $param["productId"]=$productId;
-        $param["updateBy"]=$updateBy;
-        $param["MasterKey"]=$MasterKey;
+        $path               = "/aep_firmware_management/firmware";
+        $headers            = null;
+        $param              = [];
+        $param["id"]        = $id;
+        $param["productId"] = $productId;
+        $param["updateBy"]  = $updateBy;
+        $param["MasterKey"] = $MasterKey;
 
-        $version ="20190615001534";
+        $version = "20190615001534";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "DELETE");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
     }
-
-
 }

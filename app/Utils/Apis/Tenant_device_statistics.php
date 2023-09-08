@@ -1,23 +1,23 @@
 <?php
+
 namespace App\Utils\Apis;
+
 use App\Utils\Apis\Core\AepSdkCore;
-
-
 
 class Tenant_device_statistics
 {
     public static function QueryTenantDeviceCount($appKey, $appSecret)
     {
-        $path="/tenant_device_statistics/queryTenantDeviceCount";
-        $headers=null;
-        $param=null;
-        $version ="20201225122555";
+        $path    = "/tenant_device_statistics/queryTenantDeviceCount";
+        $headers = null;
+        $param   = null;
+        $version = "20201225122555";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -29,19 +29,19 @@ class Tenant_device_statistics
     //  描述:数据类型：1：设备总数量，激活数，活跃数；3：设备活跃数，活跃率
     public static function QueryTenantDeviceTrend($appKey, $appSecret, $dateType, $type)
     {
-        $path="/tenant_device_statistics/queryTenantDeviceTrend";
-        $headers=null;
-        $param=array();
-        $param["dateType"]=$dateType;
-        $param["type"]=$type;
+        $path              = "/tenant_device_statistics/queryTenantDeviceTrend";
+        $headers           = null;
+        $param             = [];
+        $param["dateType"] = $dateType;
+        $param["type"]     = $type;
 
-        $version ="20201225122550";
+        $version = "20201225122550";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
@@ -49,20 +49,18 @@ class Tenant_device_statistics
 
     public static function QueryTenantDeviceActiveCount($appKey, $appSecret)
     {
-        $path="/tenant_device_statistics/queryTenantDeviceActiveCount";
-        $headers=null;
-        $param=null;
-        $version ="20201225122558";
+        $path    = "/tenant_device_statistics/queryTenantDeviceActiveCount";
+        $headers = null;
+        $param   = null;
+        $version = "20201225122558";
 
-        $application=$appKey;
-        $secret=$appSecret;
+        $application = $appKey;
+        $secret      = $appSecret;
 
         $response = AepSdkCore::sendSDkRequest($path, $headers, $param, null, $version, $application, $secret, "GET");
-        if ($response != null){
+        if ($response != null) {
             return $response;
         }
         return null;
     }
-
-
 }
