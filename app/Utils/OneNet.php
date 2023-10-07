@@ -9,7 +9,7 @@ use GuzzleHttp\Exception\GuzzleException;
 class OneNet extends BaseIoTClient
 {
     public const HOST         = 'https://iot-api.heclouds.com/nb-iot';
-    public const IMEI_ONE_NET = 861561056131278; // 海康烟感-移动
+    public const IMEI_ONE_NET = 861561056131278; // 海康烟感-移动,暂不写死
 
     public const OBJ_ID      = 3339;
     public const OBJ_INST_ID = 0;
@@ -47,15 +47,16 @@ class OneNet extends BaseIoTClient
 
     /**
      * 读命令
+     * @param $imei
      * @return mixed|void
      */
-    public function loadResource()
+    public function loadResource($imei)
     {
         $time = time();
         try {
             $response = $this->client->request('GET', self::HOST . '/offline', [
                 'query'   => [
-                    "imei"         => self::IMEI_ONE_NET,
+                    "imei"         => $imei,
                     "obj_id"       => self::OBJ_ID,
                     'valid_time'   => date('Y-m-d', $time + 10) . 'T' . date('H:i:s', $time + 10),
                     'expired_time' => date('Y-m-d', $time + 100) . 'T' . date('H:i:s', $time + 1000),
@@ -72,29 +73,63 @@ class OneNet extends BaseIoTClient
     }
 
     /**
-     * 直接写入实时命令（烟感用这个）
-     * @param $args
+     * 即时命令下发
+     * @param $imei
+     * @param string $command
+     * @param string $dwPackageNo
+     * @param string $cmd
      * @return mixed|void
      */
-    public function writeResource($command = 'longSilence', $dwPackageNo = '00000001')
+    public function execute($imei, string $command = self::LONG_SILENCE, string $dwPackageNo = '00000001', string $cmd = '')
     {
-        $args = self::COMMAND[$command] ?? self::COMMAND['longSilence'];
-        $time = time() + 1000;
+        $cmd = empty($cmd) ? $this->generateCommand($command, $dwPackageNo, false) : $cmd;
         try {
-            $response = $this->client->request('POST', self::HOST . '/offline', [
+            $response = $this->client->request('POST', self::HOST . '/execute', [
                 'query'   => [
-                    "imei"         => self::IMEI_ONE_NET,
+                    "imei"        => $imei,
+                    "obj_id"      => self::OBJ_ID,
+                    "obj_inst_id" => self::OBJ_INST_ID,
+                    'res_id'      => self::RES_ID,
+                ],
+                'json'    => [
+                    'args' => $cmd,
+                ],
+                'headers' => ['authorization' => $this->getSign()],
+            ]);
+
+            if ($response->getStatusCode() === 200) {
+                return json_decode($response->getBody()->getContents(), true);
+            }
+        } catch (GuzzleException $e) {
+            Log::info($e);
+        }
+    }
+
+    /**
+     * 即时写设备资源
+     * @param $imei
+     * @param string $command
+     * @param string $dwPackageNo
+     * @param string $cmd
+     * @return mixed|void
+     */
+    public function realTimewriteResource($imei, string $command = self::LONG_SILENCE, string $dwPackageNo = '00000001', string $cmd = '')
+    {
+        $cmd  = empty($cmd) ? $this->generateCommand($command, $dwPackageNo, false) : $cmd;
+        try {
+            $response = $this->client->request('POST', self::HOST, [
+                'query'   => [
+                    "imei"         => $imei,
                     "obj_id"       => self::OBJ_ID,
                     "obj_inst_id"  => self::OBJ_INST_ID,
                     'mode'         => 1, // 1：直接替换；2：局部更新
-                    'expired_time' => date('Y-m-d', $time) . 'T' . date('H:i:s', $time),
                 ],
                 'json'    => [
                     'data' => [
                         [
                             'res_id' => self::RES_ID,
                             'type'   => 1,
-                            'val'    => $args[0] . $dwPackageNo . $args[1],
+                            'val'    => $cmd,
                         ],
                     ],
                 ],
@@ -110,17 +145,68 @@ class OneNet extends BaseIoTClient
     }
 
     /**
-     * 下发缓存命令(暂时不用)
-     * @param $args
+     * 缓存写设备资源（烟感用这个）
+     * @param $imei
+     * @param string $command
+     * @param string $dwPackageNo
+     * @param string $cmd
      * @return mixed|void
      */
-    public function issueCacheCommand($args = '9000000192000c00000000060000ffff000C00023D')
+    public function writeResource($imei, string $command = self::LONG_SILENCE, string $dwPackageNo = '00000001', $cmd = '')
     {
+        $cmd  = empty($cmd) ? $this->generateCommand($command, $dwPackageNo, false) : $cmd;
+        $time = time() + 1000;
+        try {
+            $response = $this->client->request('POST', self::HOST . '/offline', [
+                'query'   => [
+                    "imei"         => $imei,
+                    "obj_id"       => self::OBJ_ID,
+                    "obj_inst_id"  => self::OBJ_INST_ID,
+                    'mode'         => 1, // 1：直接替换；2：局部更新
+                    'expired_time' => date('Y-m-d', $time) . 'T' . date('H:i:s', $time),
+                ],
+                'json'    => [
+                    'data' => [
+                        [
+                            'res_id' => self::RES_ID,
+                            'type'   => 1,
+                            'val'    => $cmd,
+                        ],
+                    ],
+                ],
+                'headers' => ['authorization' => $this->getSign()],
+            ]);
+
+            if ($response->getStatusCode() === 200) {
+                return json_decode($response->getBody()->getContents(), true);
+            }
+        } catch (GuzzleException $e) {
+            Log::info($e);
+        }
+    }
+
+    public function createGasSettingCommand($imei, int $gasAlarmCorrection = 0)
+    {
+        $cmd = $this->generateCommand(self::GAS, '', true, ['gasAlarmCorrection' => $gasAlarmCorrection]);
+        return $this->realTimewriteResource($imei, self::GAS, '', $cmd);
+    }
+
+    /**
+     * 下发缓存命令(暂时燃气检测设备用)
+     * @param $imei
+     * @param string $command
+     * @param string $dwPackageNo
+     * @param string $cmd
+     * @return mixed|void
+     */
+    public function issueCacheCommand($imei, string $command = self::LONG_SILENCE, string $dwPackageNo = '00000001', string $cmd = '')
+    {
+        $cmd  = empty($cmd) ? $this->generateCommand($command, $dwPackageNo, false) : $cmd;
         $time = time() + 1000;
         try {
             $response = $this->client->request('POST', self::HOST . '/execute/offline', [
                 'query'   => [
-                    "imei"         => self::IMEI_ONE_NET,
+                    "imei"         => $imei,
                     "obj_id"       => self::OBJ_ID,
                     "obj_inst_id"  => self::OBJ_INST_ID,
                     'mode'         => '1', // 1：直接替换；2：局部更新
@@ -128,7 +214,7 @@ class OneNet extends BaseIoTClient
                     'res_id'       => self::RES_ID,
                 ],
                 'json'    => [
-                    'args' => $args,
+                    'args' => $cmd,
                 ],
                 'headers' => ['authorization' => $this->getSign()],
             ]);
@@ -145,13 +231,13 @@ class OneNet extends BaseIoTClient
      * 命令列表
      * @return mixed|void
      */
-    public function cacheCommands()
+    public function cacheCommands($imei)
     {
         try {
             $time     = time() - 3600; // 过去24小时
             $response = $this->client->request('GET', self::HOST . '/offline/history', [
                 'query'   => [
-                    "imei"  => self::IMEI_ONE_NET,
+                    "imei"  => $imei,
                     'start' => date('Y-m-d', $time) . 'T' . date('H:i:s', $time),
                 ],
                 'headers' => ['authorization' => $this->getSign()],
@@ -167,15 +253,16 @@ class OneNet extends BaseIoTClient
 
     /**
      * 命令详情
+     * @param $imei
      * @param $uuid
      * @return mixed|void
      */
-    public function cacheCommand($uuid)
+    public function cacheCommand($imei, $uuid)
     {
         try {
             $response = $this->client->request('GET', self::HOST . '/offline/history/' . $uuid, [
                 'query'   => [
-                    "imei" => self::IMEI_ONE_NET,
+                    "imei" => $imei,
                 ],
                 'headers' => ['authorization' => $this->getSign()],
             ]);
@@ -190,14 +277,15 @@ class OneNet extends BaseIoTClient
 
     /**
      * 取消所有命令
+     * @param $imei
      * @return mixed|void
      */
-    public function cancelAllCacheCommand()
+    public function cancelAllCacheCommand($imei)
     {
         try {
             $response = $this->client->request('PUT', self::HOST . '/offline/cancel/all/', [
                 'query'   => [
-                    "imei" => self::IMEI_ONE_NET,
+                    "imei" => $imei,
                 ],
                 'headers' => ['authorization' => $this->getSign()],
             ]);
@@ -212,15 +300,16 @@ class OneNet extends BaseIoTClient
 
     /**
      * 取消某条命令
-     * @param $uuid
+     * @param string $imei
+     * @param string $uuid
      * @return mixed|void
      */
-    public function cancelCacheCommand($uuid)
+    public function cancelCacheCommand(string $imei, string $uuid)
     {
         try {
             $response = $this->client->request('PUT', self::HOST . '/offline/cancel/' . $uuid, [
                 'query'   => [
-                    "imei" => self::IMEI_ONE_NET,
+                    "imei" => $imei,
                 ],
                 'headers' => ['authorization' => $this->getSign()],
             ]);
@@ -235,15 +324,16 @@ class OneNet extends BaseIoTClient
 
     /**
      * 查询日志
-     * @param $uuid
+     * @param string $imei
+     * @param string $uuid
      * @return mixed|void
      */
-    public function logQuery($uuid)
+    public function logQuery(string $imei, string $uuid)
     {
         try {
             $response = $this->client->request('GET', self::HOST . '/offline/history/' . $uuid . '/piecewise', [
                 'query'   => [
-                    "imei" => self::IMEI_ONE_NET,
+                    "imei" => $imei,
                 ],
                 'headers' => ['authorization' => $this->getSign()],
             ]);

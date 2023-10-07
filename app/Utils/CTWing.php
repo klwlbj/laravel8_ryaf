@@ -27,7 +27,7 @@ class CTWing extends BaseIoTClient
      * @param $productId
      * @param $deviceId
      * @param $masterKey
-     * @return 返回响应：bool|null
+     * @return bool|null
      */
     public function queryDeviceEventList($productId, $deviceId, $masterKey)
     {
@@ -77,11 +77,9 @@ class CTWing extends BaseIoTClient
      * @param string $dwPackageNo
      * @return 返回响应：bool|null
      */
-    public function createCommand($productId, $deviceId, $masterKey, string $command = 'longSilence', string $dwPackageNo = '00000006')
+    public function createCommand($productId, $deviceId, $masterKey, string $command = self::LONG_SILENCE, string $dwPackageNo = '00000006')
     {
-        $args = self::COMMAND[$command] ?? self::COMMAND['longSilence'];
-
-        $cmd = substr($args[0] . $dwPackageNo . $args[1], 0, -2); //剔除最后两位
+        $cmd = $this->generateCommand($command, $dwPackageNo, true);
 
         $result = Aep_device_command::CreateCommand(
             env('CTWING_KEY'),
@@ -90,7 +88,7 @@ class CTWing extends BaseIoTClient
             json_encode([
                 "content"   => [
                     "payload" => [
-                        "val" => $cmd . $this->checkSum($cmd), // 校验和
+                        "val" => $cmd,
                     ],
                 ],
                 "deviceId"  => $deviceId,
@@ -109,13 +107,13 @@ class CTWing extends BaseIoTClient
      * @param $masterKey
      * @param string $command
      * @param string $dwPackageNo
-     * @return 返回响应：bool|null
+     * @return bool|null
      */
-    public function createCommandLwm2mProfile($productId, $deviceId, $masterKey, string $command = 'longSilence', string $dwPackageNo = '00000006')
+    public function createCommandLwm2mProfile($productId, $deviceId, $masterKey, string $command = self::LONG_SILENCE, string $dwPackageNo = '00000001', $cmd = '')
     {
-        $args = self::COMMAND[$command] ?? self::COMMAND['longSilence'];
+        $cmd = empty($cmd) ? $this->generateCommand($command, $dwPackageNo, false) : $cmd;
 
-        $result = Aep_device_command_lwm_profile::CreateCommandLwm2mProfile(
+        return Aep_device_command_lwm_profile::CreateCommandLwm2mProfile(
             env('CTWING_KEY'),
             env('CTWING_SECRET'),
             json_encode([
@@ -123,7 +121,7 @@ class CTWing extends BaseIoTClient
                     "serviceId" => "Msg",
                     "method"    => "CMD",
                     "paras"     => [
-                        "val" => $args[0] . $dwPackageNo . $args[1],
+                        "val" => $cmd,
                     ],
                 ],
                 "deviceId"  => $deviceId,
@@ -132,7 +130,31 @@ class CTWing extends BaseIoTClient
             ]),
             $masterKey
         );
-        return $result;
+    }
+
+    /**
+     * @param int $byWorkMode 工作模式，1火警，2违规住人，3养老
+     * @param int $wSensitivity 微波探测灵敏度 0-1023
+     * @param int $byCommunicationFrequency 通讯频率 0-255
+     * @param int $byEnabled 微波检测使能，0关1开
+     * @param int $byCycle 微波检测周期 60-3600
+     * @param int $byTimes 微波检测次数 0-20
+     * @param int $byWorkPeriod 微波检测工作时段个数
+     * @param int $byStartTime 开始时间
+     * @param int $byEndTime 关闭时间
+     * @return bool|null
+     */
+    public function createMicrowaveSettingCommand($productId, $deviceId, $masterKey, int $byWorkMode = 2, int $wSensitivity = 0, int $byCommunicationFrequency = 0, int $byEnabled = 1, int $byCycle = 20, int $byTimes = 20, int $byWorkPeriod = 1, int $byStartTime = 0, int $byEndTime = 23)
+    {
+        $params = compact('byWorkMode', 'wSensitivity', 'byCommunicationFrequency', 'byEnabled', 'byCycle', 'byTimes', 'byWorkPeriod', 'byStartTime', 'byEndTime');
+        $cmd    = $this->generateCommand(self::MICROWAVE_SETTING, '', false, $params);
+
+        return $this->createCommandLwm2mProfile($productId, $deviceId, $masterKey, self::MICROWAVE_SETTING, '', $cmd);
+    }
+
+    public function createGasSettingCommand($productId, $deviceId, $masterKey, int $gasAlarmCorrection = 0){
+        $cmd    = $this->generateCommand(self::GAS, '', true, ['gasAlarmCorrection' => $gasAlarmCorrection]);
+        return $this->createCommandLwm2mProfile($productId, $deviceId, $masterKey, self::GAS, '', $cmd);
     }
 
     /**
@@ -239,6 +261,7 @@ class CTWing extends BaseIoTClient
 
     /**
      * @param $productId
+     * @param $masterKey
      * @param string $subId
      * @param string $subLevel
      * @return 返回响应：bool|null
@@ -297,27 +320,5 @@ class CTWing extends BaseIoTClient
             $subId,
             $masterKey
         );
-    }
-
-    /**
-     * 和校验
-     * @param $string
-     * @return string
-     */
-    private function checkSum($string): string
-    {
-        // 将字符串按两个字符分割成数组元素
-        $hexArray = str_split($string, 2);
-
-        // 将每个数组元素从十六进制转换为十进制
-        $decArray = array_map('hexdec', $hexArray);
-
-        // 对数组中的所有元素求和
-        $sum = array_sum($decArray);
-
-        // 取和的低8位（和对256取模）
-        $checksum = $sum % 256;
-
-        return strtoupper(str_pad(dechex($checksum), 2, '0', STR_PAD_LEFT));
     }
 }

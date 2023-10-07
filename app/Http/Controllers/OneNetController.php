@@ -12,51 +12,68 @@ class OneNetController extends BaseController
         echo $client->getSign();
     }
 
-    public function loadResource()
+    public function loadResource($imei)
     {
         $client = new OneNet();
-        return $client->loadResource();
+        return $client->loadResource($imei);
     }
 
-    public function cacheCommands()
+    public function cacheCommands($imei)
     {
         $client = new OneNet();
-        return $client->cacheCommands();
+        return $client->cacheCommands($imei);
     }
 
-    public function cacheCommand($uuid)
+    public function cacheCommand($imei, $uuid)
     {
         $client = new OneNet();
-        return $client->cacheCommand($uuid);
+        return $client->cacheCommand($imei, $uuid);
     }
 
-    public function cancelAllCacheCommand()
+    public function cancelAllCacheCommand($imei)
     {
         $client = new OneNet();
-        return $client->cancelAllCacheCommand();
+        return $client->cancelAllCacheCommand($imei);
     }
 
-    public function issueCacheCommand($args)
+    public function issueCacheCommand($imei, $args, $dwPackageNo)
     {
         $client = new OneNet();
-        return $client->issueCacheCommand($args);
+        return $client->issueCacheCommand($imei, $args, $dwPackageNo);
     }
 
-    public function writeResource($command, $dwPackageNo)
+    public function createGasSettingCommand($imei, $gasAlarmCorrection)
     {
         $client = new OneNet();
-        return $client->writeResource($command, $dwPackageNo);
+        return $client->createGasSettingCommand($imei, $gasAlarmCorrection);
     }
 
-    public function cancelCacheCommand($uuid)
+    public function writeResource($imei, $command, $dwPackageNo)
     {
         $client = new OneNet();
-        return $client->cancelCacheCommand($uuid);
+        return $client->writeResource($imei, $command, $dwPackageNo);
+    }
+    public function execute($imei, $command, $dwPackageNo)
+    {
+        $client = new OneNet();
+        return $client->execute($imei, $command, $dwPackageNo);
+    }
+    public function realTimewriteResource($imei, $command, $dwPackageNo)
+    {
+        $client = new OneNet();
+        return $client->realTimewriteResource($imei, $command, $dwPackageNo);
+
     }
 
-    public function logQuery($uuid)
+    public function cancelCacheCommand($imei, $uuid)
     {
         $client = new OneNet();
-        return $client->logQuery($uuid);
+        return $client->cancelCacheCommand($imei, $uuid);
+    }
+
+    public function logQuery($imei, $uuid)
+    {
+        $client = new OneNet();
+        return $client->logQuery($imei, $uuid);
     }
 }

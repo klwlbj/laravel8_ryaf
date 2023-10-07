@@ -54,6 +54,18 @@ class CTWingController extends BaseController
         return $client->createCommandLwm2mProfile($productId, $deviceId, $masterKey, $command, $dwPackageNo);
     }
 
+    public function createMicrowaveSettingCommand($productId, $deviceId, $masterKey)
+    {
+        $client = new CTWing();
+        return $client->createMicrowaveSettingCommand($productId, $deviceId, $masterKey);
+    }
+
+    public function createGasSettingCommand($productId, $deviceId, $masterKey, $gasAlarmCorrection = 0)
+    {
+        $client = new CTWing();
+        return $client->createGasSettingCommand($productId, $deviceId, $masterKey, $gasAlarmCorrection);
+    }
+
     public function getSubscriptionsList($productId, $masterKey, $pageNow, $pageSize)
     {
         $client = new CTWing();
