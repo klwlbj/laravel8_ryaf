@@ -66,6 +66,7 @@ Route::prefix('ctwing')->group(function () {
     Route::get('/createMicrowaveSettingCommand/{productId}/{deviceId}/{masterKey}', [CTWingController::class, 'createMicrowaveSettingCommand']);
     Route::get('/createGasSettingCommand/{productId}/{deviceId}/{masterKey}/{gasAlarmCorrection}', [CTWingController::class, 'createGasSettingCommand']);
     Route::get('/createCommand/{productId}/{deviceId}/{masterKey}/{command}/{dwPackageNo}', [CTWingController::class, 'createCommand']);
+    Route::get('/createNTTCommand/{productId}/{deviceId}/{masterKey}/{second}', [CTWingController::class, 'createNTTCommand']);
 });
 
 
@@ -75,7 +76,11 @@ Route::get('/hkWarm', [NBController::class, 'nbWarm']);
 Route::post('/nbWarm', [NBController::class, 'nbReceived']);
 Route::post('/hkWarm', [NBController::class, 'hkReceived']);
 Route::post('/hkCTWingWarm', [NBController::class, 'hkCTWingWarm']);
+Route::post('/dhCTWingWarm', [NBController::class, 'dhCTWingWarm']);
 Route::post('/hkCTWing4GWarm', [NBController::class, 'hkCTWing4GWarm']);
 
 // 海康指令解析测试
 Route::get('/analyze/{string}', [NBController::class, 'analyze']);
+Route::get('dahua/analyze/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze']);
+Route::get('dahua/analyze2/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze2']);
+Route::get('dahua/analyze3/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze3']);

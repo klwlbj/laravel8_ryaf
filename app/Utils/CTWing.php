@@ -101,15 +101,46 @@ class CTWing extends BaseIoTClient
     }
 
     /**
+     * 非透传设备消声
+     * @param $productId
+     * @param $deviceId
+     * @param $masterKey
+     * @param int $second
+     * @return 返回响应：bool|null
+     */
+    public function createNTTCommand($productId, $deviceId, $masterKey, int $second = 120)
+    {
+        $result = Aep_device_command::CreateCommand(
+            env('CTWING_KEY'),
+            env('CTWING_SECRET'),
+            $masterKey,
+            json_encode([
+                "content"   => [
+                    "params"            => [
+                        "muffling" => $second,
+                    ],
+                    'serviceIdentifier' => "cmd",
+                ],
+                "deviceId"  => $deviceId,
+                "operator"  => "ryaf", // 操作者，暂时写死
+                "productId" => $productId,
+                // "ttl"           => 7200,
+            ])
+        );
+        return $result;
+    }
+
+    /**
      * lwm2m协议有profile指令下发接口
      * @param $productId
      * @param $deviceId
      * @param $masterKey
      * @param string $command
      * @param string $dwPackageNo
+     * @param string $cmd
      * @return bool|null
      */
-    public function createCommandLwm2mProfile($productId, $deviceId, $masterKey, string $command = self::LONG_SILENCE, string $dwPackageNo = '00000001', $cmd = '')
+    public function createCommandLwm2mProfile($productId, $deviceId, $masterKey, string $command = self::LONG_SILENCE, string $dwPackageNo = '00000001', string $cmd = '')
     {
         $cmd = empty($cmd) ? $this->generateCommand($command, $dwPackageNo, false) : $cmd;
 
@@ -152,8 +183,9 @@ class CTWing extends BaseIoTClient
         return $this->createCommandLwm2mProfile($productId, $deviceId, $masterKey, self::MICROWAVE_SETTING, '', $cmd);
     }
 
-    public function createGasSettingCommand($productId, $deviceId, $masterKey, int $gasAlarmCorrection = 0){
-        $cmd    = $this->generateCommand(self::GAS, '', true, ['gasAlarmCorrection' => $gasAlarmCorrection]);
+    public function createGasSettingCommand($productId, $deviceId, $masterKey, int $gasAlarmCorrection = 0)
+    {
+        $cmd = $this->generateCommand(self::GAS, '', true, ['gasAlarmCorrection' => $gasAlarmCorrection]);
         return $this->createCommandLwm2mProfile($productId, $deviceId, $masterKey, self::GAS, '', $cmd);
     }
 

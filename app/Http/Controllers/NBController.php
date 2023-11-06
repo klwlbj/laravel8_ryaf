@@ -15,7 +15,7 @@ class NBController extends BaseController
         '0004' => ['name' => '温度', 'unit' => '*0.1摄氏度'], // 温度
         '001a' => ['name' => '湿度', 'unit' => '%RH'], // 湿度
         '002e' => ['name' => '水汽浓度', 'unit' => '%'], // 水汽浓度
-        '0036' => ['name' => '232', 'unit'=> 'asd'],// 燃气浓度
+        '0036' => ['name' => '232', 'unit' => 'asd'], // 燃气浓度
     ];
 
     // byMessageId
@@ -129,12 +129,12 @@ class NBController extends BaseController
         Log::info('failed:' . json_encode($params));
     }
 
-    public function dhCTWingWarm(Request  $request){
+    public function dhCTWingWarm(Request $request)
+    {
         $jsonData = $request->all();
         Log::info('dhctwingWarm:' . json_encode($jsonData));
 
         return response('', 200);
-
     }
 
     /**
@@ -530,8 +530,8 @@ class NBController extends BaseController
                     case 'value3':
                     case 'value2':
                     case 'value1':
-                        $lastChar                                      = substr($value[0], -1);
-                        $string = $littleString;
+                        $lastChar = substr($value[0], -1);
+                        $string   = $littleString;
                         // if($littleString === 'FFFF' || $littleString === 'ffff'){
                         //     // 可变长
                         //     // $offset += $value[1];

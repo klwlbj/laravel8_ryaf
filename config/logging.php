@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Cache;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\SyslogUdpHandler;
@@ -47,11 +48,57 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
         ],
 
+        // 心跳
+        'heartbeat' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/heartbeat/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => null,
+        ],
+        // 漏电
+        'alarm' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/alarm/laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => null,
+        ],
+
+        'heartbeat_log' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/heartbeat/my_custom_log.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+
+        // 'my_custom_log' => [
+        //     'driver' => 'single',
+        //     'path' => tap(storage_path('logs/my_custom_log.log'), function ($path) {
+        //         // 从缓存获取动态文件名，如果存在则使用缓存的文件名
+        //         $dynamicLogName = cache::get('key',time());
+        //         if ($dynamicLogName) {
+        //             $path = storage_path("logs/{$dynamicLogName}.log");
+        //         }
+        //
+        //         return $path;
+        //     }),
+        //     'level' => 'debug',
+        // ],
+
+        'alarm_log' => [
+            'driver' => 'single',
+            'path' => 'logs/alarm/my_custom_log.log',
+            'level' => env('LOG_LEVEL', 'debug'),
+        ],
+
         'daily' => [
             'driver' => 'daily',
             'path' => storage_path('logs/laravel.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 14,
+        ],
+
+        'dynamiclog' => [
+            'driver' => 'custom',
+            'via' => \App\Logging\CreateDynamicLogger::class,
         ],
 
         'slack' => [

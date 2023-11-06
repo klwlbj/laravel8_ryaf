@@ -2,9 +2,15 @@
 
 namespace App\Console\Commands;
 
+use Illuminate\Support\Carbon;
 use Illuminate\Console\Command;
 use PhpMqtt\Client\Facades\MQTT;
 use Illuminate\Support\Facades\Log;
+use PhpMqtt\Client\Exceptions\MqttClientException;
+use PhpMqtt\Client\Exceptions\RepositoryException;
+use PhpMqtt\Client\Exceptions\DataTransferException;
+use PhpMqtt\Client\Exceptions\InvalidMessageException;
+use PhpMqtt\Client\Exceptions\ProtocolViolationException;
 use PhpMqtt\Client\Exceptions\ClientNotConnectedToBrokerException;
 
 class HappyBirdMqttClient extends Command
@@ -319,6 +325,7 @@ class HappyBirdMqttClient extends Command
         325 => '电流过低',
         326 => '甲烷可燃气体泄漏',
         327 => '丙烷可燃气体泄漏',
+        402 => '电动车充电疑似真警',
     ];
 
     protected array $saveType = [
@@ -328,16 +335,34 @@ class HappyBirdMqttClient extends Command
         '3' => '操作',
     ];
 
+    protected array $errList = [
+        'ErrVal'       => '报警值',
+        'SaveType'     => '1操作，2:隐患 3:故障',
+        'Node'         => '节点信息',
+        'Time'         => '报警时间',
+        'IsSave'       => '弃用字段',
+        'ErrIsFg'      => '0恢复，1产生',
+        'Xh'           => '预留字段',
+        'ValUin'       => '报警值的单位',
+        'ErrType'      => '报警节点类型',
+        'UUID'         => '警情id',
+
+        'id'           => 'ID',
+        'modelNo'      => '型号',
+        'saveTypeName' => '故障或隐患或操作',
+        'errorName'    => '错误类型名',
+    ];
+
     // 两套设备（包括一个子设备）字段对应的单位和描述
     protected array $unitList = [
         'LN6M-L1T4A3V3-H-4G'  => [
             'CL1' => ['容性漏电', 'mA'],
-            'BIc' => ['C相谐波电流', 'A'],
-            'BIb' => ['B相谐波电流', 'A'],
-            'BIa' => ['A相谐波电流', 'A'],
-            'BVc' => ['C相谐波电压', 'V'],
-            'BVb' => ['B相谐波电压', 'V'],
-            'BVa' => ['A相谐波电压', 'V'],
+            'BIC' => ['C相谐波电流', 'A'],
+            'BIB' => ['B相谐波电流', 'A'],
+            'BIA' => ['A相谐波电流', 'A'],
+            'BVC' => ['C相谐波电压', 'V'],
+            'BVB' => ['B相谐波电压', 'V'],
+            'BVA' => ['A相谐波电压', 'V'],
             'ICA' => ['C相电流相位角',	 '°'],
             'IBC' => ['B相电流相位角',	 '°'],
             'DA'  => ['A相功率因数', ''],
@@ -353,17 +378,17 @@ class HappyBirdMqttClient extends Command
             'FA'  => ['电压频率', 'Hz'],
             'IAB' => ['A相电流相位角',	 '°'],
             'VCA' => ['C相电压相位角',	 '°'],
-            'In'  => ['N 相电流/In', 'A'],
-            'Ic'  => ['C 相电流/Ic', 'A'],
-            'Ib'  => ['B 相电流/Ib', 'A'],
-            'Ia'  => ['A 相电流/Ia', 'A'],
+            'IN'  => ['N 相电流/In', 'A'],
+            'IC'  => ['C 相电流/Ic', 'A'],
+            'IB'  => ['B 相电流/Ib', 'A'],
+            'IA'  => ['A 相电流/Ia', 'A'],
             'T4'  => ['N 相温度/Tn', '℃'],
             'T3'  => ['C 相温度/Tc', '℃'],
             'T2'  => ['B 相温度/Tb', '℃'],
             'T1'  => ['A 相温度/Ta', '℃'],
-            'Va'  => ['A 相电压/Va', 'V'],
-            'Vb'  => ['B 相电压/Vb', 'V'],
-            'Vc'  => ['C 相电压/Vc', 'V'],
+            'VA'  => ['A 相电压/Va', 'V'],
+            'VB'  => ['B 相电压/Vb', 'V'],
+            'VC'  => ['C 相电压/Vc', 'V'],
             'VBC' => ['B相电压相位角',	 '°'],
             'VAB' => ['A相电压相位角',	 '°'],
             'CSQ' => ['信号强度', 'db'],
@@ -373,21 +398,54 @@ class HappyBirdMqttClient extends Command
             'AP'  => ['总有功率', 'W'],
             'QT'  => ['总电量', 'KWh'],
             'L1'  => ['剩余电流/L1', 'mA'],
+            'FB'  => ['B相电压频率', 'Hz'],
+            "FC"  => ['C相电压频率',	'Hz'],
         ],
         'LN6M-L1T4A3V3-D-485' => [
+            'BI'  => ['3相电流平衡度',	 '%'],
             'L1'  => ['剩余电流/L1',	'mA'],
             'FA'  => ['电压频率',	'Hz'],
             'DA'  => ['功率因数',	''],
-            'BIa' => ['谐波电流',	'A'],
-            'BVa' => ['谐波电压',	'V'],
+            'BIA' => ['谐波电流',	'A'],
+            'BVA' => ['谐波电压',	'V'],
             'RP'  => ['总无功率',	'W'],
             'AP'  => ['总有功率',	'W'],
             'QT'  => ['总电量',	'KWh'],
-            'Va'  => ['电压/Va',	'V'],
-            'Ia'  => ['电流/Ia',	'A'],
+            'VA'  => ['电压/Va',	'V'],
+            'IA'  => ['电流/Ia',	'A'],
             'T4'  => ['N 相温度/Tn',	'℃'],
             'T1'  => ['L 相温度/Ta',	'℃'],
             'A1'  => ['故障电弧量',	'个'],
+            'CL1' => ['容性漏电', 'mA'],
+            'BIC' => ['C相谐波电流', 'A'],
+            'BIB' => ['B相谐波电流', 'A'],
+            'BVC' => ['C相谐波电压', 'V'],
+            'BVB' => ['B相谐波电压', 'V'],
+            'ICA' => ['C相电流相位角',	 '°'],
+            'IBC' => ['B相电流相位角',	 '°'],
+            'DB'  => ['B相功率因数', ''],
+            'DC'  => ['C相功率因数', ''],
+            'RL1' => ['阻性漏电', 'mA'],
+            'APC' => ['C相有功功率', 'W'],
+            'APB' => ['B相有功功率', 'W'],
+            'APA' => ['A相有功功率', 'W'],
+            'A3'  => ['C相故障电弧量', '个'],
+            'A2'  => ['B相故障电弧量', '个'],
+            'IAB' => ['A相电流相位角',	 '°'],
+            'VCA' => ['C相电压相位角',	 '°'],
+            'IN'  => ['N 相电流/In', 'A'],
+            'IC'  => ['C 相电流/Ic', 'A'],
+            'IB'  => ['B 相电流/Ib', 'A'],
+            'T3'  => ['C 相温度/Tc', '℃'],
+            'T2'  => ['B 相温度/Tb', '℃'],
+            'VB'  => ['B 相电压/Vb', 'V'],
+            'VC'  => ['C 相电压/Vc', 'V'],
+            'VBC' => ['B相电压相位角',	 '°'],
+            'VAB' => ['A相电压相位角',	 '°'],
+            'CSQ' => ['信号强度', 'db'],
+            'BV'  => ['3相电压平衡度',	 '%'],
+            'FB'  => ['B相电压频率', 'Hz'],
+            "FC"  => ['C相电压频率',	'Hz'],
         ],
         'LN6M-L1T4A3V3-S-NB'  => [
             'L1'   => ['剩余电流/L1',	'mA'],
@@ -395,12 +453,12 @@ class HappyBirdMqttClient extends Command
             'T2'   => ['B相温度/Tb',	'℃'],
             'T3'   => ['C相温度/Tc',	'℃'],
             'T4'   => ['N相温度/Tn',	'℃'],
-            'Ia'   => ['A相电流/Ia',	'A'],
-            'Ib'   => ['B相电流/Ib',	'A'],
-            'Ic'   => ['C相电流/Ic',	'A'],
-            'Va'   => ['A相电压/Va',	'V'],
-            'Vb'   => ['B相电压/Vb',	'V'],
-            'Vc'   => ['C相电压/Vc',	'V'],
+            'IA'   => ['A相电流/Ia',	'A'],
+            'IB'   => ['B相电流/Ib',	'A'],
+            'IC'   => ['C相电流/Ic',	'A'],
+            'VA'   => ['A相电压/Va',	'V'],
+            'VB'   => ['B相电压/Vb',	'V'],
+            'VC'   => ['C相电压/Vc',	'V'],
             'QA'   => ['A相电量/QA',	'KWH'],
             'QB'   => ['B相电量/QB',	'KWH'],
             'QC'   => ['C相电量/QC',	'KWH'],
@@ -434,20 +492,20 @@ class HappyBirdMqttClient extends Command
             'RPC'  => ['C相无功功率',	'kvar'],
             'RP'   => ['总无功功率',	'kvar'],
             'PQ0'  => ['上时总正向电量',	'KWH'],
-            'PQ0t' => ['上时总正向电量时间',	''],
+            'PQ0T' => ['上时总正向电量时间',	''],
             'PQ1'  => ['当时总正向电量',	'KWH'],
             'PQ2'  => ['上日总正向电量',	'KWH'],
             'PQ3'  => ['当日总正向电量',	'KWH'],
             'PQ4'  => ['上月总正向电量',	'KWH'],
             'PQ5'  => ['当月总正向电量',	'KWH'],
             'PP0'  => ['上日功率总正向最大需量',	'KW'],
-            'PP0t' => ['上日功率总正向最大需量时间',	''],
+            'PP0T' => ['上日功率总正向最大需量时间',	''],
             'PP1'  => ['当日功率总正向最大需量',	'KW'],
-            'PP1t' => ['当日功率总正向最大需量时间',	''],
+            'PP1T' => ['当日功率总正向最大需量时间',	''],
             'PP2'  => ['上月功率总正向最大需量',	'KW'],
-            'PP2t' => ['上月功率总正向最大需量时间',	''],
+            'PP2T' => ['上月功率总正向最大需量时间',	''],
             'PP3'  => ['当月功率总正向最大需量',	'KW'],
-            'PP3t' => ['当月功率总正向最大需量时间',	''],
+            'PP3T' => ['当月功率总正向最大需量时间',	''],
             'XBA'  => ['A相电压谐波含量',	'%'],
             'XBB'  => ['B相电压谐波含量',	'%'],
             'XBC'  => ['C相电压谐波含量',	'%'],
@@ -463,6 +521,11 @@ class HappyBirdMqttClient extends Command
      * Execute the console command.
      *
      * @return int
+     * @throws DataTransferException
+     * @throws InvalidMessageException
+     * @throws MqttClientException
+     * @throws ProtocolViolationException
+     * @throws RepositoryException
      */
     public function handle()
     {
@@ -477,15 +540,42 @@ class HappyBirdMqttClient extends Command
 
                 $modelNo = $topicArray[2]; // 型号
                 $id      = $topicArray[3]; // 编号
+
+                $uuid = 'null';
+
                 foreach ($json['ErrList'] as &$error) {
                     foreach ($this->warmTypes as $key => $warmType) {
                         if ($error['ErrType'] == $key) {
                             $error['errorName']    = $warmType;
                             $error['saveTypeName'] = $this->saveType[$error['SaveType']];
+                            $error['id']           = $id;
+                            $error['modelNo']      = $modelNo;
 
+                            $errorArray = [
+                                ["name" => "type", "value" => $error['errorName'], "desc" => "告警类型"],
+                            ];
+                            foreach ($error as $name => $err) {
+                                if ($name === "UUID") {
+                                    $uuid = $err;
+                                }
+                                $errorArray[] = [
+                                    'name'  => $name,
+                                    'value' => $err,
+                                    'desc'  => $this->errList[$name] ?? '',
+                                ];
+                            }
                             // 由于ErrList有多条，如果是漏电，过载，过热，电瓶车的情况，则每条分开打印，分开处理todo
-                            if (in_array($error['ErrType'], [5, 30, 6, 276])) {
-                                Log::info("Received alone alarm message:{$error['ErrType']}/{$modelNo}/{$id}/{$date} " . json_encode($error) . " on topic {$topic}");
+                            if (in_array(
+                                $error['ErrType'],
+                                [5, 30, 6, 277, 278, 279, 280, 281, 282, 283, 284, 289, 290, 291, 292, 293, 294, 295, 296, 299, 300, 301, 302, 304, 306, 308, 310, 312, 402]// 添加电动车报警
+                            )) {
+                                $time       = Carbon::now(); // 获取当前时间
+                                $format     = 'Y-m-d\TH:i:s.uP'; // 设置指定的时间格式
+                                $timeString = $time->format($format); // 格式化时间
+
+                                $log_message = "[{$timeString}] 报警: {$error['ErrType']}/{$modelNo}/{$id}/{$date}/" . json_encode($errorArray);
+                                $log_file    = "storage/logs/alarm/" . $uuid . ".log";
+                                file_put_contents($log_file, $log_message);
                             }
                         }
                     }
@@ -504,9 +594,28 @@ class HappyBirdMqttClient extends Command
                 $modelNo = $topicArray[2]; // 型号
                 $id      = $topicArray[3]; // 编号
 
-                // 保存型号，编号和心跳数据 todo
-                // 单位转化，展示时，再根据型号去转 todo
-                Log::info("Received tdata message:{$modelNo}/{$id}/{$date} {$message} on topic {$topic}");
+                $units    = json_decode($message);
+                $newArray = [
+                    ["name" => "type", "value" => "心跳", "desc" => "告警类型"],
+                ];
+                foreach ($units as $unit => $value) {
+                    // 单位名
+                    $newArray[] = [
+                        'name'  => $unit,
+                        'desc'  => $this->unitList[$modelNo][$unit][0],
+                        'value' => $value,
+                        'unit'  => $this->unitList[$modelNo][$unit][1],
+                    ];
+                }
+                $data = json_encode($newArray);
+                Log::info("Received tdata message:{$modelNo}/{$id}/{$date}{$message} on topic {$topic}");
+                $time       = Carbon::now(); // 获取当前时间
+                $format     = 'Y-m-d\TH:i:s.uP'; // 设置指定的时间格式
+                $timeString = $time->format($format); // 格式化时间
+
+                $log_message = "[{$timeString}] 心跳包:{$modelNo}/{$id}/{$date}/{$data}";
+                $log_file    = "storage/logs/heartbeat/" . $id . microtime(true) . ".log";
+                file_put_contents($log_file, $log_message);
             }, 1);
             $mqtt->loop(true);// 不退出
         } catch (ClientNotConnectedToBrokerException $e) {
