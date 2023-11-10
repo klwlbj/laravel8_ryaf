@@ -3,14 +3,13 @@
 namespace App\Utils;
 
 use ReflectionClass;
-use Illuminate\Support\Facades\Log;
 
 class DaHua
 {
     /**
      * 命令字节
      */
-    public const COMMAND_BYTE = [
+    public const COMMAND_BYTE_LIST = [
         0 => '预留',
         1 => '控制命令',
         2 => '发送数据',
@@ -18,9 +17,10 @@ class DaHua
         4 => '请求',
         5 => '应答',
         6 => '否认',
+        7 => '保活'
     ];
 
-    public const SYSTEM_TYPE_FLAG = [
+    public const SYSTEM_TYPE_MARK_LIST = [
         0  => '通用',
         1  => '火灾报警系统',
         10 => '消防联动控制器',
@@ -38,9 +38,10 @@ class DaHua
         22 => '消防应急照明和疏散指示系统',
         23 => '消防电源',
         24 => '消防电话',
+
     ];
 
-    public const UNIT_TYPE_FLAG = [
+    public const UNIT_TYPE_MARK_LIST = [
         0   => '通用',
         1   => '火灾报警控制器',
         10  => '可燃气体探铡器',
@@ -109,123 +110,122 @@ class DaHua
         121 => '警报装置',
     ];
 
-    public const TYPE_FLAG = [
+    public const TYPE_MARK_LIST = [
         0  => '预留',
         1  => [
             'name'      => '上传建筑消防设施系统状态',
             'structure' => [
                 // 名称=>字节数,0为可变长度
-                'system_type_flag'  => 1,
-                'system_address'    => 1,
-                'bfpf_system_state' => 2,
-                'time'              => 6,
+                self::SYSTEM_TYPE_MARK  => 1,
+                self::SYSTEM_ADDRESS    => 1,
+                self::BFPF_SYSTEM_STATE => 2,
+                self::TIME              => 6,
             ],
         ],
         2  => [
             'name'      => '上传建筑消防设施部件运行状态',
             'structure' => [
                 // 名称=>字节数
-                'system_type_flag' => 1,
-                'system_address'   => 1,
-                'unit_type_flag'   => 1,
-                'unit_address'     => 4,
-                'bfpf_unit_state'  => 2,
-                'unit_desc'        => 31,
-                'time'             => 6,
+                self::SYSTEM_TYPE_MARK => 1,
+                self::SYSTEM_ADDRESS   => 1,
+                self::UNIT_TYPE_MARK   => 1,
+                self::UNIT_ADDRESS     => 4,
+                self::BFPF_UNIT_STATE  => 2,
+                self::UNIT_DESC        => 31,
+                self::TIME             => 6,
             ],
         ],
         3  => [
             'name'      => '上传建筑消防设施部件模拟量',
             'structure' => [
-                'system_type_flag' => 1,
-                'system_address'   => 1,
-                'unit_type_flag'   => 1,
-                'unit_address'     => 4,
-                'analog_type'      => 1,
-                'analog_value'     => 2,
-                'time'             => 2,
+                self::SYSTEM_TYPE_MARK => 1,
+                self::SYSTEM_ADDRESS   => 1,
+                self::UNIT_TYPE_MARK   => 1,
+                self::UNIT_ADDRESS     => 4,
+                self::ANALOG_TYPE      => 1,
+                self::ANALOG_VALUE     => 2,
+                self::TIME             => 2,
             ],
         ],
         4  => [
             'name'      => '上传建筑消防设施操作信息',
             'structure' => [
-                'system_type_flag' => 1,
-                'system_address'   => 1,
-                'operate_info'     => 1,
-                'operator'         => 1,
-                'time'             => 6,
+                self::SYSTEM_TYPE_MARK => 1,
+                self::SYSTEM_ADDRESS   => 1,
+                self::OPERATE_MARK     => 1,
+                self::OPERATOR         => 1,
+                self::TIME             => 6,
             ],
         ],
         5  => [
             'name'      => '上传建筑消防设施软件版本',
             'structure' => [
-                'system_type_flag'  => 1,
-                'system_address'    => 1,
-                'main_version'      => 1,
-                'secondary_version' => 1,
+                self::SYSTEM_TYPE_MARK  => 1,
+                self::SYSTEM_ADDRESS    => 1,
+                self::MAIN_VERSION      => 1,
+                self::SECONDARY_VERSION => 1,
             ],
         ],
         6  => [
             'name'      => '上传建筑消防设施系统配置情况',
             'structure' => [
-                'system_type_flag'   => 1,
-                'system_address'     => 1,
-                'system_desc_length' => 1,
-                'system_desc'        => 0,
+                self::SYSTEM_TYPE_MARK   => 1,
+                self::SYSTEM_ADDRESS     => 1,
+                self::SYSTEM_DESC_LENGTH => 1,
+                self::SYSTEM_DESC        => 0,
             ],
         ],
         7  => [
             'name'      => '上传建筑消防设施部件配置情况',
             'structure' => [
-                'system_type_flag' => 1,
-                'system_address'   => 1,
-                'unit_type_flag'   => 1,
-                'unit_address'     => 4,
-                'unit_desc'        => 31,
+                self::SYSTEM_TYPE_MARK => 1,
+                self::SYSTEM_ADDRESS   => 1,
+                self::UNIT_TYPE_MARK   => 1,
+                self::UNIT_ADDRESS     => 4,
+                self::UNIT_DESC        => 31,
             ],
         ],
         8  => [
             'name'      => '上传建筑消防设施系统时间',
             'structure' => [
-                'system_type_flag' => 1,
-                'system_address'   => 1,
-                'time'             => 6,
+                self::SYSTEM_TYPE_MARK => 1,
+                self::SYSTEM_ADDRESS   => 1,
+                self::TIME             => 6,
             ],
         ],
         21 => [
             'name'      => '上传用户信息传输装置运行状态',
             'structure' => [
-                'uit_running_state' => 1,
-                'time'              => 6,
+                self::UIT_RUNNING_STATE => 1,
+                self::TIME               => 6,
             ],
         ],
         24 => [
             'name'      => '上传用户信息传输装置操作信息',
             'structure' => [
-                'operate_info' => 1,
-                'operator'     => 1,
-                'time'         => 6,
+                self::OPERATE_MARK => 1,
+                self::OPERATOR     => 1,
+                self::TIME         => 6,
             ],
         ],
         25 => [
             'name'      => '上传用户信息传输装置软件版本',
             'structure' => [
-                'main_version'      => 1,
-                'secondary_version' => 1,
+                self::MAIN_VERSION      => 1,
+                self::SECONDARY_VERSION => 1,
             ],
         ],
         26 => [
             'name'      => '上传用户信息传输装置配置',
             'structure' => [
-                'setting_length' => 1,
-                'setting_desc'   => 0,
+                self::SETTING_LENGTH => 1,
+                self::SETTING_DESC   => 0,
             ],
         ],
         28 => [
             'name'      => '上传用户信息传输装置系统时间',
             'structure' => [
-                '',
-                'time' => 6,
+                self::TIME => 6,
             ],
         ],
 
@@ -251,42 +251,10 @@ class DaHua
     ];
 
     /**
-     * 8.2.1.8
-     * 用户信息传输装置运行状态
+     * 8.1.1.1
+     * 建筑消防设施系统状态
      */
-    public const UIT_RUNNING_STATE = [
-        [
-            '测试状态',
-            "正常监视",
-        ],
-        [
-            '无火警',
-            "火警",
-        ],
-        [
-            '无故障',
-            '故障',
-        ],
-        [
-            '主电正常',
-            '主电故障',
-        ],
-        [
-            '备电正常',
-            '备电故障',
-        ],
-        [
-            '同信信道正常',
-            '与监控中心通信信道故障',
-        ],
-        [
-            '监测连接线路正常',
-            '监测连接线路故障',
-        ],
-        ['预留'],
-    ];
-
-    public const BFPF_SYSTEM_STATE = [
+    public const BFPF_SYSTEM_STATE_LIST = [
         ["测试状态", "正常运行状态"],
         ["无火警", "火警"],
         ["无故障", "故障"],
@@ -306,7 +274,7 @@ class DaHua
      * 8.2.1.2
      * 建筑消防设施部件状态
      */
-    public const BFPF_UNIT_STATE = [
+    public const BFPF_UNIT_STATE_LIST = [
         [
             "测试状态",
             "正常运行状态",
@@ -349,7 +317,7 @@ class DaHua
      * 8.2.1.3
      * 建筑消防设施部件模拟量值
      */
-    public const ANALOG_TYPE = [
+    public const ANALOG_TYPE_LIST = [
         ["name" => "未用"],
         [
             "name"     => "事件计数",
@@ -426,10 +394,46 @@ class DaHua
     ];
 
     /**
+     * 8.2.1.8
+     * 用户信息传输装置运行状态
+     */
+    public const UIT_RUNNING_STATE_LIST = [
+        [
+            '测试状态',
+            "正常监视",
+        ],
+        [
+            '无火警',
+            "火警",
+        ],
+        [
+            '无故障',
+            '故障',
+        ],
+        [
+            '主电正常',
+            '主电故障',
+        ],
+        [
+            '备电正常',
+            '备电故障',
+        ],
+        [
+            '同信信道正常',
+            '与监控中心通信信道故障',
+        ],
+        [
+            '监测连接线路正常',
+            '监测连接线路故障',
+        ],
+        ['预留'],
+    ];
+
+    /**
      * 8.2.1.9
      * 用户信息传输装置操作信息
      */
-    public const OPERATE_INFO = [
+    public const OPERATE_MARK_LIST = [
         [
             "无操作",
             "复位",
@@ -461,26 +465,84 @@ class DaHua
         ],
         ["预留"],
     ];
+    // 业务流水号
+    public const SERVICE_NO = 'service_no';
+    // 协议版本号
+    public const PROTOCOL_VERSION = 'protocol_version';
+    // 时间标签
+    public const TIME_TAG = 'time_tag';
+    // 源地址
+    public const FROM_ADDRESS = 'from_address';
+    // 目的地址
+    public const TO_ADDRESS = 'to_address';
+    // 应用数据单元
+    public const APP_DATA_UNIT        = 'app_data_unit';
+    // 应用数据单元长度
+    public const APP_DATA_UNIT_LENGTH = 'app_data_unit_length';
+    // 命令字节
+    public const CMD_BYTE = 'cmd_byte';
+    // 类型标志
+    public const TYPE_MARK = 'type_mark';
+    // 信息对象数目
+    public const INFO_OBJECT_NUM = 'info_object_num';
+    // 自定义字段，信息体
+    public const CUSTOM_FIELDS = 'custom_fields';
+    // 系统类型标志
+    public const SYSTEM_TYPE_MARK = 'system_type_mark';
+    // 系统地址
+    public const SYSTEM_ADDRESS = 'system_address';
+    // 建筑消防设施系统状态
+    public const BFPF_SYSTEM_STATE = 'bfpf_system_state';
+    // 发生时间
+    public const TIME = 'time';
+    // 部件类型标志
+    public const UNIT_TYPE_MARK = 'unit_type_mark';
+    // 部件地址
+    public const UNIT_ADDRESS = 'unit_address';
+    // 建筑消防设施部件状态
+    public const BFPF_UNIT_STATE = 'bfpf_unit_state';
+    // 部件描述
+    public const UNIT_DESC = 'unit_desc';
+    // 模拟量类型
+    public const ANALOG_TYPE = 'analog_type';
+    // 模拟量值
+    public const ANALOG_VALUE = 'analog_value';
+    // 操作标志
+    public const OPERATE_MARK = 'operate_mark';
+    // 操作员编号
+    public const OPERATOR = 'operator';
+    // 主版本号
+    public const MAIN_VERSION = 'main_version';
+    // 次版本号
+    public const SECONDARY_VERSION = 'secondary_version';
+    // 系统说明长度
+    public const SYSTEM_DESC_LENGTH = 'system_desc_length';
+    // 系统说明
+    public const SYSTEM_DESC = 'system_desc';
+    // 用传运行状态
+    public const UIT_RUNNING_STATE = 'uit_running_state';
+    // 配置长度
+    public const SETTING_LENGTH = 'setting_length';
+    // 配置描述
+    public const SETTING_DESC = 'setting_desc';
 
     public const SUBSTR_ARRAY = [
         // ['字段名','字段长度','字段是否需要转10进制']
-        ['业务流水号', 2, false],
-
-        ['协议版本号', 2, false],
-        // 时间标签
-        ['时间标签', 6, true],
-
-        ['源地址', 6, true],
-        ['目的地址', 6, true],
-        ['应用数据单元长度', 2, true],
-        ['命令字节', 1, true],
+        [self::SERVICE_NO, 2, false],
+        [self::PROTOCOL_VERSION, 2, false],
+        [self::TIME_TAG, 6, true],
+        [self::FROM_ADDRESS, 6, true],
+        [self::TO_ADDRESS, 6, true],
+        [self::APP_DATA_UNIT_LENGTH, 2, true],
+        [self::CMD_BYTE, 1, true],
         // 应用数据单元 不定长
-        ['类型标志', 1, true],
-        ['信息对象数目', 1, true],
-        ['自定义字段', 0, true],
-        // ...
+        [self::TYPE_MARK, 1, true],
+        [self::INFO_OBJECT_NUM, 1, true],
+        [self::CUSTOM_FIELDS, 0, true],
     ];
-
+    /**
+     * 根据时间生成应答命令
+     */
     public function createCmd(string $no)
     {
         $year   = date('y');
@@ -528,32 +590,33 @@ class DaHua
             if ($value[2] === true) {
                 $littleString = substr($substring, $offset, $value[1] * 2);
                 switch ($value[0]) {
-                    case '源地址':
-                    case '目的地址':
-                        $parsedData[$value[0]] = $littleString;
+                    case self::FROM_ADDRESS:
+                    case self::TO_ADDRESS:
+                        $parsedData['to_from_address'] = $littleString.($parsedData['to_from_address'] ?? '');
+                        // 转成10进制编码
+                        $parsedData[$value[0]] = hexdec($this->strReverse($littleString));
                         break;
-                    case '应用数据单元长度':
+                    case self::APP_DATA_UNIT_LENGTH:
                         $len                   = strlen($littleString); // 字符串长度
                         $reversedStr           = substr($littleString, $len - 2) . substr($littleString, 0, $len - 2); // 构造反转后的字符串
-                        $parsedData[$value[0]] = $parsedData['app_data_unit_length'] = hexdec($reversedStr);
+                        $parsedData[$value[0]] = hexdec($reversedStr);
                         break;
-                    case '命令字节':
-                        $parsedData[$value[0]] = self::COMMAND_BYTE[hexdec($littleString)] ?? '';
+                    case self::CMD_BYTE:
+                        $parsedData[$value[0]] = self::COMMAND_BYTE_LIST[hexdec($littleString)] ?? '';
                         break;
-                    case '时间标签':
+                    case self::TIME_TAG:
                         $parsedData[$value[0]] = $this->strToTime($littleString);
                         break;
-                    case '类型标志':
-                        $typeFlag              = self::TYPE_FLAG[hexdec($littleString)] ?? '';
+                    case self::TYPE_MARK:
+                        $typeFlag              = self::TYPE_MARK_LIST[hexdec($littleString)] ?? '';
                         $typeFlagStructures    = $typeFlag['structure'] ?? [];
                         $parsedData[$value[0]] = $typeFlag['name'] ?? '预留';
                         break;
-                    case '信息对象数目':
+                    case self::INFO_OBJECT_NUM:
                         $parsedData[$value[0]] = $infoOjbNum = hexdec($littleString);
                         break;
-                    case '自定义字段':
+                    case self::CUSTOM_FIELDS:
                         $customString = substr($substring, $offset);
-                        // echo $customString;die;
                         break 2;// 跳出foreach
                     default:
                         $parsedData[$value[0]] = hexdec($littleString);
@@ -566,57 +629,57 @@ class DaHua
         }
         unset($offset);
         if (isset($typeFlagStructures)) {
-            for ($j = 1;$j <= $infoOjbNum;$j++) {
+            for ($j = 0;$j <= $infoOjbNum - 1;$j++) {
                 $offset = 0;
                 foreach ($typeFlagStructures as $name => $structure) {
                     $littleString = substr($customString, $offset, $structure * 2);
 
                     switch ($name) {
-                        case 'system_type_flag':
-                        case 'unit_type_flag':
-                        case 'bfpf_system_state':
-                            $constantName           = strtoupper($name);
-                            $reflectionClass        = new ReflectionClass(self::class);
-                            $constantValue          = $reflectionClass->getConstant($constantName);
-                            $parsedData[$name . $j] = $constantValue[hexdec($littleString)];
+                        case self::SYSTEM_TYPE_MARK:
+                        case self::UNIT_TYPE_MARK:
+                            $constantName                               = strtoupper($name. '_LIST');
+                            $reflectionClass                            = new ReflectionClass(self::class);
+                            $constantValue                              = $reflectionClass->getConstant($constantName);
+                            $parsedData[self::APP_DATA_UNIT][$j][$name] = $constantValue[hexdec($littleString)] ?? '预留';
                             break;
-                        case 'bfpf_unit_state':
-                        case 'uit_running_state':
-                        case 'operate_info':
-                            $constantName    = strtoupper($name);
+                        case self::BFPF_SYSTEM_STATE:
+                        case self::BFPF_UNIT_STATE:
+                        case self::UIT_RUNNING_STATE:
+                        case self::OPERATE_MARK:
+                            $constantName    = strtoupper($name . '_LIST');
                             $reflectionClass = new ReflectionClass(self::class);
                             $constantValue   = $reflectionClass->getConstant($constantName);
                             $unitStates      = strrev(base_convert($this->strReverse($littleString), 16, 2));
                             // 16进制转二进制，记录状态
                             for ($i = 0; $i < strlen($unitStates); $i++) {
                                 if ($unitStates[$i] == 1) {
-                                    $parsedData[$name . $j][] = $constantValue[$i][1];
+                                    $cValue                                       = $constantValue[$i] ?? ['', '预留'];
+                                    $parsedData[self::APP_DATA_UNIT][$j][$name][] = $cValue[1];
                                 }
                             }
                             break;
-                        case 'unit_address':
-                            $parsedData[$name . $j] = $this->strReverse($littleString);
+                        case self::UNIT_ADDRESS:
+                            $parsedData[self::APP_DATA_UNIT][$j][$name] = $this->strReverse($littleString);
                             break;
-                        case 'time' :
-                            $parsedData[$name . $j] = $this->strToTime($littleString);
+                        case self::TIME :
+                            $parsedData[self::APP_DATA_UNIT][$j][$name] = $this->strToTime($littleString);
                             break;
-                        case 'analog_type':
-                            $keyName                = 'analog' . $j;
-                            ${$keyName}             = self::ANALOG_TYPE[hexdec($littleString)];
-                            $parsedData[$name . $j] = ${$keyName}['name'] ?? '';
+                        case self::ANALOG_TYPE:
+                            $keyName                                    = 'analog' . $j;
+                            ${$keyName}                                 = self::ANALOG_TYPE[hexdec($littleString)];
+                            $parsedData[self::APP_DATA_UNIT][$j][$name] = ${$keyName}['name'] ?? '';
                             break;
-                        case 'analog_value':
+                        case self::ANALOG_VALUE:
                             // todo test
-                            $parsedData[$name . $j]             = hexdec($littleString);
-                            $parsedData['analog_unit' . $j]     = ${$keyName}['unit'] ?? '';
-                            $parsedData['analog_min_rage' . $j] = ${$keyName}['min_rage'] ?? '';
-                            $parsedData['analog_radius' . $j]   = ${$keyName}['radius'] ?? '';
+                            $parsedData[$name . $j]                                 = hexdec($littleString);
+                            $parsedData[self::APP_DATA_UNIT][$j]['analog_unit']     = ${$keyName}['unit'] ?? '';
+                            $parsedData[self::APP_DATA_UNIT][$j]['analog_min_rage'] = ${$keyName}['min_rage'] ?? '';
+                            $parsedData[self::APP_DATA_UNIT][$j]['analog_radius']   = ${$keyName}['radius'] ?? '';
                             break;
                         default:
-                            $parsedData[$name . $j] = $littleString;
+                            $parsedData[self::APP_DATA_UNIT][$j][$name] = $littleString;
                             break;
                     }
-
                     $offset += $structure * 2;
                 }
             }
@@ -652,6 +715,7 @@ class DaHua
     {
         $array = str_split($string, 2);
 
+        // 初始值
         $second = '00';
         $minute = '00';
         $hour   = '00';
@@ -684,7 +748,7 @@ class DaHua
     }
 
     /**
-     * 和校验
+     * 和校验(小写)
      * @param $string
      * @return string
      */
