@@ -43,13 +43,13 @@ class DaHuaClient extends Command
     {
         // 创建一个Worker监听2347端口，不使用任何应用层协议
         $tcp_worker = new Worker("tcp://0.0.0.0:8080");
-        $util       = new DaHua();
 
         // 启动4个进程对外提供服务
         $tcp_worker->count = 4;
 
         // 当客户端发来数据时
-        $tcp_worker->onMessage = function (TcpConnection $connection, $data) use ($util) {
+        $tcp_worker->onMessage = function (TcpConnection $connection, $data) {
+            $util = new DaHua();
             $data = bin2hex($data);
             echo date('H:i:s') . '收到客户端消息：' . $data . PHP_EOL;
 

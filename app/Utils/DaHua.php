@@ -17,7 +17,7 @@ class DaHua
         4 => '请求',
         5 => '应答',
         6 => '否认',
-        7 => '保活'
+        7 => '保活',
     ];
 
     public const SYSTEM_TYPE_MARK_LIST = [
@@ -38,7 +38,6 @@ class DaHua
         22 => '消防应急照明和疏散指示系统',
         23 => '消防电源',
         24 => '消防电话',
-
     ];
 
     public const UNIT_TYPE_MARK_LIST = [
@@ -197,7 +196,7 @@ class DaHua
             'name'      => '上传用户信息传输装置运行状态',
             'structure' => [
                 self::UIT_RUNNING_STATE => 1,
-                self::TIME               => 6,
+                self::TIME              => 6,
             ],
         ],
         24 => [
@@ -476,7 +475,7 @@ class DaHua
     // 目的地址
     public const TO_ADDRESS = 'to_address';
     // 应用数据单元
-    public const APP_DATA_UNIT        = 'app_data_unit';
+    public const APP_DATA_UNIT = 'app_data_unit';
     // 应用数据单元长度
     public const APP_DATA_UNIT_LENGTH = 'app_data_unit_length';
     // 命令字节
@@ -540,6 +539,7 @@ class DaHua
         [self::INFO_OBJECT_NUM, 1, true],
         [self::CUSTOM_FIELDS, 0, true],
     ];
+
     /**
      * 根据时间生成应答命令
      */
@@ -553,8 +553,7 @@ class DaHua
         $second = date('s');
 
         $string = $no . '0102' . sprintf("%02s", dechex($second)) . sprintf("%02s", dechex($minute)) . sprintf("%02s", dechex($hour)) . sprintf("%02s", dechex($day)) . sprintf("%02s", dechex($month)) . sprintf("%02s", dechex($year)) . '64000000000028249c330000000003';
-
-        // 处理请求
+        
         return '4040' . $string . $this->checkSum($string) . '2323';
     }
 
@@ -592,7 +591,7 @@ class DaHua
                 switch ($value[0]) {
                     case self::FROM_ADDRESS:
                     case self::TO_ADDRESS:
-                        $parsedData['to_from_address'] = $littleString.($parsedData['to_from_address'] ?? '');
+                        $parsedData['to_from_address'] = $littleString . ($parsedData['to_from_address'] ?? '');
                         // 转成10进制编码
                         $parsedData[$value[0]] = hexdec($this->strReverse($littleString));
                         break;
@@ -637,7 +636,7 @@ class DaHua
                     switch ($name) {
                         case self::SYSTEM_TYPE_MARK:
                         case self::UNIT_TYPE_MARK:
-                            $constantName                               = strtoupper($name. '_LIST');
+                            $constantName                               = strtoupper($name . '_LIST');
                             $reflectionClass                            = new ReflectionClass(self::class);
                             $constantValue                              = $reflectionClass->getConstant($constantName);
                             $parsedData[self::APP_DATA_UNIT][$j][$name] = $constantValue[hexdec($littleString)] ?? '预留';
@@ -671,7 +670,7 @@ class DaHua
                             break;
                         case self::ANALOG_VALUE:
                             // todo test
-                            $parsedData[$name . $j]                                 = hexdec($littleString);
+                            $parsedData[self::APP_DATA_UNIT][$j][$name]             = hexdec($littleString);
                             $parsedData[self::APP_DATA_UNIT][$j]['analog_unit']     = ${$keyName}['unit'] ?? '';
                             $parsedData[self::APP_DATA_UNIT][$j]['analog_min_rage'] = ${$keyName}['min_rage'] ?? '';
                             $parsedData[self::APP_DATA_UNIT][$j]['analog_radius']   = ${$keyName}['radius'] ?? '';
