@@ -41,7 +41,7 @@ class DaHuaClient extends Command
      */
     public function handle()
     {
-        // 创建一个Worker监听2347端口，不使用任何应用层协议
+        // 创建一个TCP连接监听端口，不使用任何应用层协议
         $tcp_worker = new Worker("tcp://0.0.0.0:8080");
 
         // 启动4个进程对外提供服务

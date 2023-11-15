@@ -9,7 +9,7 @@ class DaHua
     /**
      * 命令字节
      */
-    public const COMMAND_BYTE_LIST = [
+    public const CMD_BYTE_LIST = [
         0 => '预留',
         1 => '控制命令',
         2 => '发送数据',
@@ -110,7 +110,10 @@ class DaHua
     ];
 
     public const TYPE_MARK_LIST = [
-        0  => '预留',
+        0  => [
+            'name'      => '预留',
+            'structure' => [],
+        ],
         1  => [
             'name'      => '上传建筑消防设施系统状态',
             'structure' => [
@@ -227,7 +230,6 @@ class DaHua
                 self::TIME => 6,
             ],
         ],
-
         61 => '读建筑消防设施系统状态',
         62 => '读建筑消防设施部件运行状态',
         63 => '读建筑消防设施部件模拟量',
@@ -274,42 +276,15 @@ class DaHua
      * 建筑消防设施部件状态
      */
     public const BFPF_UNIT_STATE_LIST = [
-        [
-            "测试状态",
-            "正常运行状态",
-        ],
-        [
-            "无火警",
-            "火警",
-        ],
-        [
-            "无故障",
-            "故障",
-        ],
-        [
-            "无屏蔽",
-            "屏蔽",
-        ],
-        [
-            "无监管",
-            "监管",
-        ],
-        [
-            "停止（关闭）",
-            "启动（开启）",
-        ],
-        [
-            "无反馈",
-            "反馈",
-        ],
-        [
-            "未延时",
-            "延时状态",
-        ],
-        [
-            "电源正常",
-            "电源故障",
-        ],
+        ["测试状态", "正常运行状态"],
+        ["无火警", "火警"],
+        ["无故障", "故障"],
+        ["无屏蔽", "屏蔽"],
+        ["无监管", "监管"],
+        ["停止（关闭）", "启动（开启）"],
+        ["无反馈", "反馈"],
+        ["未延时", "延时状态"],
+        ["电源正常", "电源故障"],
     ];
 
     /**
@@ -397,34 +372,13 @@ class DaHua
      * 用户信息传输装置运行状态
      */
     public const UIT_RUNNING_STATE_LIST = [
-        [
-            '测试状态',
-            "正常监视",
-        ],
-        [
-            '无火警',
-            "火警",
-        ],
-        [
-            '无故障',
-            '故障',
-        ],
-        [
-            '主电正常',
-            '主电故障',
-        ],
-        [
-            '备电正常',
-            '备电故障',
-        ],
-        [
-            '同信信道正常',
-            '与监控中心通信信道故障',
-        ],
-        [
-            '监测连接线路正常',
-            '监测连接线路故障',
-        ],
+        ['测试状态', "正常监视"],
+        ['无火警', "火警"],
+        ['无故障', '故障'],
+        ['主电正常', '主电故障'],
+        ['备电正常', '备电故障'],
+        ['同信信道正常', '与监控中心通信信道故障'],
+        ['监测连接线路正常', '监测连接线路故障'],
         ['预留'],
     ];
 
@@ -433,35 +387,13 @@ class DaHua
      * 用户信息传输装置操作信息
      */
     public const OPERATE_MARK_LIST = [
-        [
-            "无操作",
-            "复位",
-        ],
-        [
-            "无操作",
-            "消音",
-        ],
-
-        [
-            "无操作",
-            "手动报警",
-        ],
-        [
-            "无操作",
-            "警情消除",
-        ],
-        [
-            "无操作",
-            "自检",
-        ],
-        [
-            "无操作",
-            "确认",
-        ],
-        [
-            "无操作",
-            "测试",
-        ],
+        ["无操作", "复位"],
+        ["无操作", "消音"],
+        ["无操作", "手动报警"],
+        ["无操作", "警情消除"],
+        ["无操作", "自检"],
+        ["无操作", "确认"],
+        ["无操作", "测试"],
         ["预留"],
     ];
     // 业务流水号
@@ -553,15 +485,22 @@ class DaHua
         $second = date('s');
 
         $string = $no . '0102' . sprintf("%02s", dechex($second)) . sprintf("%02s", dechex($minute)) . sprintf("%02s", dechex($hour)) . sprintf("%02s", dechex($day)) . sprintf("%02s", dechex($month)) . sprintf("%02s", dechex($year)) . '64000000000028249c330000000003';
-        
+
         return '4040' . $string . $this->checkSum($string) . '2323';
     }
 
+    /**
+     * 解析字符串
+     * @param string $string
+     * @return array|false
+     */
     public function parseString(string $string)
     {
         $parsedData = [];
-        $startStr   = '4040';
-        $endStr     = '2323';
+        // 字符串开头
+        $startStr = '4040';
+        // 字符串结尾
+        $endStr = '2323';
 
         $string = str_replace(' ', '', $string);// 去除空格
 
@@ -601,7 +540,7 @@ class DaHua
                         $parsedData[$value[0]] = hexdec($reversedStr);
                         break;
                     case self::CMD_BYTE:
-                        $parsedData[$value[0]] = self::COMMAND_BYTE_LIST[hexdec($littleString)] ?? '';
+                        $parsedData[$value[0]] = self::CMD_BYTE_LIST[hexdec($littleString)] ?? '';
                         break;
                     case self::TIME_TAG:
                         $parsedData[$value[0]] = $this->strToTime($littleString);
@@ -632,7 +571,6 @@ class DaHua
                 $offset = 0;
                 foreach ($typeFlagStructures as $name => $structure) {
                     $littleString = substr($customString, $offset, $structure * 2);
-
                     switch ($name) {
                         case self::SYSTEM_TYPE_MARK:
                         case self::UNIT_TYPE_MARK:
@@ -653,7 +591,7 @@ class DaHua
                             for ($i = 0; $i < strlen($unitStates); $i++) {
                                 if ($unitStates[$i] == 1) {
                                     $cValue                                       = $constantValue[$i] ?? ['', '预留'];
-                                    $parsedData[self::APP_DATA_UNIT][$j][$name][] = $cValue[1];
+                                    $parsedData[self::APP_DATA_UNIT][$j][$name][] = $cValue[1] ?? '预留';
                                 }
                             }
                             break;
@@ -670,10 +608,12 @@ class DaHua
                             break;
                         case self::ANALOG_VALUE:
                             // todo test
-                            $parsedData[self::APP_DATA_UNIT][$j][$name]             = hexdec($littleString);
-                            $parsedData[self::APP_DATA_UNIT][$j]['analog_unit']     = ${$keyName}['unit'] ?? '';
-                            $parsedData[self::APP_DATA_UNIT][$j]['analog_min_rage'] = ${$keyName}['min_rage'] ?? '';
-                            $parsedData[self::APP_DATA_UNIT][$j]['analog_radius']   = ${$keyName}['radius'] ?? '';
+                            $parsedData[self::APP_DATA_UNIT][$j][$name] = hexdec($littleString);
+                            if (isset(${$keyName})) {
+                                $parsedData[self::APP_DATA_UNIT][$j]['analog_unit']     = ${$keyName}['unit'] ?? '';
+                                $parsedData[self::APP_DATA_UNIT][$j]['analog_min_rage'] = ${$keyName}['min_rage'] ?? '';
+                                $parsedData[self::APP_DATA_UNIT][$j]['analog_radius']   = ${$keyName}['radius'] ?? '';
+                            }
                             break;
                         default:
                             $parsedData[self::APP_DATA_UNIT][$j][$name] = $littleString;
@@ -687,10 +627,11 @@ class DaHua
     }
 
     /**
+     * 字符串每两个字符反转
      * @param string $string
      * @return string
      */
-    private function strReverse(string $string)
+    private function strReverse(string $string): string
     {
         // 将字符串拆分成每两个字符一组的数组
         $chunks = str_split($string, 2);
@@ -710,7 +651,7 @@ class DaHua
      * @param string $string
      * @return false|string
      */
-    private function strToTime(string $string)
+    private function strToTime(string $string): string
     {
         $array = str_split($string, 2);
 
@@ -747,7 +688,7 @@ class DaHua
     }
 
     /**
-     * 和校验(小写)
+     * 校验和(小写)
      * @param $string
      * @return string
      */
