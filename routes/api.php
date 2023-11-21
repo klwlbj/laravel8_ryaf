@@ -81,6 +81,8 @@ Route::post('/hkCTWing4GWarm', [NBController::class, 'hkCTWing4GWarm']);
 
 // 海康指令解析测试
 Route::get('/analyze/{string}', [NBController::class, 'analyze']);
+
+// 大华指令解析测试
 Route::get('dahua/analyze/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze']);
 Route::get('dahua/analyze2/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze2']);
 Route::get('dahua/analyze3/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze3']);

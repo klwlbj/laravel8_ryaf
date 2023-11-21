@@ -457,6 +457,7 @@ class DaHua
     // 配置描述
     public const SETTING_DESC = 'setting_desc';
 
+    // 字符串分隔规则
     public const SUBSTR_ARRAY = [
         // ['字段名','字段长度','字段是否需要转10进制']
         [self::SERVICE_NO, 2, false],
@@ -474,8 +475,10 @@ class DaHua
 
     /**
      * 根据时间生成应答命令
+     * @param string $no
+     * @return string
      */
-    public function createCmd(string $no)
+    public function createCmd(string $no): string
     {
         $year   = date('y');
         $month  = date('m');
@@ -522,11 +525,11 @@ class DaHua
 
         $customString = '';
         $infoOjbNum   = 0;
-
-        $offset = 0;
+        $offset       = 0;
         foreach (self::SUBSTR_ARRAY as $value) {
+            $length = $value[1] * 2;
             if ($value[2] === true) {
-                $littleString = substr($substring, $offset, $value[1] * 2);
+                $littleString = substr($substring, $offset, $length);
                 switch ($value[0]) {
                     case self::FROM_ADDRESS:
                     case self::TO_ADDRESS:
@@ -546,9 +549,9 @@ class DaHua
                         $parsedData[$value[0]] = $this->strToTime($littleString);
                         break;
                     case self::TYPE_MARK:
-                        $typeFlag              = self::TYPE_MARK_LIST[hexdec($littleString)] ?? '';
-                        $typeFlagStructures    = $typeFlag['structure'] ?? [];
-                        $parsedData[$value[0]] = $typeFlag['name'] ?? '预留';
+                        $typeMark              = self::TYPE_MARK_LIST[hexdec($littleString)] ?? '';
+                        $typeMarkStructures    = $typeMark['structure'] ?? [];
+                        $parsedData[$value[0]] = $typeMark['name'] ?? '预留';
                         break;
                     case self::INFO_OBJECT_NUM:
                         $parsedData[$value[0]] = $infoOjbNum = hexdec($littleString);
@@ -561,15 +564,15 @@ class DaHua
                         break;
                 }
             } else {
-                $parsedData[$value[0]] = substr($substring, $offset, $value[1] * 2);
+                $parsedData[$value[0]] = substr($substring, $offset, $length);
             }
-            $offset += $value[1] * 2;
+            $offset += $length;
         }
         unset($offset);
-        if (isset($typeFlagStructures)) {
+        if (isset($typeMarkStructures)) {
             for ($j = 0;$j <= $infoOjbNum - 1;$j++) {
                 $offset = 0;
-                foreach ($typeFlagStructures as $name => $structure) {
+                foreach ($typeMarkStructures as $name => $structure) {
                     $littleString = substr($customString, $offset, $structure * 2);
                     switch ($name) {
                         case self::SYSTEM_TYPE_MARK:

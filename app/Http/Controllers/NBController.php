@@ -511,7 +511,6 @@ class NBController extends BaseController
                                 $parsedData['channel'][$lastChar - 1]['warm'] = $this->getBitValue($eventValue, self::HK_PARAM_WARM_TYPE);
                                 break;
                         }
-
                         break;
                     case 'paramType1':
                     case 'paramType2':
@@ -538,7 +537,6 @@ class NBController extends BaseController
                         // }
                         $parsedData['channel'][$lastChar - 1]['paramValue'] = hexdec($string);
                         break;
-
                     case 'byTime':
                         $parsedData[$value[0]] = date('Y-m-d H:i:s', hexdec($littleString));
                         break;
@@ -568,7 +566,13 @@ class NBController extends BaseController
         return $parsedData;
     }
 
-    private function getBitValue($string, $typeArray)
+    /**
+     * 根据二进制位，判断值
+     * @param string $string
+     * @param array $typeArray
+     * @return array
+     */
+    private function getBitValue(string $string, array $typeArray): array
     {
         $returnArray = [];
         foreach (str_split($string) as $key => $bit) {

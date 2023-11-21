@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use App\Utils\DaHua;
 use Workerman\Worker;
 use Illuminate\Console\Command;
@@ -41,51 +42,55 @@ class DaHuaClient extends Command
      */
     public function handle()
     {
-        // 创建一个TCP连接监听端口，不使用任何应用层协议
-        $tcp_worker = new Worker("tcp://0.0.0.0:8080");
+        try {
+            // 创建一个TCP连接监听端口，不使用任何应用层协议
+            $tcp_worker = new Worker("tcp://0.0.0.0:8080");
 
-        // 启动4个进程对外提供服务
-        $tcp_worker->count = 4;
+            // 启动4个进程对外提供服务
+            $tcp_worker->count = 4;
 
-        // 当客户端发来数据时
-        $tcp_worker->onMessage = function (TcpConnection $connection, $data) {
-            $util = new DaHua();
-            $data = bin2hex($data);
-            echo date('H:i:s') . '收到客户端消息：' . $data . PHP_EOL;
+            // 当客户端发来数据时
+            $tcp_worker->onMessage = function (TcpConnection $connection, $data) {
+                $util = new DaHua();
+                $data = bin2hex($data);
+                echo date('H:i:s') . '收到客户端消息：' . $data . PHP_EOL;
 
-            // 解析，并保存日志
-            $array = $util->parseString($data);
-            if ($array) {
-                Log::info("收到客户端消息:" . date('H:i:s') . ':' . $data);
-                // Log::info("Received dahua message:" . json_encode($array));
-                $log_file = "storage/logs/dahua/" . ($array['from_address'] ?? '') . microtime(true) . ".log";
-                file_put_contents($log_file, json_encode($array));
+                // 解析，并保存日志
+                $array = $util->parseString($data);
+                if ($array) {
+                    Log::info("收到客户端消息:" . date('H:i:s') . ':' . $data);
+                    // Log::info("Received dahua message:" . json_encode($array));
+                    $log_file = "storage/logs/dahua/" . ($array['from_address'] ?? '') . microtime(true) . ".log";
+                    file_put_contents($log_file, json_encode($array));
 
-                // 业务流水号
-                $no = substr($data, 4, 4);
+                    // 业务流水号
+                    $no = substr($data, 4, 4);
 
-                $year   = date('y');
-                $month  = date('m');
-                $day    = date('d');
-                $hour   = date('H');
-                $minute = date('i');
-                $second = date('s');
+                    $year   = date('y');
+                    $month  = date('m');
+                    $day    = date('d');
+                    $hour   = date('H');
+                    $minute = date('i');
+                    $second = date('s');
 
-                $time = sprintf("%02s", dechex($second)) . sprintf("%02s", dechex($minute)) . sprintf("%02s", dechex($hour)) . sprintf("%02s", dechex($day)) . sprintf("%02s", dechex($month)) . sprintf("%02s", dechex($year));
-                // $time = substr($data, 12, 12);// 截取命令的时间
+                    $time = sprintf("%02s", dechex($second)) . sprintf("%02s", dechex($minute)) . sprintf("%02s", dechex($hour)) . sprintf("%02s", dechex($day)) . sprintf("%02s", dechex($month)) . sprintf("%02s", dechex($year));
+                    // $time = substr($data, 12, 12);// 截取命令的时间
 
-                $string = $no . '0102' . $time . $array['to_from_address'] . '000003';// 协议版本号，暂写死0102，地址也写死
+                    $string = $no . '0102' . $time . $array['to_from_address'] . '000003';// 协议版本号，暂写死0102，地址也写死
 
-                // 处理请求
-                $response = strtolower('4040' . $string . $util->checkSum($string) . '2323');
+                    // 处理请求
+                    $response = strtolower('4040' . $string . $util->checkSum($string) . '2323');
 
-                // 向客户端发送hello
-                $connection->send(hex2bin($response));
-            }
-            unset($util);
-        };
-
-        // 运行worker
-        Worker::runAll();
+                    // 向客户端发送hello
+                    $connection->send(hex2bin($response));
+                }
+                unset($util);
+            };
+            // 运行worker
+            Worker::runAll();
+        } catch (Exception $e) {
+            // 捕获到异常后的处理逻辑
+            $this->error('An error occurred: ' . $e->getMessage());
+        }
     }
 }
