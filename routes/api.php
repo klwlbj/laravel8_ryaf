@@ -86,3 +86,7 @@ Route::get('/analyze/{string}', [NBController::class, 'analyze']);
 Route::get('dahua/analyze/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze']);
 Route::get('dahua/analyze2/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze2']);
 Route::get('dahua/analyze3/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze3']);
+
+
+
+Route::post('excel', [\App\Http\Controllers\ExcelController::class, 'handleImportExport']);
