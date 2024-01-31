@@ -90,3 +90,6 @@ Route::get('dahua/analyze3/{string}', [\App\Http\Controllers\DaHuaController::cl
 
 
 Route::post('excel', [\App\Http\Controllers\ExcelController::class, 'handleImportExport']);
+Route::get('hik', [\App\Http\Controllers\HikvisionCloudController::class, 'index']);
+
+

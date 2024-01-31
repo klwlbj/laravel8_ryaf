@@ -18,7 +18,7 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithEvent
         $this->data = $data;
     }
 
-    public function collection()
+    public function collection(): Collection
     {
         return new Collection($this->data);
     }
@@ -38,7 +38,6 @@ class DataExport implements FromCollection, WithHeadings, WithMapping, WithEvent
             $row['address_detail'],
             $row['name'],
             $row['phone'],
-            // str_replace('<br />', "\n", $row['phone']),
         ];
     }
 
