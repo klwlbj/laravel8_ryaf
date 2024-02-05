@@ -69,6 +69,13 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
         ],
 
+        'hikvision' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/hikvision/hikvision.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 60,
+        ],
+
         // 'my_custom_log' => [
         //     'driver' => 'single',
         //     'path' => tap(storage_path('logs/my_custom_log.log'), function ($path) {

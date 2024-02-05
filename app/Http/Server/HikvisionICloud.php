@@ -48,7 +48,7 @@ class HikvisionICloud
                 "X-Ca-Signature"         => $sign,
                 "X-Ca-Signature-Headers" => "x-ca-key",
             ],
-            'json'    => $params, // 将关联数组转换为 JSON 对象
+            'json'    => (object)$params, // 将关联数组转换为 JSON 对象,PHP空数组转空对象
         ]);
 
         return json_decode($response->getBody(), true);

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HikvisionCloudController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NBController;
@@ -69,7 +70,6 @@ Route::prefix('ctwing')->group(function () {
     Route::get('/createNTTCommand/{productId}/{deviceId}/{masterKey}/{second}', [CTWingController::class, 'createNTTCommand']);
 });
 
-
 // http回调
 Route::get('/nbWarm', [NBController::class, 'nbWarm']);
 Route::get('/hkWarm', [NBController::class, 'nbWarm']);
@@ -87,9 +87,14 @@ Route::get('dahua/analyze/{string}', [\App\Http\Controllers\DaHuaController::cla
 Route::get('dahua/analyze2/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze2']);
 Route::get('dahua/analyze3/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze3']);
 
-
-
 Route::post('excel', [\App\Http\Controllers\ExcelController::class, 'handleImportExport']);
-Route::get('hik', [\App\Http\Controllers\HikvisionCloudController::class, 'index']);
+Route::get('hik', [HikvisionCloudController::class, 'index']);
 
+Route::get('hikvision/addSubcription', [HikvisionCloudController::class, 'addSubcription']);
+Route::get('hikvision/subcriptionList/{msgType?}', [HikvisionCloudController::class, 'subcriptionList']);
+Route::post('hikvision/getTraditionMsg', [HikvisionCloudController::class, 'getTraditionMsg']);
+Route::post('hikvision/getFireDeviceStatus', [HikvisionCloudController::class, 'getFireDeviceStatus']);
+Route::post('hikvision/getParamConfig/{deviceID}', [HikvisionCloudController::class, 'getParamConfig']);
+Route::post('hikvision/deviceTypeDict', [HikvisionCloudController::class, 'deviceTypeDict']);
 
+Route::post('hikvision/callback/{code}', [HikvisionCloudController::class, 'callback']);
