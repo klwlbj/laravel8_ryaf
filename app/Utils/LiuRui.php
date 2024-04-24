@@ -385,10 +385,14 @@ class LiuRui
      */
     private function longBinToDec(string $hexString): string
     {
-        $strArr   = str_split($hexString, 8);
-        $binArray = array_map(function ($hexString) {
-            return str_pad(base_convert($hexString, 2, 10), 1, '0', STR_PAD_LEFT);
-        }, $strArr);
-        return implode('', $binArray);
+        $decimalNumber = '0';
+
+        $length = strlen($hexString);
+
+        for ($i = 0; $i < $length; $i++) {
+            $bitValue = $hexString[$length - $i - 1];
+            $decimalNumber = bcadd($decimalNumber, bcmul($bitValue, bcpow('2', $i)));
+        }
+        return $decimalNumber;
     }
 }
