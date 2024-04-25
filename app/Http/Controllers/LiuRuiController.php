@@ -13,4 +13,8 @@ class LiuRuiController
         $data = $util->toDecrypt($string);
         return response()->json($data);
     }
+
+    public function muffling($productId, $deviceId, $masterKey){
+        return (new LiuRui())->muffling($productId, $deviceId, $masterKey);
+    }
 }

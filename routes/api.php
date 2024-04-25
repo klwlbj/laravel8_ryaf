@@ -98,3 +98,7 @@ Route::post('hikvision/getParamConfig/{deviceID}', [HikvisionCloudController::cl
 Route::post('hikvision/deviceTypeDict', [HikvisionCloudController::class, 'deviceTypeDict']);
 
 Route::post('hikvision/callback/{code}', [HikvisionCloudController::class, 'callback']);
+
+Route::prefix('liurui')->group(function () {
+    Route::get('/muffling/{productId}/{deviceId}/{masterKey}', [\App\Http\Controllers\LiuRuiController::class, 'muffling']);
+});

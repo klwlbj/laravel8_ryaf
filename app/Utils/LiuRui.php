@@ -2,6 +2,8 @@
 
 namespace App\Utils;
 
+use App\Utils\Apis\Aep_device_command;
+
 class LiuRui
 {
     public const HEAD        = 'head';
@@ -394,5 +396,71 @@ class LiuRui
             $decimalNumber = bcadd($decimalNumber, bcmul($bitValue, bcpow('2', $i)));
         }
         return $decimalNumber;
+    }
+
+    /**消声命令下发
+     * @param $productId
+     * @param $deviceId
+     * @param $masterKey
+     * @return array|mixed
+     */
+    public function muffling($productId, $deviceId, $masterKey){
+        $index = $this->getIndex($deviceId);
+        $header = '5A';
+        $deviceType = '02';
+        $messageType = '07';
+        $len = '02';
+        $data = '01';
+        #头部5A 设备类型01 序号index 消息类型07 消息len01 data01  校验
+        #获取校验码
+        $checkSign = $this->checkSum($header.$deviceType.$index.$messageType.$len.$data);
+
+        $str = $header.$deviceType.$index.$this->getEncryptData($messageType,$index).$this->getEncryptData($len,$index).$this->getEncryptData($data,$index).$this->getEncryptData($checkSign,$index);
+
+        $content = [
+            'dataType' => 1,
+            'payload' => $str
+        ];
+
+        #获取参数日志
+
+        $res = $result = Aep_device_command::CreateCommand(
+            env('CTWING_KEY'),
+            env('CTWING_SECRET'),
+            $masterKey,
+            json_encode([
+                "content"   => $content,
+                "deviceId"  => $deviceId,
+                "operator"  => "ryaf", // 操作者，暂时写死
+                "productId" => $productId,
+                // "ttl"           => 7200,
+            ])
+        );
+
+        #获取结果日志
+        return $res;
+    }
+
+    public function getEncryptData($str,$indexHex): string
+    {
+        $str = base_convert($str,16,10);
+        $index = base_convert($indexHex,16,10);
+
+        if($index % 2 === 0){ //偶数
+            $bin = base_convert($str,10,2);
+            $bin = str_pad($bin, 8, '0', STR_PAD_LEFT);
+            $heightBit = substr($bin,-4);
+            $lowBit = substr($bin,0,-4);
+            $res = base_convert((int)base_convert($heightBit.$lowBit,2,10) ^ (int) $index,10,16);
+        }else{
+            $res = base_convert((int)$str ^ (int)$index,10,16);
+        }
+
+        return str_pad($res, 2, '0', STR_PAD_LEFT);
+    }
+
+    public function getIndex($deviceId): string
+    {
+        return str_pad(base_convert(rand(0,99),10,16),2,'0', STR_PAD_LEFT);
     }
 }
