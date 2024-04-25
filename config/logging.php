@@ -82,6 +82,13 @@ return [
             'days' => 60,
         ],
 
+        'haiman' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/haiman/haiman.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 60,
+        ],
+
         // 'my_custom_log' => [
         //     'driver' => 'single',
         //     'path' => tap(storage_path('logs/my_custom_log.log'), function ($path) {

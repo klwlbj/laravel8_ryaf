@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Utils\LiuRui;
 use App\Utils\Tools;
+use App\Utils\LiuRui;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -16,24 +16,30 @@ class LiuRuiController
         return response()->json($data);
     }
 
-    public function muffling($productId, $deviceId, $masterKey){
+    public function muffling($productId, $deviceId, $masterKey)
+    {
         return (new LiuRui())->muffling($productId, $deviceId, $masterKey);
     }
 
-    public function report(Request $request){
+    public function report(Request $request)
+    {
         $params = $request->all();
-
         $params = Tools::jsonDecode($params);
         $util = new LiuRui();
 
-        if($params['messageType'] == 'dataReport' && isset($params['payload']['APPdata'])){
-            $data = $util->toDecrypt(base64_decode($params['payload']['APPdata']));
-            $params['analyze_data'] = $data;
+        if (isset($params['messageType']) && $params['messageType'] == 'dataReport' && isset($params['payload']['APPdata'])) {
+            $decodeCode = base64_decode($params['payload']['APPdata']);
+            try {
+                $data                   = $util->toDecrypt($decodeCode);
+                $params['analyze_data'] = $data;
+            } catch (\Exception $e) {
+                Log::channel('liurui')->info('liurui analyze exception: ' . $e);
+            }
         }
 
         Log::channel('liurui')->info('liurui analyze data: ' . json_encode($params));
         // ToolsLogic::writeLog('params','report',$params);
 
-        return response()->json(['code' => 0,'message' => 0]);
+        return response()->json(['code' => 0, 'message' => 0]);
     }
 }
