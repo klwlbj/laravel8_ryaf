@@ -188,6 +188,18 @@ class NBController extends BaseController
     }
 
     /**
+     * 电信海曼烟感4G回调地址
+     * @param Request $request
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
+    public function hmCTWing4GWarm(Request $request, string $url)
+    {
+        $jsonData = $request->all();
+        Log::channel('haiman')->info("海曼电信4G {$url}:" . json_encode($jsonData));
+        return response('', 200);
+    }
+
+    /**
      * 移动海康烟感回调地址
      * @param Request $request
      * @return void

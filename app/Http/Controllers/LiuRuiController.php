@@ -22,12 +22,11 @@ class LiuRuiController
 
     public function report(Request $request){
         $params = $request->all();
-
         $params = Tools::jsonDecode($params);
         $util = new LiuRui();
 
-        if($params['messageType'] == 'dataReport' && isset($params['payload']['APPdata'])){
-            $data = $util->toDecrypt($params['payload']['APPdata']);
+        if(isset($params['messageType']) && $params['messageType'] == 'dataReport' && isset($params['payload']['APPdata'])){
+            $data = $util->toDecrypt(base64_decode($params['payload']['APPdata']));
             $params['analyze_data'] = $data;
         }
 

@@ -1,13 +1,15 @@
 <?php
 
-use App\Http\Controllers\HikvisionCloudController;
-use App\Http\Controllers\LiuRuiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NBController;
+use App\Http\Controllers\DaHuaController;
+use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\CTWingController;
+use App\Http\Controllers\LiuRuiController;
 use App\Http\Controllers\OneNetController;
 use App\Http\Controllers\WanLinYunController;
+use App\Http\Controllers\HikvisionCloudController;
 
 /*
 |--------------------------------------------------------------------------
@@ -80,15 +82,19 @@ Route::post('/hkCTWingWarm', [NBController::class, 'hkCTWingWarm']);
 Route::post('/dhCTWingWarm', [NBController::class, 'dhCTWingWarm']);
 Route::post('/hkCTWing4GWarm', [NBController::class, 'hkCTWing4GWarm']);
 
+Route::any('/hmCTWing4GWarm/{string}', [NBController::class, 'hmCTWing4GWarm']);
+
 // 海康指令解析测试
 Route::get('/analyze/{string}', [NBController::class, 'analyze']);
 
 // 大华指令解析测试
-Route::get('dahua/analyze/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze']);
-Route::get('dahua/analyze2/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze2']);
-Route::get('dahua/analyze3/{string}', [\App\Http\Controllers\DaHuaController::class, 'analyze3']);
+Route::get('dahua/analyze/{string}', [DaHuaController::class, 'analyze']);
+Route::get('dahua/analyze2/{string}', [DaHuaController::class, 'analyze2']);
+Route::get('dahua/analyze3/{string}', [DaHuaController::class, 'analyze3']);
 
-Route::post('excel', [\App\Http\Controllers\ExcelController::class, 'handleImportExport']);
+// 六瑞解密
+
+Route::post('excel', [ExcelController::class, 'handleImportExport']);
 Route::get('hik', [HikvisionCloudController::class, 'index']);
 
 Route::get('hikvision/addSubcription', [HikvisionCloudController::class, 'addSubcription']);
@@ -102,5 +108,6 @@ Route::post('hikvision/callback/{code}', [HikvisionCloudController::class, 'call
 
 Route::prefix('liurui')->group(function () {
     Route::get('/muffling/{productId}/{deviceId}/{masterKey}', [LiuRuiController::class, 'muffling']);
-    Route::get('/report', [LiuRuiController::class, 'report']);
+    Route::any('/report', [LiuRuiController::class, 'report']);
+    Route::get('toDecrypt/{string}', [LiuRuiController::class, 'toDecrypt']);
 });
