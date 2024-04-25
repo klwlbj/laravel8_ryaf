@@ -27,7 +27,7 @@ class LiuRuiController
         $util = new LiuRui();
 
         if($params['messageType'] == 'dataReport' && isset($params['payload']['APPdata'])){
-            $data = $util->toDecrypt($params['payload']['APPdata']);
+            $data = $util->toDecrypt(base64_decode($params['payload']['APPdata']));
             $params['analyze_data'] = $data;
         }
 
