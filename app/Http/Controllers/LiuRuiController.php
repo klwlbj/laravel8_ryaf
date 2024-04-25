@@ -33,12 +33,11 @@ class LiuRuiController
                 $data                   = $util->toDecrypt($decodeCode);
                 $params['analyze_data'] = $data;
             } catch (\Exception $e) {
-                Log::channel('liurui')->info('liurui analyze exception: ' . $e);
+                Log::channel('liurui')->info('liurui analyze exception: ' . $e->getMessage());
             }
         }
 
         Log::channel('liurui')->info('liurui analyze data: ' . json_encode($params));
-        // ToolsLogic::writeLog('params','report',$params);
 
         return response()->json(['code' => 0, 'message' => 0]);
     }
