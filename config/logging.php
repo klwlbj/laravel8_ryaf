@@ -75,6 +75,12 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 60,
         ],
+        'liurui' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/liurui/liurui.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 60,
+        ],
 
         // 'my_custom_log' => [
         //     'driver' => 'single',

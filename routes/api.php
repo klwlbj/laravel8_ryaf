@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HikvisionCloudController;
+use App\Http\Controllers\LiuRuiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NBController;
@@ -100,5 +101,6 @@ Route::post('hikvision/deviceTypeDict', [HikvisionCloudController::class, 'devic
 Route::post('hikvision/callback/{code}', [HikvisionCloudController::class, 'callback']);
 
 Route::prefix('liurui')->group(function () {
-    Route::get('/muffling/{productId}/{deviceId}/{masterKey}', [\App\Http\Controllers\LiuRuiController::class, 'muffling']);
+    Route::get('/muffling/{productId}/{deviceId}/{masterKey}', [LiuRuiController::class, 'muffling']);
+    Route::get('/report', [LiuRuiController::class, 'report']);
 });
