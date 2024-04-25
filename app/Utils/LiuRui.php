@@ -268,6 +268,7 @@ class LiuRui
         $offset    = 0;
         $sliceData = [];
         $data      = $cmdConfigs = [];
+        $dataLen   = 0;
         foreach (self::SUBSTR_ARRAY as $value) {
             $sliceString = substr($substring, $offset, $value[1]);
             switch ($value[0]) {
@@ -283,6 +284,7 @@ class LiuRui
                         break;
                     }
                     $sliceData['cmd_type'] = self::CMD_ARRAY[$sliceString][self::CMD] ?? '';
+                    $sliceData['cmd_name'] = self::CMD_ARRAY[$sliceString]['name'] ?? '';
                     $cmdConfigs            = self::CMD_ARRAY[$sliceString]['data_config'] ?? [];
                     if (!in_array(self::CMD_ARRAY[$sliceString]['length'], [0, -1, -2])) {
                         $dataLen = self::CMD_ARRAY[$sliceString]['length'] ?? 0; // 这个长度貌似用处不大,以实际DATA_LENGTH为准
@@ -325,7 +327,7 @@ class LiuRui
                             } else {
                                 // 二进制转10进制
                                 $data[$key] = [
-                                    'value' => bindec($byte[$byteNum]),
+                                    'value' => bindec($byte[$byteNum]), // 短字节，只用原生方法即可
                                     'name'  => $dataConfig['name'] ?? '',
                                 ];
                             }
@@ -392,7 +394,7 @@ class LiuRui
         $length = strlen($hexString);
 
         for ($i = 0; $i < $length; $i++) {
-            $bitValue = $hexString[$length - $i - 1];
+            $bitValue      = $hexString[$length - $i - 1];
             $decimalNumber = bcadd($decimalNumber, bcmul($bitValue, bcpow('2', $i)));
         }
         return $decimalNumber;
@@ -404,22 +406,23 @@ class LiuRui
      * @param $masterKey
      * @return array|mixed
      */
-    public function muffling($productId, $deviceId, $masterKey){
-        $index = $this->getIndex($deviceId);
-        $header = '5A';
-        $deviceType = '02';
+    public function muffling($productId, $deviceId, $masterKey)
+    {
+        $index       = $this->getIndex($deviceId);
+        $header      = '5A';
+        $deviceType  = '02';
         $messageType = '07';
-        $len = '02';
-        $data = '01';
+        $len         = '02';
+        $data        = '01';
         #头部5A 设备类型01 序号index 消息类型07 消息len01 data01  校验
         #获取校验码
-        $checkSign = $this->checkSum($header.$deviceType.$index.$messageType.$len.$data);
+        $checkSign = $this->checkSum($header . $deviceType . $index . $messageType . $len . $data);
 
-        $str = $header.$deviceType.$index.$this->getEncryptData($messageType,$index).$this->getEncryptData($len,$index).$this->getEncryptData($data,$index).$this->getEncryptData($checkSign,$index);
+        $str = $header . $deviceType . $index . $this->getEncryptData($messageType, $index) . $this->getEncryptData($len, $index) . $this->getEncryptData($data, $index) . $this->getEncryptData($checkSign, $index);
 
         $content = [
             'dataType' => 1,
-            'payload' => $str
+            'payload'  => $str,
         ];
 
         #获取参数日志
@@ -441,19 +444,19 @@ class LiuRui
         return $res;
     }
 
-    public function getEncryptData($str,$indexHex): string
+    public function getEncryptData($str, $indexHex): string
     {
-        $str = base_convert($str,16,10);
-        $index = base_convert($indexHex,16,10);
+        $str   = base_convert($str, 16, 10);
+        $index = base_convert($indexHex, 16, 10);
 
-        if($index % 2 === 0){ //偶数
-            $bin = base_convert($str,10,2);
-            $bin = str_pad($bin, 8, '0', STR_PAD_LEFT);
-            $heightBit = substr($bin,-4);
-            $lowBit = substr($bin,0,-4);
-            $res = base_convert((int)base_convert($heightBit.$lowBit,2,10) ^ (int) $index,10,16);
-        }else{
-            $res = base_convert((int)$str ^ (int)$index,10,16);
+        if ($index % 2 === 0) { //偶数
+            $bin       = base_convert($str, 10, 2);
+            $bin       = str_pad($bin, 8, '0', STR_PAD_LEFT);
+            $heightBit = substr($bin, -4);
+            $lowBit    = substr($bin, 0, -4);
+            $res       = base_convert((int) base_convert($heightBit . $lowBit, 2, 10) ^ (int) $index, 10, 16);
+        } else {
+            $res = base_convert((int) $str ^ (int) $index, 10, 16);
         }
 
         return str_pad($res, 2, '0', STR_PAD_LEFT);
@@ -461,6 +464,6 @@ class LiuRui
 
     public function getIndex($deviceId): string
     {
-        return str_pad(base_convert(rand(0,99),10,16),2,'0', STR_PAD_LEFT);
+        return str_pad(base_convert(rand(0, 99), 10, 16), 2, '0', STR_PAD_LEFT);
     }
 }

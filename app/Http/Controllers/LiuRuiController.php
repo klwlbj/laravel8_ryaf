@@ -33,7 +33,7 @@ class LiuRuiController
                 $data                   = $util->toDecrypt($decodeCode);
                 $params['analyze_data'] = $data;
             } catch (\Exception $e) {
-                Log::channel('liurui')->info('liurui analyze exception: ' . $e);
+                Log::channel('liurui')->info('liurui analyze exception: ' . $e->getMessage());
             }
         }
 
