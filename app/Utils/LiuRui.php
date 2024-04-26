@@ -157,6 +157,14 @@ class LiuRui
                     'is_binary' => false,
                     'name'      => '烟雾滤波值',
                 ],
+                'empty'         => [
+                    'is_binary' => false,
+                    'name'      => '预留',
+                ],
+                'smoke_value'         => [
+                    'is_binary' => false,
+                    'name'      => '烟雾浓度',
+                ],
             ],
         ],
         '02' => [self::CMD => 'CMD_SENSOR_ERR', 'length' => 1, 'name' => '传感器故障',
@@ -180,6 +188,14 @@ class LiuRui
                 'smoke_concentration' => [
                     'is_binary' => false,
                     'name'      => '烟雾滤波值',
+                ],
+                'empty'         => [
+                    'is_binary' => false,
+                    'name'      => '预留',
+                ],
+                'smoke_value'         => [
+                    'is_binary' => false,
+                    'name'      => '烟雾浓度',
                 ],
             ],
         ],
@@ -326,10 +342,18 @@ class LiuRui
                                 ];
                             } else {
                                 // 二进制转10进制
-                                $data[$key] = [
-                                    'value' => bindec($byte[$byteNum]), // 短字节，只用原生方法即可
-                                    'name'  => $dataConfig['name'] ?? '',
-                                ];
+                                #如果是烟雾浓度 从0-255转换成  0-1dB/m
+                                if($key == 'smoke_value'){
+                                    $data[$key] = [
+                                        'value' => round(bindec($byte[$byteNum])/255,2), // 数值除以255转换
+                                        'name'  => $dataConfig['name'] ?? '',
+                                    ];
+                                }else{
+                                    $data[$key] = [
+                                        'value' => bindec($byte[$byteNum]), // 短字节，只用原生方法即可
+                                        'name'  => $dataConfig['name'] ?? '',
+                                    ];
+                                }
                             }
                         }
                         $byteNum++;
