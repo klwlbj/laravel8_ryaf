@@ -79,12 +79,9 @@ class LiuRui
         '62' => [self::CMD => 'CMD_SIM', 'length' => 0, 'name' => 'SIM类型',
             'data_config'  => [
                 'card_type' => [
-                    'is_binary'     => true,
-                    'name'          => '卡类型',
-                    'default_value' => 'USIM', // 当值为0时
-                    'config'        => [
-                        '贴片SIM', 'ESIM', '软SIM',
-                    ],
+                    'is_binary' => true,
+                    'name'      => '卡类型',
+                    'config'    => ['USIM', '贴片SIM', 'ESIM', '软SIM'],
                 ],
                 'imsi'      => [
                     'is_binary' => false,
@@ -113,26 +110,23 @@ class LiuRui
         '70' => [self::CMD => 'CMD_COMMUNICATION', 'length' => 1, 'name' => '通信故障',
             'data_config'  => [
                 'communicate_falut' => [
-                    'is_binary'     => true,
-                    'name'          => '通信故障',
-                    'default_value' => '通信故障', // 当值为00时
-                    'config'        => [],
+                    'is_binary' => true,
+                    'name'      => '通信故障',
+                    'config'    => ['通信故障'], // 00时表示故障
                 ],
             ]],
         '00' => [self::CMD => 'CMD_BEAT', 'length' => 5, 'name' => '心跳',
             'data_config'  => [
                 'fault_and_alarm'     => [
-                    'is_binary'     => true,
-                    'name'          => '故障火警',
-                    'default_value' => '正常',
-                    'config'        => ['温感火警', '温度传感器故障', '', '', '烟雾火警', '传感器故障'],
+                    'is_binary' => true,
+                    'name'      => '故障火警',
+                    'config1'   => ['正常', '温感火警', '温度传感器故障', '预留'], // bit3-bit0
+                    'config2'   => ['正常', '烟雾火警', '传感器故障', '预留'], // bit7-bit4
                 ],
                 'status'              => [
-                    'is_binary'     => true,
-                    'name'          => '状态',
-                    'default_value' => '正常',
-                    'config'        => [
-                        '预留', '拆除状态', '消音', '低压'],
+                    'is_binary' => true,
+                    'name'      => '状态',
+                    'config'    => ['预留', '拆除状态', '消音', '低压'], // 每bit是1时命中，否则为正常
                 ],
                 'heartbeat_interval'  => [
                     'is_binary' => false,
@@ -244,7 +238,7 @@ class LiuRui
             'reserved_info'  => '', // 预留信息
         ];
         $subArray = explode(',', $string);
-        // 遍历 $arr，将每个值依次赋给 $structure 中的对应键
+        // 遍历 $subArray，将每个值依次赋给 $structure 中的对应键
         foreach ($structure as $key => $value) {
             if (!empty($subArray)) {
                 $structure[$key] = array_shift($subArray);
@@ -319,19 +313,36 @@ class LiuRui
 
                     foreach ($cmdConfigs as $key => $dataConfig) {
                         static $byteNum = 0;
-                        // dd($cmdConfigs);
+                        // dd($dataConfig);
                         if ($dataConfig['is_binary']) {
-                            $list = $dataConfig['config'];
-                            // 将二进制数转换为数组，方便逐位检查
-                            $binaryArray = str_split($byte[$byteNum]);
-                            foreach ($binaryArray as $index => $bit) {
-                                // 检查二进制位是否为1，如果是1则将对应的元素添加到 $selectedItems 数组中
-                                if ($bit === '1' && isset($list[$index])) {
-                                    $data[$dataConfig['name']][] = $list[$index];
-                                }
-                            }
-                            if (empty($data[$dataConfig['name']])) {
-                                $data[$dataConfig['name']][] = $dataConfig['default_value'] ?? '';
+                            $data[$key]['name'] = $dataConfig['name'] ?? '';
+                            switch($key) {
+                                // 分情况处理
+                                case 'card_type':
+                                case 'communicate_falut':
+                                    $byteValue             = $this->longBinToDec($byte[$byteNum]);
+                                    $data[$key]['value'][] = $dataConfig['config'][$byteValue] ?? '';
+                                    break;
+                                case 'status':
+                                    $list = $dataConfig['config'];
+                                    // 将二进制数转换为数组，方便逐位检查
+                                    $binaryArray = str_split(strrev($byte[$byteNum]));
+                                    foreach ($binaryArray as $index => $bit) {
+                                        if ($bit === '1' && isset($list[$index])) {
+                                            $data[$key]['value'][] = $list[$index];
+                                        }
+                                    }
+                                    break;
+                                case 'fault_and_alarm':
+                                    list($bit74, $bit30)   = str_split($byte[$byteNum], 4);
+                                    $bit30Value            = $this->longBinToDec($bit30);
+                                    $data[$key]['value'][] = $dataConfig['config1'][$bit30Value] ?? '';
+
+                                    $bit74Value            = $this->longBinToDec($bit74);
+                                    $data[$key]['value'][] = $dataConfig['config2'][$bit74Value] ?? '';
+                                    break;
+                                default:
+                                    break;
                             }
                         } else {
                             if (isset($dataConfig['to_last']) && $dataConfig['to_last']) {
@@ -358,7 +369,6 @@ class LiuRui
                         }
                         $byteNum++;
                     }
-                    // dd($data);
                     break;
                 default:
                     break;
