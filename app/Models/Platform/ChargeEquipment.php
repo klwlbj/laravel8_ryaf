@@ -4,6 +4,7 @@ namespace App\Models\Platform;
 
 class ChargeEquipment extends BaseModel
 {
+    public $table                           = 'charge_equipments';
     public const EQUIPMENT_TYPE_ALTERNATING = 1;
     public const EQUIPMENT_TYPE_DIRECT      = 2;
     public const EQUIPMENT_TYPE_INTEGRATION = 3;
