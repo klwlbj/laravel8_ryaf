@@ -15,7 +15,7 @@ class ChargeCellController extends BaseChargeController
             'cellId'                 => 'required|string|unique:charge_cells,cell_id',
             'equipmentId'            => ['required', new ExistsInTableRule('charge_equipments', 'equipment_id')],
             'operatorId'             => 'required|string',
-            'cellType'               => 'required|integer|in:1,2,3,4,5',
+            'cellType'               => ['required', 'integer', new EnumValueRule(array_keys(ChargeCell::$formatEquipmentTypeMaps))],
             'cellStandard'           => 'required|string',
             'ratedVoltageUpperLimit' => 'required|numeric',
             'ratedVoltageLowerLimit' => 'required|numeric',
@@ -23,8 +23,8 @@ class ChargeCellController extends BaseChargeController
             'ratedPower'             => 'required|numeric',
             'electricityFee'         => 'required|string',
             'serviceFee'             => 'required|string',
-            'fireControl'            => 'required|integer|in:1,2,3',
-            'smokeSensation'         => 'required|integer|in:1,2,3',
+            'fireControl'            => ['required', 'integer', new EnumValueRule(array_keys(ChargeCell::$formatWhetherOrNotMaps))],
+            'smokeSensation'         => ['required', 'integer', new EnumValueRule(array_keys(ChargeCell::$formatWhetherOrNotMaps))],
         ];
 
         return parent::baseStore($request, new ChargeCell(), $rules);
