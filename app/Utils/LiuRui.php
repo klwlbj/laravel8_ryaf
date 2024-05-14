@@ -121,29 +121,63 @@ class LiuRui
             ]],
         '00' => [self::CMD => 'CMD_BEAT', 'length' => 5, 'name' => '心跳',
             'data_config'  => [
-                'fault_and_alarm'     => [
+                'fault_and_alarm'       => [
                     'is_binary' => true,
                     'name'      => '故障火警',
                     'config1'   => ['正常', '温感火警', '温度传感器故障', '预留'], // bit3-bit0
                     'config2'   => ['正常', '烟雾火警', '传感器故障', '预留'], // bit7-bit4
                 ],
-                'status'              => [
+                'status'                => [
                     'is_binary' => true,
                     'name'      => '状态',
-                    'config'    => ['预留', '拆除状态', '消音', '低压'], // 每bit是1时命中，否则为正常
+                    'config'    => ['预留', '拆除状态', '火警消音', '低压', '低压消音', '故障消音'], // 每bit是1时命中，否则为正常
                 ],
-                'heartbeat_interval'  => [
+                'heartbeat_interval'    => [
                     'is_binary' => false,
                     'name'      => '心跳间隔',
                 ],
 
-                'contaminate'         => [
+                'contaminate'           => [
                     'is_binary' => false,
                     'name'      => '污染程度',
                 ],
-                'smoke_concentration' => [
+                'smoke_concentration'   => [
                     'is_binary' => false,
                     'name'      => '烟雾浓度',
+                ],
+                'temperature'           => [
+                    'is_binary' => false,
+                    'name'      => '温度值',
+                ],
+                'working_mode'          => [
+                    'is_binary' => true,
+                    'name'      => '工作模式',
+                    'config'    => ['预留', '单烟感工作', '单温感工作', '烟温相或工作', '烟温相与工作'], // 转10进制后，值为1时表示单烟感工作，以此类推
+                ],
+
+                'sound_and_ligntstatus' => [
+                    'is_binary' => true,
+                    'name'      => '声光状态',
+                    'config1'   => ['允许声响', '夜间关闭声响', '永久关闭声响', '白天关闭声响', '撤防'], // bit3-bit0
+                    'config2'   => ['允许灯光', '夜间关闭灯光', '永久关闭灯光'], // bit7-bit4
+                ],
+                'reserve1'              => [
+                    'is_binary' => false,
+                    'name'      => '预留1',
+                ],
+                'reserve2'              => [
+                    'is_binary' => false,
+                    'name'      => '预留2',
+                ],
+                'reserve3'              => [
+                    'is_binary' => false,
+                    'name'      => '预留3',
+                ],
+                'sensitivity'           => [
+                    'length'    => '4',
+                    'is_float'  => true,
+                    'is_binary' => false,
+                    'name'      => '灵敏度',
                 ],
             ],
         ],
@@ -340,7 +374,7 @@ class LiuRui
 
                         $length = 1;
                         #如果存在多字节
-                        if(isset($dataConfig['length']) && !empty($dataConfig['length'])) {
+                        if (isset($dataConfig['length']) && !empty($dataConfig['length'])) {
                             $length = $dataConfig['length'];
                         }
                         // dd($dataConfig);
@@ -350,6 +384,7 @@ class LiuRui
                                 // 分情况处理
                                 case 'card_type':
                                 case 'communicate_falut':
+                                case 'working_mode':
                                     $byteValue             = $this->longBinToDec($byte[$byteNum]);
                                     $data[$key]['value'][] = $dataConfig['config'][$byteValue] ?? '';
                                     break;
@@ -364,6 +399,7 @@ class LiuRui
                                     }
                                     break;
                                 case 'fault_and_alarm':
+                                case 'sound_and_ligntstatus':
                                     list($bit74, $bit30)   = str_split($byte[$byteNum], 4);
                                     $bit30Value            = $this->longBinToDec($bit30);
                                     $data[$key]['value'][] = $dataConfig['config1'][$bit30Value] ?? '';
@@ -382,7 +418,7 @@ class LiuRui
                                     'name'  => $dataConfig['name'] ?? '',
                                 ];
                             } else {
-                                if(isset($dataConfig['is_float']) && $dataConfig['is_float']) {
+                                if (isset($dataConfig['is_float']) && $dataConfig['is_float']) {
                                     $data[$key] = [
                                         // 剩余字段，转成10进制
                                         'value' => $this->binToFloat(implode('', array_slice($byte, $byteNum, $length))),
@@ -439,9 +475,9 @@ class LiuRui
 
         $str      = substr($bin, 9);
         $mantissa = 0;
-        for($i = 0; $i < 23; $i++) {
+        for ($i = 0; $i < 23; $i++) {
             $bit = substr($str, $i, 1);
-            if($bit == 1) {
+            if ($bit == 1) {
                 $mantissa += pow(2, -($i + 1));
             }
         }
@@ -582,7 +618,7 @@ class LiuRui
 
     public function getEncryptData($string, $indexHex): string
     {
-        if(strlen($string) > 2) {
+        if (strlen($string) > 2) {
             $arr = str_split($string, 2);
         } else {
             $arr = [$string];
