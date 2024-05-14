@@ -41,4 +41,30 @@ class LiuRuiController
 
         return response()->json(['code' => 0, 'message' => 0]);
     }
+
+    public function oneNetReport(Request $request){
+        $params = $request->all();
+        $params = Tools::jsonDecode($params);
+        $util  = new LiuRui();
+        $msg = $params['msg'] ?? [];
+        if($msg && isset($msg['value'])){
+            $decodeCode = base64_decode($msg['value']);
+            try {
+                $data                   = $util->toDecrypt($decodeCode);
+                $msg['analyze_data']    = $data;
+            } catch (\Exception $e) {
+                Log::channel('liurui_ontnet')->info('liurui_ontnet analyze exception: ' . $e->getMessage());
+            }
+        }
+
+        Log::channel('liurui_ontnet')->info('liurui_ontnet analyze data: ' . $msg);
+
+        return $params['msg'];
+        // return response()->json(['code' => 0, 'message' => 0]);
+    }
+
+    public function mufflingByOneNet($imei)
+    {
+        return (new LiuRui())->mufflingByOneNet($imei);
+    }
 }

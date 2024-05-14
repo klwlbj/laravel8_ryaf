@@ -108,6 +108,8 @@ Route::post('hikvision/callback/{code}', [HikvisionCloudController::class, 'call
 
 Route::prefix('liurui')->group(function () {
     Route::get('/muffling/{productId}/{deviceId}/{masterKey}', [LiuRuiController::class, 'muffling']);
+    Route::get('/mufflingByOneNet/{imei}', [LiuRuiController::class, 'mufflingByOneNet']);
     Route::any('/report', [LiuRuiController::class, 'report']);
+    Route::any('/oneNetReport', [LiuRuiController::class, 'oneNetReport']);
     Route::get('toDecrypt/{string}', [LiuRuiController::class, 'toDecrypt']);
 });

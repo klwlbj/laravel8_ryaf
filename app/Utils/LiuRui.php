@@ -12,6 +12,10 @@ class LiuRui
     public const CMD         = 'cmd';
     public const DATA_LENGTH = 'data_length';
     public const DATA        = 'data';
+
+    public const OBJ_ID      = 3202;
+    public const OBJ_INST_ID = 0;
+    public const RES_ID      = 0;
     // CONST check_sum = 'check_sum';
 
     public const SUBSTR_ARRAY = [
@@ -151,13 +155,23 @@ class LiuRui
                     'is_binary' => false,
                     'name'      => '烟雾滤波值',
                 ],
-                'empty'         => [
+                'temperature'         => [
                     'is_binary' => false,
-                    'name'      => '预留',
+                    'name'      => '温度',
                 ],
                 'smoke_value'         => [
                     'is_binary' => false,
                     'name'      => '烟雾浓度',
+                ],
+                'pollution_level'     => [
+                    'is_binary' => false,
+                    'name'      => '污染程度',
+                ],
+                'sensitivity'         => [
+                    'length'    => '4',
+                    'is_float'  => true,
+                    'is_binary' => false,
+                    'name'      => '灵敏度',
                 ],
             ],
         ],
@@ -183,13 +197,23 @@ class LiuRui
                     'is_binary' => false,
                     'name'      => '烟雾滤波值',
                 ],
-                'empty'         => [
+                'temperature'         => [
                     'is_binary' => false,
-                    'name'      => '预留',
+                    'name'      => '温度',
                 ],
                 'smoke_value'         => [
                     'is_binary' => false,
                     'name'      => '烟雾浓度',
+                ],
+                'pollution_level'     => [
+                    'is_binary' => false,
+                    'name'      => '污染程度',
+                ],
+                'sensitivity'         => [
+                    'length'    => '4',
+                    'is_float'  => true,
+                    'is_binary' => false,
+                    'name'      => '灵敏度',
                 ],
             ],
         ],
@@ -313,6 +337,12 @@ class LiuRui
 
                     foreach ($cmdConfigs as $key => $dataConfig) {
                         static $byteNum = 0;
+
+                        $length = 1;
+                        #如果存在多字节
+                        if(isset($dataConfig['length']) && !empty($dataConfig['length'])) {
+                            $length = $dataConfig['length'];
+                        }
                         // dd($dataConfig);
                         if ($dataConfig['is_binary']) {
                             $data[$key]['name'] = $dataConfig['name'] ?? '';
@@ -352,22 +382,22 @@ class LiuRui
                                     'name'  => $dataConfig['name'] ?? '',
                                 ];
                             } else {
-                                // 二进制转10进制
-                                #如果是烟雾浓度 从0-255转换成  0-1dB/m
-                                if($key == 'smoke_value'){
+                                if(isset($dataConfig['is_float']) && $dataConfig['is_float']) {
                                     $data[$key] = [
-                                        'value' => round(bindec($byte[$byteNum])/255,2), // 数值除以255转换
+                                        // 剩余字段，转成10进制
+                                        'value' => $this->binToFloat(implode('', array_slice($byte, $byteNum, $length))),
                                         'name'  => $dataConfig['name'] ?? '',
                                     ];
-                                }else{
+                                } else {
                                     $data[$key] = [
-                                        'value' => bindec($byte[$byteNum]), // 短字节，只用原生方法即可
+                                        // 剩余字段，转成10进制
+                                        'value' => $this->longBinToDec(implode('', array_slice($byte, $byteNum, $length))),
                                         'name'  => $dataConfig['name'] ?? '',
                                     ];
                                 }
                             }
                         }
-                        $byteNum++;
+                        $byteNum += $length;
                     }
                     break;
                 default:
@@ -399,6 +429,26 @@ class LiuRui
         $checksum = (int) ($sum % 256) ^ (int) base_convert('ff', 16, 10);
 
         return strtolower(str_pad(dechex($checksum), 2, '0', STR_PAD_LEFT));
+    }
+
+    private function binToFloat($bin): string
+    {
+        $symbol = substr($bin, 0, 1);
+
+        $exponent = base_convert(substr($bin, 1, 8), 2, 10) - 127;
+
+        $str      = substr($bin, 9);
+        $mantissa = 0;
+        for($i = 0; $i < 23; $i++) {
+            $bit = substr($str, $i, 1);
+            if($bit == 1) {
+                $mantissa += pow(2, -($i + 1));
+            }
+        }
+
+        $mantissa = 1 + $mantissa;
+
+        return round(bcmul(pow(-1, $symbol) * $mantissa, pow(2, $exponent), 3), 2);
     }
 
     /**
@@ -442,17 +492,7 @@ class LiuRui
      */
     public function muffling($productId, $deviceId, $masterKey)
     {
-        $index       = $this->getIndex($deviceId);
-        $header      = '5A';
-        $deviceType  = '02';
-        $messageType = '07';
-        $len         = '02';
-        $data        = '01';
-        #头部5A 设备类型01 序号index 消息类型07 消息len01 data01  校验
-        #获取校验码
-        $checkSign = $this->checkSum($header . $deviceType . $index . $messageType . $len . $data);
-
-        $str = $header . $deviceType . $index . $this->getEncryptData($messageType, $index) . $this->getEncryptData($len, $index) . $this->getEncryptData($data, $index) . $this->getEncryptData($checkSign, $index);
+        $str = $this->getMuffingData($deviceId);
 
         $content = [
             'dataType' => 1,
@@ -461,7 +501,7 @@ class LiuRui
 
         #获取参数日志
 
-        $res = $result = Aep_device_command::CreateCommand(
+        $res = Aep_device_command::CreateCommand(
             env('CTWING_KEY'),
             env('CTWING_SECRET'),
             $masterKey,
@@ -478,22 +518,96 @@ class LiuRui
         return $res;
     }
 
-    public function getEncryptData($str, $indexHex): string
+    public function mufflingByOneNet($imei)
     {
-        $str   = base_convert($str, 16, 10);
-        $index = base_convert($indexHex, 16, 10);
+        $str = $this->getMuffingData($imei);
 
-        if ($index % 2 === 0) { //偶数
-            $bin       = base_convert($str, 10, 2);
-            $bin       = str_pad($bin, 8, '0', STR_PAD_LEFT);
-            $heightBit = substr($bin, -4);
-            $lowBit    = substr($bin, 0, -4);
-            $res       = base_convert((int) base_convert($heightBit . $lowBit, 2, 10) ^ (int) $index, 10, 16);
+        $oneNet = new OneNet(self::OBJ_ID, self::OBJ_INST_ID, self::RES_ID);
+
+        return $oneNet->execute($imei, '', '', $str);
+    }
+
+    public function getMuffingData($deviceId): string
+    {
+        $index       = $this->getIndex($deviceId);
+        $header      = '5A';
+        $deviceType  = '02';
+        $messageType = '07';
+        $len         = '02';
+        $data        = '01';
+        #头部5A 设备类型01 序号index 消息类型07 消息len01 data01  校验
+        #获取校验码
+        $checkSign = $this->checkSum($header . $deviceType . $index . $messageType . $len . $data);
+
+        return $header . $deviceType . $index . $this->getEncryptData($messageType, $index) . $this->getEncryptData($len, $index) . $this->getEncryptData($data, $index) . $this->getEncryptData($checkSign, $index);
+    }
+
+    public function ack($productId, $deviceId, $masterKey, $index)
+    {
+        // $index       = $this->getIndex($deviceId);
+        $header      = '5A';
+        $deviceType  = '02';
+        $messageType = 'A0';
+        $len         = '00';
+        $data        = '';
+        #头部5A 设备类型01 序号index 消息类型07 消息len00  校验
+        #获取校验码
+        $checkSign = $this->checkSum($header . $deviceType . $index . $messageType . $len . $data);
+
+        $str = $header . $deviceType . $index . $this->getEncryptData($messageType, $index) . $this->getEncryptData($len, $index) . $this->getEncryptData($data, $index) . $this->getEncryptData($checkSign, $index);
+
+        $content = [
+            'dataType' => 1,
+            'payload'  => $str,
+        ];
+
+        #获取参数日志
+
+        $res = Aep_device_command::CreateCommand(
+            env('CTWING_KEY'),
+            env('CTWING_SECRET'),
+            $masterKey,
+            json_encode([
+                "content"   => $content,
+                "deviceId"  => $deviceId,
+                "operator"  => "ryaf", // 操作者，暂时写死
+                "productId" => $productId,
+                // "ttl"           => 7200,
+            ])
+        );
+
+        #获取结果日志
+        return $res;
+    }
+
+    public function getEncryptData($string, $indexHex): string
+    {
+        if(strlen($string) > 2) {
+            $arr = str_split($string, 2);
         } else {
-            $res = base_convert((int) $str ^ (int) $index, 10, 16);
+            $arr = [$string];
         }
 
-        return str_pad($res, 2, '0', STR_PAD_LEFT);
+        $returnStr = '';
+
+        foreach ($arr as $key => $str) {
+            $str   = base_convert($str, 16, 10);
+            $index = base_convert($indexHex, 16, 10);
+
+            if ($index % 2 === 0) { //偶数
+                $bin       = base_convert($str, 10, 2);
+                $bin       = str_pad($bin, 8, '0', STR_PAD_LEFT);
+                $heightBit = substr($bin, -4);
+                $lowBit    = substr($bin, 0, -4);
+                $res       = base_convert((int) base_convert($heightBit . $lowBit, 2, 10) ^ (int) $index, 10, 16);
+            } else {
+                $res = base_convert((int) $str ^ (int) $index, 10, 16);
+            }
+
+            $returnStr .= str_pad($res, 2, '0', STR_PAD_LEFT);
+        }
+
+        return $returnStr;
     }
 
     public function getIndex($deviceId): string

@@ -30,7 +30,7 @@ class CheckSign
         }
 
         if(!Auth::getInstance()->checkSign($datetime,$operatorId,$signature)){
-            return Response::apiErrorResult('签名有误');
+            return Response::apiErrorResult(Response::getMsg());
         }
 
         Auth::$operatorId = $operatorId;

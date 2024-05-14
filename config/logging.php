@@ -81,6 +81,12 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 60,
         ],
+        'liurui_ontnet' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/liurui/liurui_ontnet.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 60,
+        ],
 
         'haiman' => [
             'driver' => 'daily',

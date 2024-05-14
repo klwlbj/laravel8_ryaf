@@ -11,14 +11,23 @@ class OneNet extends BaseIoTClient
     public const HOST         = 'https://iot-api.heclouds.com/nb-iot';
     public const IMEI_ONE_NET = 861561056131278; // 海康烟感-移动,暂不写死
 
-    public const OBJ_ID      = 3339;
-    public const OBJ_INST_ID = 0;
-    public const RES_ID      = 5522;
+    public $objId     = 3339;
+    public $objInstId = 0;
+    public $resId     = 5522;
 
     private Client $client;
 
-    public function __construct()
+    public function __construct($objId = null, $objInstId = null, $resId = null)
     {
+        if($objId !== null) {
+            $this->objId = $objId;
+        }
+        if($objInstId !== null) {
+            $this->objInstId = $objInstId;
+        }
+        if($resId !== null) {
+            $this->resId = $resId;
+        }
         $this->client = new Client([
             'verify' => false, // 关闭 SSL 验证
         ]);
@@ -57,7 +66,7 @@ class OneNet extends BaseIoTClient
             $response = $this->client->request('GET', self::HOST . '/offline', [
                 'query'   => [
                     "imei"         => $imei,
-                    "obj_id"       => self::OBJ_ID,
+                    "obj_id"       => $this->objId,
                     'valid_time'   => date('Y-m-d', $time + 10) . 'T' . date('H:i:s', $time + 10),
                     'expired_time' => date('Y-m-d', $time + 100) . 'T' . date('H:i:s', $time + 1000),
                 ],
@@ -87,9 +96,9 @@ class OneNet extends BaseIoTClient
             $response = $this->client->request('POST', self::HOST . '/execute', [
                 'query'   => [
                     "imei"        => $imei,
-                    "obj_id"      => self::OBJ_ID,
-                    "obj_inst_id" => self::OBJ_INST_ID,
-                    'res_id'      => self::RES_ID,
+                    "obj_id"      => $this->objId,
+                    "obj_inst_id" => $this->objInstId,
+                    'res_id'      => $this->resId,
                 ],
                 'json'    => [
                     'args' => $cmd,
@@ -115,19 +124,19 @@ class OneNet extends BaseIoTClient
      */
     public function realTimewriteResource($imei, string $command = self::LONG_SILENCE, string $dwPackageNo = '00000001', string $cmd = '')
     {
-        $cmd  = empty($cmd) ? $this->generateCommand($command, $dwPackageNo, false) : $cmd;
+        $cmd = empty($cmd) ? $this->generateCommand($command, $dwPackageNo, false) : $cmd;
         try {
             $response = $this->client->request('POST', self::HOST, [
                 'query'   => [
-                    "imei"         => $imei,
-                    "obj_id"       => self::OBJ_ID,
-                    "obj_inst_id"  => self::OBJ_INST_ID,
-                    'mode'         => 1, // 1：直接替换；2：局部更新
+                    "imei"        => $imei,
+                    "obj_id"      => $this->objId,
+                    "obj_inst_id" => $this->objInstId,
+                    'mode'        => 1, // 1：直接替换；2：局部更新
                 ],
                 'json'    => [
                     'data' => [
                         [
-                            'res_id' => self::RES_ID,
+                            'res_id' => $this->resId,
                             'type'   => 1,
                             'val'    => $cmd,
                         ],
@@ -160,15 +169,15 @@ class OneNet extends BaseIoTClient
             $response = $this->client->request('POST', self::HOST . '/offline', [
                 'query'   => [
                     "imei"         => $imei,
-                    "obj_id"       => self::OBJ_ID,
-                    "obj_inst_id"  => self::OBJ_INST_ID,
+                    "obj_id"       => $this->objId,
+                    "obj_inst_id"  => $this->objInstId,
                     'mode'         => 1, // 1：直接替换；2：局部更新
                     'expired_time' => date('Y-m-d', $time) . 'T' . date('H:i:s', $time),
                 ],
                 'json'    => [
                     'data' => [
                         [
-                            'res_id' => self::RES_ID,
+                            'res_id' => $this->resId,
                             'type'   => 1,
                             'val'    => $cmd,
                         ],
@@ -207,11 +216,11 @@ class OneNet extends BaseIoTClient
             $response = $this->client->request('POST', self::HOST . '/execute/offline', [
                 'query'   => [
                     "imei"         => $imei,
-                    "obj_id"       => self::OBJ_ID,
-                    "obj_inst_id"  => self::OBJ_INST_ID,
+                    "obj_id"       => $this->objId,
+                    "obj_inst_id"  => $this->objInstId,
                     'mode'         => '1', // 1：直接替换；2：局部更新
                     'expired_time' => date('Y-m-d', $time) . 'T' . date('H:i:s', $time),
-                    'res_id'       => self::RES_ID,
+                    'res_id'       => $this->resId,
                 ],
                 'json'    => [
                     'args' => $cmd,
