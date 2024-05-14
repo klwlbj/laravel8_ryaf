@@ -25,7 +25,7 @@ class LiuRuiController
     {
         $params = $request->all();
         $params = Tools::jsonDecode($params);
-        $util = new LiuRui();
+        $util   = new LiuRui();
 
         if (isset($params['messageType']) && $params['messageType'] == 'dataReport' && isset($params['payload']['APPdata'])) {
             $decodeCode = base64_decode($params['payload']['APPdata']);
@@ -42,22 +42,24 @@ class LiuRuiController
         return response()->json(['code' => 0, 'message' => 0]);
     }
 
-    public function oneNetReport(Request $request){
-        $params = $request->all();
-        $params = Tools::jsonDecode($params);
-        $util  = new LiuRui();
-        $msg = $params['msg'] ?? [];
-        if($msg && isset($msg['value'])){
-            $decodeCode = base64_decode($msg['value']);
+    public function oneNetReport(Request $request)
+    {
+        $params        = $request->all();
+        $params        = Tools::jsonDecode($params);
+        $util          = new LiuRui();
+        $params['msg'] = Tools::jsonDecode($params['msg']);
+
+        if($params['msg'] && isset($params['msg']['value'])) {
+            //            $decodeCode = base64_decode($msg['value']);
             try {
-                $data                   = $util->toDecrypt($decodeCode);
-                $msg['analyze_data']    = $data;
+                $data                          = $util->toDecrypt($params['msg']['value']);
+                $params['msg']['analyze_data'] = $data;
             } catch (\Exception $e) {
                 Log::channel('liurui_ontnet')->info('liurui_ontnet analyze exception: ' . $e->getMessage());
             }
         }
 
-        Log::channel('liurui_ontnet')->info('liurui_ontnet analyze data: ' . $msg);
+        Log::channel('liurui_ontnet')->info('liurui_ontnet analyze data: ' . json_encode($params));
 
         return $params['msg'];
         // return response()->json(['code' => 0, 'message' => 0]);

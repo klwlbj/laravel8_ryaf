@@ -524,7 +524,7 @@ class LiuRui
 
         $oneNet = new OneNet(self::OBJ_ID, self::OBJ_INST_ID, self::RES_ID);
 
-        return $oneNet->execute($imei, '', '', $str);
+        return $oneNet->realTimewriteResource($imei, '', '', bin2hex($str));
     }
 
     public function getMuffingData($deviceId): string
