@@ -573,7 +573,7 @@ class LiuRui
         $deviceType  = '02';
         $messageType = '07';
         $len         = '02';
-        $data        = '01';
+        $data        = '0201';
         #头部5A 设备类型01 序号index 消息类型07 消息len01 data01  校验
         #获取校验码
         $checkSign = $this->checkSum($header . $deviceType . $index . $messageType . $len . $data);
