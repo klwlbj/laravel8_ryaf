@@ -27,7 +27,10 @@ class BaseChargeController extends BaseController
         $offset    = ($pageIndex - 1) * $pageSize; // 计算偏移量
 
         // 执行分页查询
-        $items = $model::skip($offset)->take($pageSize)->where('operator_id', $input['operatorId'])->get();
+        $items = $model::skip($offset)->take($pageSize)
+            ->where('operator_id', $input['operatorId'])
+            ->select('*')
+            ->get();
         // 查询总记录数
         $totalRecord = $model::where('operator_id', $input['operatorId'])->count();
 

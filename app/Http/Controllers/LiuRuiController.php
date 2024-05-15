@@ -12,8 +12,12 @@ class LiuRuiController
     public function toDecrypt(Request $request, string $string)
     {
         $util = new LiuRui();
-        $data = $util->toDecrypt($string);
-        return response()->json($data);
+        try {
+            $data = $util->toDecrypt($string);
+            return response()->json($data);
+        } catch (\Exception $e) {
+            Log::channel('liurui')->info('liurui analyze exception: ' . $e->getMessage());
+        }
     }
 
     public function muffling($productId, $deviceId, $masterKey)
@@ -33,7 +37,7 @@ class LiuRuiController
                 $data                   = $util->toDecrypt($decodeCode);
                 $params['analyze_data'] = $data;
             } catch (\Exception $e) {
-                Log::channel('liurui')->info('liurui analyze exception: ' . $e->getMessage());
+                Log::channel('liurui')->info('liurui analyze exception: ' . $e->getMessage() . ' this json:' . json_encode($params));
             }
         }
 
@@ -49,7 +53,7 @@ class LiuRuiController
         $util          = new LiuRui();
         $params['msg'] = Tools::jsonDecode($params['msg']);
 
-        if($params['msg'] && isset($params['msg']['value'])) {
+        if ($params['msg'] && isset($params['msg']['value'])) {
             //            $decodeCode = base64_decode($msg['value']);
             try {
                 $data                          = $util->toDecrypt($params['msg']['value']);

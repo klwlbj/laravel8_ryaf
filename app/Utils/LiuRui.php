@@ -469,6 +469,9 @@ class LiuRui
 
     private function binToFloat($bin): string
     {
+        if(empty(intval($bin))){
+            return 0;
+        }
         $symbol = substr($bin, 0, 1);
 
         $exponent = base_convert(substr($bin, 1, 8), 2, 10) - 127;
