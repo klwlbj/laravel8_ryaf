@@ -5,6 +5,7 @@ namespace App\Http\Server\Platform;
 use App\Http\Server\BaseServer;
 use App\Models\Platform\Operator;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Session;
 
 class Auth extends BaseServer
 {
@@ -52,7 +53,9 @@ class Auth extends BaseServer
     {
         $token = md5(time() . rand(10, 99) . self::$operatorId);
 
-        Redis::set('platform_token:' . $token, self::$operatorId, 86400);
+        Session::put('platform_token:' . $token,self::$operatorId);
+        Session::save();
+//        Redis::set('platform_token:' . $token, self::$operatorId, 86400);
 
         return $token;
     }

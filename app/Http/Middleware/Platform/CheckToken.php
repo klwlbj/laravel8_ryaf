@@ -6,6 +6,7 @@ use App\Http\Server\Platform\Auth;
 use App\Http\Server\Platform\Response;
 use Closure;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Session;
 
 class CheckToken
 {
@@ -16,8 +17,7 @@ class CheckToken
         if (empty($token)) {
             return Response::apiErrorResult('token 不能为空');
         }
-
-        $data = Redis::get('platform_token:' . $token);
+        $data = Session::get('platform_token:' . $token);
 
         if(empty($data)){
             return Response::apiErrorResult('token 已过期');
