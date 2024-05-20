@@ -129,6 +129,31 @@ class NBController extends BaseController
         Log::info('failed:' . json_encode($params));
     }
 
+    /**
+     * 豪恩声光报警测试回调地址
+     * @param Request $request
+     * @return void
+     */
+    public function haoenCtwing(Request $request)
+    {
+        $jsonData = $request->all();
+        Log::info('haoenCtwing:' . json_encode($jsonData));
+
+        return response('', 200);
+    }
+    /**
+     * 豪恩手报报警测试回调地址
+     * @param Request $request
+     * @return void
+     */
+    public function haoen2Ctwing(Request $request)
+    {
+        $jsonData = $request->all();
+        Log::info('haoen2Ctwing:' . json_encode($jsonData));
+
+        return response('', 200);
+    }
+
     public function dhCTWingWarm(Request $request)
     {
         $jsonData = $request->all();

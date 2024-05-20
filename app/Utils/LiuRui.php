@@ -284,7 +284,7 @@ class LiuRui
     {
         $structure = [
             'encrypted_text' => '', // 密文
-            'status'         => '', // 状态
+            // 'status'         => '', // 状态
             'timestamp'      => '', // 时间戳
             'battery'        => '', // 电量
             'rsrp'           => '', // 信号强度

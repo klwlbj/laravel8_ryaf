@@ -113,3 +113,7 @@ Route::prefix('liurui')->group(function () {
     Route::any('/oneNetReport', [LiuRuiController::class, 'oneNetReport']);
     Route::get('toDecrypt/{string}', [LiuRuiController::class, 'toDecrypt']);
 });
+
+Route::post('/haoenCtwing', [NBController::class, 'haoenCtwing']);
+Route::post('/haoen2Ctwing', [NBController::class, 'haoen2Ctwing']);
+
