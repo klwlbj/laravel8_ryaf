@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Platform;
 
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Http\Server\Platform\Auth;
 use App\Http\Controllers\BaseController;
 
 class BaseChargeController extends BaseController
@@ -20,6 +21,10 @@ class BaseChargeController extends BaseController
         $valicate = $this->validateParams($request, $rules, $input);
         if ($valicate) {
             return $valicate;
+        }
+        $validateOperatorId = $this->validateOperatorId($input['operatorId']);
+        if ($validateOperatorId) {
+            return $validateOperatorId;
         }
 
         $pageIndex = $input['pageIndex']; // 获取页面索引
@@ -66,6 +71,10 @@ class BaseChargeController extends BaseController
         if ($valicate) {
             return $valicate;
         }
+        $validateOperatorId = $this->validateOperatorId($input['operatorId']);
+        if ($validateOperatorId) {
+            return $validateOperatorId;
+        }
 
         $item = $model::where(Str::snake($idString), $input[$idString])
             ->where('operator_id', $input['operatorId'])
@@ -87,6 +96,10 @@ class BaseChargeController extends BaseController
         if ($valicate) {
             return $valicate;
         }
+        $validateOperatorId = $this->validateOperatorId($input['operatorId']);
+        if ($validateOperatorId) {
+            return $validateOperatorId;
+        }
 
         foreach (array_keys($rules) as $key) {
             $model->{$key} = $input[$key];
@@ -104,6 +117,10 @@ class BaseChargeController extends BaseController
         $valicate = $this->validateParams($request, $rules, $input);
         if ($valicate) {
             return $valicate;
+        }
+        $validateOperatorId = $this->validateOperatorId($input['operatorId']);
+        if ($validateOperatorId) {
+            return $validateOperatorId;
         }
 
         $item = $model::where(Str::snake($idString), $input[$idString])
@@ -126,5 +143,12 @@ class BaseChargeController extends BaseController
         // 保存
         $item->save();
         return response()->json(['status' => 200, 'message' => '请求成功!', 'data' => '提交成功！']);
+    }
+
+    public function validateOperatorId($operatorId)
+    {
+        if (Auth::$operatorId != $operatorId) {
+            return response()->json(['error' => 'operatorId error'], 400);
+        }
     }
 }

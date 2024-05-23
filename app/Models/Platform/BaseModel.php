@@ -15,6 +15,7 @@ class BaseModel extends Model
         'id',
         'created_at',
         'updated_at',
+        'deletedAt',
     ];
     public const YES     = 1;
     public const NO      = 2;

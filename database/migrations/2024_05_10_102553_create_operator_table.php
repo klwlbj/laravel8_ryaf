@@ -21,7 +21,7 @@ class CreateOperatorTable extends Migration
             $table->tinyInteger('status')->default(1)->comment('状态 0 禁用 1正常');
             $table->timestamp('created_at')->useCurrent()->comment('创建时间');
             $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate()->useCurrent()->comment('更新时间');
-            $table->timestamp('deleted_at')->nullable()->comment('删除时间');
+            $table->softDeletes()->comment('删除时间');
         });
     }
 

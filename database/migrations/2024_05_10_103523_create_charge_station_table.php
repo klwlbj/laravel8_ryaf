@@ -43,7 +43,9 @@ class CreateChargeStationTable extends Migration
             $table->string('service_fee')->default('')->comment('服务费率');
             $table->date('create_date')->nullable()->comment('建成日期');
             $table->date('operation_date')->nullable()->comment('投运日期');
-            $table->timestamps();
+            $table->softDeletes();
+            $table->timestamp('created_at')->useCurrent()->comment('创建时间');
+            $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate()->useCurrent()->comment('更新时间');
         });
     }
 

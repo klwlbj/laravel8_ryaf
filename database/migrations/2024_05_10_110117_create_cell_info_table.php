@@ -37,7 +37,7 @@ class CreateCellInfoTable extends Migration
             $table->timestamp('update_datetime')->comment('充电桩硬件上生成上报的时间');
             $table->timestamp('created_at')->useCurrent()->comment('创建时间');
             $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate()->useCurrent()->comment('更新时间');
-            $table->timestamp('deleted_at')->nullable()->comment('删除时间');
+            $table->softDeletes()->comment('删除时间');
         });
     }
 

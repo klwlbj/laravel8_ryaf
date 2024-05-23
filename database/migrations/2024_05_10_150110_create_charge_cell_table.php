@@ -29,8 +29,9 @@ class CreateChargeCellTable extends Migration
             $table->string('service_fee')->default('')->comment('服务费率描述');
             $table->tinyInteger('fire_control')->default(0)->comment('是否有灭火装置');
             $table->tinyInteger('smoke_sensation')->default(0)->comment('是否有烟感');
-
-            $table->timestamps();
+            $table->softDeletes();
+            $table->timestamp('created_at')->useCurrent()->comment('创建时间');
+            $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate()->useCurrent()->comment('更新时间');
         });
     }
 

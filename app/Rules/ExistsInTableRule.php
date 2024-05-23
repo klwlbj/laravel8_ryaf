@@ -18,7 +18,7 @@ class ExistsInTableRule implements Rule
 
     public function passes($attribute, $value)
     {
-        return DB::table($this->table)->where($this->column, $value)->exists();
+        return DB::table($this->table)->whereNull('deleted_at')->where($this->column, $value)->exists();
     }
 
     public function message()

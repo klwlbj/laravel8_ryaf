@@ -34,7 +34,9 @@ class CreateChargeEquipmentTable extends Migration
             $table->decimal('equipment_lat', 10, 6)->comment('充电设备纬度');
             $table->date('operation_date')->nullable()->comment('投运日期');
             $table->tinyInteger('camera')->default(0)->comment('是否有摄像头');
-            $table->timestamps();
+            $table->softDeletes();
+            $table->timestamp('created_at')->useCurrent()->comment('创建时间');
+            $table->timestamp('updated_at')->nullable()->useCurrentOnUpdate()->useCurrent()->comment('更新时间');
         });
     }
 

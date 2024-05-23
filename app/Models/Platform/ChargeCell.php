@@ -2,8 +2,14 @@
 
 namespace App\Models\Platform;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class ChargeCell extends BaseModel
 {
+    use SoftDeletes;
+
+    protected $dates = ['deleted_at'];
+
     public const CELL_TYPE_HOME        = 1;
     public const CELL_TYPE_DIRECT      = 2;
     public const CELL_TYPE_ALTERNATING = 3;

@@ -2,8 +2,14 @@
 
 namespace App\Models\Platform;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class ChargeStation extends BaseModel
 {
+    use SoftDeletes;
+
+    protected $dates = ['deleted_at'];
+
     public const TYPE_TAKE_OUT       = 1;
     public const TYPE_EXPRESS        = 2;
     public const TYPE_OTHER_SPECIFIC = 3;
@@ -47,4 +53,21 @@ class ChargeStation extends BaseModel
         self::Fee_TYPE_QUANTITY       => '按电度计费',
         self::Fee_TYPE_OTHER          => '其他',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleted(function($table) {
+            $table->ChargeEquipment->each(function($chargeEquipment) {
+                $chargeEquipment->ChargeCell->each->delete(); // 删除表2关联的表3数据
+                $chargeEquipment->delete(); // 删除表2数据
+            });
+        });
+    }
+
+    public function ChargeEquipment()
+    {
+        return $this->hasMany(ChargeEquipment::class, 'station_id', 'station_id');
+    }
 }
