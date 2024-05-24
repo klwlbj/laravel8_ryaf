@@ -4,6 +4,7 @@ namespace App\Utils;
 
 use DateTimeZone;
 use Illuminate\Support\Str;
+use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Logger;
 
@@ -44,13 +45,18 @@ class Tools
      * @param null $path
      * @param array $data
      */
-    public static function writeLog($msg, $path = null, $data = []){
+    public static function writeLog($msg, $path = null, $data = [], $filename = '',$output = null){
         if(empty($path)){
             $actions=explode('\\', \Route::current()->getActionName());
             $func=explode('@', $actions[count($actions)-1]);
             $path=$func[0].'-'.$func[1];
         }
-        $path = 'logs/'.$path.'/'.$path.'.log';
+
+        if(empty($filename)){
+            $filename = $path;
+        }
+
+        $path = 'logs/'.$path.'/'.$filename.'.log';
 
         if(!is_array($data) && !empty($data)){
             $data = ['data' => $data];
@@ -65,9 +71,14 @@ class Tools
             $data = self::jsonDecode($data);
         }
 
-        (new Logger('daily',[],[],new DateTimeZone('Asia/Shanghai')))
-            ->pushHandler(new RotatingFileHandler(storage_path($path),14))
-            ->debug($msg,$data);
+//        if(!empty($output)){
+//            $output = "%message%%context% %extra%\n";
+//        }
+
+        (new Logger('local',[],[],new DateTimeZone('Asia/Shanghai')))
+            ->pushHandler((new RotatingFileHandler(storage_path($path),14))
+                ->setFormatter(new LineFormatter($output, null, true, true)))
+            ->info($msg,$data);
     }
 
     public static function snake($data): array

@@ -48,6 +48,11 @@ class ReportServer extends BaseServer
 
     public function cellInfoReport($params): string
     {
+        if($params['operatorId'] != Auth::$operatorId){
+            Response::setMsg('运营商id不为授权运营商');
+            return false;
+        }
+
         $existId = CellInfo::query()
             ->where([
                 'operator_id'  => $params['operatorId'],

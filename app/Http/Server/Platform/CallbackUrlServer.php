@@ -34,14 +34,13 @@ class CallbackUrlServer extends BaseServer
     public function deleteCallbackUrl($params){
         $existId = NotifyUrl::query()
             ->where(['operator_id' => $params['operatorId'],'type' => $params['type']])
-            ->whereNull('deleted_at')
             ->value('id');
 
         if(empty($existId)){
             return "不存在回调地址，不需要删除!";
         }
 
-        if(NotifyUrl::query()->where(['id' => $existId])->update(['deleted_at' => date('Y-m-d H:i:s')]) === false){
+        if(NotifyUrl::query()->where(['id' => $existId])->delete() === false){
             Response::setMsg('删除失败');
             return false;
         }

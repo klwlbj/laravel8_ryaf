@@ -28,6 +28,7 @@ class LiuRuiController
     public function report(Request $request)
     {
         $params = $request->all();
+        //        print_r($params);die;
         $params = Tools::jsonDecode($params);
         $util   = new LiuRui();
 
@@ -37,11 +38,17 @@ class LiuRuiController
                 $data                   = $util->toDecrypt($decodeCode);
                 $params['analyze_data'] = $data;
             } catch (\Exception $e) {
-                Log::channel('liurui')->info('liurui analyze exception: ' . $e->getMessage() . ' this json:' . json_encode($params));
+                Tools::writeLog('liurui analyze exception: ' . $e->getMessage() . ' this json:', 'liurui_exception', $params, 'exception');
+                //                Log::channel('liurui')->info('liurui analyze exception: ' . $e->getMessage() . ' this json:' . json_encode($params));
             }
         }
 
-        Log::channel('liurui')->info('liurui analyze data: ' . json_encode($params));
+        if(isset($params['analyze_data']['cmd_type'])){
+            Tools::writeLog('liurui analyze data: ', 'liurui', $params, $params['IMEI'] . '-' . time(), '%message%%context% %extra%');
+//            Log::channel('liurui')->info('liurui analyze data: ' . json_encode($params));
+        }
+
+
 
         return response()->json(['code' => 0, 'message' => 0]);
     }
@@ -59,11 +66,15 @@ class LiuRuiController
                 $data                          = $util->toDecrypt($params['msg']['value']);
                 $params['msg']['analyze_data'] = $data;
             } catch (\Exception $e) {
-                Log::channel('liurui_ontnet')->info('liurui_ontnet analyze exception: ' . $e->getMessage());
+                Tools::writeLog('liurui_ontnet analyze exception: ' . $e->getMessage() . ' this json:','liurui_exception',$params,'exception');
+//                Log::channel('liurui_ontnet')->info('liurui_ontnet analyze exception: ' . $e->getMessage());
             }
         }
+        if(isset($params['msg']['analyze_data']['cmd_type'])){
+            Tools::writeLog('liurui_ontnet analyze data: ','liurui_ontnet',$params,$params['msg']['imei'] . '-' . time(),'%message%%context% %extra%');
+//            Log::channel('liurui_ontnet')->info('liurui_ontnet analyze data: ' . json_encode($params));
+        }
 
-        Log::channel('liurui_ontnet')->info('liurui_ontnet analyze data: ' . json_encode($params));
 
         return $params['msg'];
         // return response()->json(['code' => 0, 'message' => 0]);

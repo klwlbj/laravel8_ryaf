@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Platform;
 use App\Http\Controllers\Controller;
+use App\Http\Server\Platform\Auth;
 use App\Http\Server\Platform\ChargingRecordServer;
 use App\Http\Server\Platform\Response;
 use Illuminate\Http\Request;
@@ -22,7 +23,7 @@ class ChargingRecordController extends Controller
         $res = ChargingRecordServer::getInstance()->chargingRecordSubmit($params);
 
         if(!$res){
-            return Response::apiErrorResult('上报失败');
+            return Response::apiErrorResult(Response::getMsg());
         }
         return Response::apiResult(200,'请求成功!',$res);
     }
@@ -38,6 +39,10 @@ class ChargingRecordController extends Controller
             if($validate->fails())
             {
                 return Response::apiErrorResult('第' . ($key + 1) . '个数据有误' . $validate->errors()->first());
+            }
+
+            if($item['operatorId'] != Auth::$operatorId){
+                return Response::apiErrorResult('第' . ($key + 1) . '个数据有误：运营商id不为授权运营商');
             }
         }
 

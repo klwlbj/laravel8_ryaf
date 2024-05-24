@@ -49,6 +49,11 @@ class ChargingRecordServer extends BaseServer
     {
         $insertData = Tools::snake($params);
 
+        if($params['operatorId'] != Auth::$operatorId){
+            Response::setMsg('运营商id不为授权运营商');
+            return false;
+        }
+
         #插入流水记录
         ChargingRecord::query()->insert($insertData);
 
