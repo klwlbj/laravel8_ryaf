@@ -14,4 +14,4 @@ use Illuminate\Support\Facades\Route;
 |
 */
 //不需要token的接口
-Route::post('/untis/add', [UnitsController::class, 'add']);
+Route::post('/units/add', [UnitsController::class, 'add']);
