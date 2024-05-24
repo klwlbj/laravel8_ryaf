@@ -18,8 +18,8 @@ class RequestServer extends BaseServer
         $client   = new Client(['verify' => false]);
         $response = $client->post($fullPath, [
             'headers' => [
-                "Content-Type" => $this->contentType,
                 "Client-Token" =>  $sign,
+                "Content-Type" => $this->contentType,
             ],
             'json'    => (object)$params, // 将关联数组转换为 JSON 对象,PHP空数组转空对象
         ]);
