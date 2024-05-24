@@ -52,7 +52,7 @@ class RouteServiceProvider extends ServiceProvider
                 ->namespace($this->namespace)
                 ->group(base_path('routes/platform.php'));
 
-            Route::prefix('Hikvision')
+            Route::prefix('hikvision')
                 ->middleware('api')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/hikvision.php'));
