@@ -2,6 +2,7 @@
 
 namespace App\Utils;
 
+use DateTime;
 use DateTimeZone;
 use Illuminate\Support\Str;
 use Monolog\Formatter\LineFormatter;
@@ -93,5 +94,29 @@ class Tools
         return collect($data)->mapWithKeys(function ($v, $k) {
             return [Str::camel($k) => $v];
         })->toArray();
+    }
+
+    public static function getISO8601Date()
+    {
+        $date = new DateTime();
+
+// 设置时区为东八区（亚洲/上海）
+        $date->setTimezone(new DateTimeZone('Asia/Shanghai'));
+
+// 格式化时间，'Y-m-d\TH:i:s.uP' 表示：
+// Y - 四位年份
+// m - 两位月份
+// d - 两位日期
+// T - 字符T
+// H - 两位小时（24小时制）
+// i - 两位分钟
+// s - 两位秒
+// u - 微秒（这里将被截断为毫秒）
+// P - 时区偏移量
+        $formattedDate = $date->format('Y-m-d\TH:i:s.u');
+
+// 截断微秒，只保留前三位
+        $formattedDate = substr($formattedDate, 0, -3);
+        return $formattedDate . '+08:00';
     }
 }

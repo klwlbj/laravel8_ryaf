@@ -3,10 +3,29 @@
 namespace App\Http\Server\Hikvision;
 
 use App\Http\Server\BaseServer;
+use App\Utils\Tools;
 use Illuminate\Support\Facades\Validator;
 
 class UnitsServer extends BaseServer
 {
+    public $resourceCode = '309000';
+
+    /**统一社会信用代码
+     * @param $id
+     * @param $regionCode
+     * @return string
+     */
+    public function getCreditCode($id, $regionCode): string
+    {
+        #生成统一社会信用代码
+        return "11" . $regionCode . str_pad($id, 10, '0', STR_PAD_LEFT);
+    }
+
+    public function getUnitsId($creditCode)
+    {
+        return "9423" . $this->resourceCode . "00" . $creditCode;
+    }
+
     public function verifyParams($params)
     {
         $validate = Validator::make($params, [
@@ -49,12 +68,77 @@ class UnitsServer extends BaseServer
     }
     public function add($params)
     {
-        $res = RequestServer::getInstance()->doRequest('fire/v1/units/add',$params);
-        print_r($res);die;
+        $id = '114111';
+        $regionCode = '440111';
+        $creditCode = $this->getCreditCode($id,$regionCode);
+        $unitId = $this->getUnitsId($creditCode);
+
+        $params = [
+            'unitId' => $unitId,
+            'unitName' => '白云区石井街道庆丰社区庆丰忠和里街75号101室',
+            'address' => '白云区石井街道庆丰社区庆丰忠和里街75号101室',
+            'pointX' => '113.224015',
+            'pointY' => '23.212011',
+            'creditCode' => $creditCode,
+            'regionCode' => $regionCode,
+        ];
+
+
+        $date = Tools::getISO8601Date();
+        $params['createTime'] = $date;
+        $params['updateTime'] = $date;
+//        print_r($params);die;
+        $data = [
+            'units' => [
+                $params
+            ]
+        ];
+        return RequestServer::getInstance()->doRequest('fire/v1/units/add',$data);
     }
 
     public function update($params)
     {
+        $id = '114111';
+        $regionCode = '440111';
+        $creditCode = $this->getCreditCode($id,$regionCode);
+        $unitId = $this->getUnitsId($creditCode);
 
+        $params = [
+            'unitId' => $unitId,
+            'unitName' => '白云区石井街道庆丰社区庆丰忠和里街75号101室',
+            'address' => '白云区石井街道庆丰社区庆丰忠和里街75号101室',
+            'pointX' => '113.224015',
+            'pointY' => '23.212011',
+            'creditCode' => $creditCode,
+            'regionCode' => $regionCode,
+        ];
+
+
+        $date = Tools::getISO8601Date();
+        $params['createTime'] = $date;
+        $params['updateTime'] = $date;
+//        print_r($params);die;
+        $data = [
+            'units' => [
+                $params
+            ]
+        ];
+        return RequestServer::getInstance()->doRequest('fire/v1/units/update',$data);
+    }
+
+    public function delete($params)
+    {
+        $params['id'] = '114111';
+        $regionCode = '440111';
+
+        $creditCode = $this->getCreditCode($params['id'],$regionCode);
+        $unitId = $this->getUnitsId($creditCode);
+        $data = [
+            'unitIds' => [
+                $unitId
+            ]
+        ];
+//        print_r($data);die;
+        return RequestServer::getInstance()->doRequest('fire/v1/units/delete',$data);
     }
 }

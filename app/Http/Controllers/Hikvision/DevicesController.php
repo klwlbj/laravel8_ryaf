@@ -2,22 +2,19 @@
 
 namespace App\Http\Controllers\Hikvision;
 use App\Http\Controllers\Controller;
+use App\Http\Server\Hikvision\DevicesServer;
 use App\Http\Server\Hikvision\Response;
-use App\Http\Server\Hikvision\UnitsServer;
-use App\Utils\Tools;
-use DateTime;
-use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-class UnitsController extends Controller
+class DevicesController extends Controller
 {
     public function add(Request $request){
         $params = $request->all();
 
 //        print_r(Tools::calculateCheckDigit('11440111000114111'));die;
 
-        $res = UnitsServer::getInstance()->add($params);
+        $res = DevicesServer::getInstance()->add($params);
 
         return Response::returnJson($res);
     }
@@ -29,7 +26,7 @@ class UnitsController extends Controller
 //            return Response::apiErrorResult(Response::getMsg());
 //        }
 
-        $res = UnitsServer::getInstance()->update($params);
+        $res = DevicesServer::getInstance()->update($params);
 
         return Response::returnJson($res);
     }
@@ -42,7 +39,7 @@ class UnitsController extends Controller
 //            return Response::apiErrorResult(Response::getMsg());
 //        }
 
-        $res = UnitsServer::getInstance()->delete($params);
+        $res = DevicesServer::getInstance()->delete($params);
 
         return Response::returnJson($res);
     }

@@ -19,6 +19,11 @@ class Response extends BaseServer
         return self::$message;
     }
 
+    public static function returnJson($result)
+    {
+        return response()->json($result, 200);
+    }
+
     public static function apiResult($status = 200,$message = '',$data = []): \Illuminate\Http\JsonResponse
     {
         $result = [

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Hikvision\DevicesController;
 use App\Http\Controllers\Hikvision\UnitsController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,3 +16,9 @@ use Illuminate\Support\Facades\Route;
 */
 //不需要token的接口
 Route::post('/units/add', [UnitsController::class, 'add']);
+Route::post('/units/update', [UnitsController::class, 'update']);
+Route::post('/units/delete', [UnitsController::class, 'delete']);
+
+Route::post('/devices/add', [DevicesController::class, 'add']);
+Route::post('/devices/update', [DevicesController::class, 'update']);
+Route::post('/devices/delete', [DevicesController::class, 'delete']);
