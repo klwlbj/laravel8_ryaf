@@ -6,6 +6,7 @@ use App\Utils\Tools;
 use App\Utils\LiuRui;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Ramsey\Uuid\Nonstandard\Uuid;
 
 class LiuRuiController
 {
@@ -44,11 +45,11 @@ class LiuRuiController
         }
 
         if(isset($params['analyze_data']['cmd_type'])){
-            Tools::writeLog('liurui analyze data: ', 'liurui', $params, $params['IMEI'] . '-' . time(), '%message%%context% %extra%');
-//            Log::channel('liurui')->info('liurui analyze data: ' . json_encode($params));
+            Tools::deviceLog('aep',$params['IMEI'],'liurui',$params);
+//            $logFileName = 'aep-'.date('YmdHis').'-'.$params['IMEI']. '-' .md5(Uuid::uuid4()->toString());
+//            Tools::writeLog('', 'liurui', $params, $logFileName , '%message%%context% %extra%');
+                //            Log::channel('liurui')->info('liurui analyze data: ' . json_encode($params));
         }
-
-
 
         return response()->json(['code' => 0, 'message' => 0]);
     }
@@ -66,13 +67,14 @@ class LiuRuiController
                 $data                          = $util->toDecrypt($params['msg']['value']);
                 $params['msg']['analyze_data'] = $data;
             } catch (\Exception $e) {
-                Tools::writeLog('liurui_ontnet analyze exception: ' . $e->getMessage() . ' this json:','liurui_exception',$params,'exception');
+                Tools::writeLog('' . $e->getMessage() . ' this json:','liurui_exception',$params,'exception');
 //                Log::channel('liurui_ontnet')->info('liurui_ontnet analyze exception: ' . $e->getMessage());
             }
         }
         if(isset($params['msg']['analyze_data']['cmd_type'])){
-            Tools::writeLog('liurui_ontnet analyze data: ','liurui_ontnet',$params,$params['msg']['imei'] . '-' . time(),'%message%%context% %extra%');
-//            Log::channel('liurui_ontnet')->info('liurui_ontnet analyze data: ' . json_encode($params));
+            Tools::deviceLog('onenet',$params['msg']['imei'],'liurui',$params);
+//            $logFileName = 'onenet-'.date('YmdHis').'-'.$params['msg']['imei']. '-' .md5(Uuid::uuid4()->toString());
+//            Tools::writeLog('','liurui',$params,$logFileName,'%message%%context% %extra%');
         }
 
 

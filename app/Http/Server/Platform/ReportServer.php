@@ -16,33 +16,33 @@ class ReportServer extends BaseServer
     public function cellInfoValidator($data): \Illuminate\Contracts\Validation\Validator
     {
         return Validator::make($data, [
-            'cellId'         => 'required',
-            'equipmentId'    => 'required',
-            'operatorId'     => 'required',
-            'updateDatetime' => 'required',
-            'cellStatus'     => 'required',
-            'doorStatus'     => 'required',
-            'errorCode'      => 'required',
-            'current'        => 'required',
-            'voltage'        => 'required',
-            'power'          => 'required',
-            'quantity'       => 'required',
-            'envTemperature' => 'required',
-            'cirTemperature' => 'required',
+//            'cellId'         => 'required',
+//            'equipmentId'    => 'required',
+//            'operatorId'     => 'required',
+//            'updateDatetime' => 'required',
+//            'cellStatus'     => 'required',
+//            'doorStatus'     => 'required',
+//            'errorCode'      => 'required',
+//            'current'        => 'required',
+//            'voltage'        => 'required',
+//            'power'          => 'required',
+//            'quantity'       => 'required',
+//            'envTemperature' => 'required',
+//            'cirTemperature' => 'required',
         ], [
-            'cellId.required'         => 'cellId不能为空',
-            'equipmentId.required'    => 'equipmentId不能为空',
-            'operatorId.required'     => 'chargingMetaInfoId不能为空',
-            'updateDatetime.required' => 'updateDatetime不能为空',
-            'cellStatus.required'     => 'cellStatus不能为空',
-            'doorStatus.required'     => 'doorStatus不能为空',
-            'errorCode.required'      => 'errorCode不能为空',
-            'current.required'        => 'current不能为空',
-            'voltage.required'        => 'voltage不能为空',
-            'power.required'          => 'power不能为空',
-            'quantity.required'       => 'quantity不能为空',
-            'envTemperature.required' => 'envTemperature不能为空',
-            'cirTemperature.required' => 'cirTemperature不能为空',
+//            'cellId.required'         => 'cellId不能为空',
+//            'equipmentId.required'    => 'equipmentId不能为空',
+//            'operatorId.required'     => 'chargingMetaInfoId不能为空',
+//            'updateDatetime.required' => 'updateDatetime不能为空',
+//            'cellStatus.required'     => 'cellStatus不能为空',
+//            'doorStatus.required'     => 'doorStatus不能为空',
+//            'errorCode.required'      => 'errorCode不能为空',
+//            'current.required'        => 'current不能为空',
+//            'voltage.required'        => 'voltage不能为空',
+//            'power.required'          => 'power不能为空',
+//            'quantity.required'       => 'quantity不能为空',
+//            'envTemperature.required' => 'envTemperature不能为空',
+//            'cirTemperature.required' => 'cirTemperature不能为空',
         ]);
     }
 
@@ -58,7 +58,7 @@ class ReportServer extends BaseServer
                 'operator_id'  => $params['operatorId'],
                 'equipment_id' => $params['equipmentId'],
                 'cell_id'      => $params['cellId'],
-            ])->whereNull('deleted_at')->value('id');
+            ])->value('id');
 
         $insertData = [
             'cell_id'         => $params['cellId'],
@@ -93,7 +93,56 @@ class ReportServer extends BaseServer
         }
 
         #插入流水记录
-        CellInfoLog::query()->insert($insertData);
+//        CellInfoLog::query()->insert($insertData);
+
+        return '上报成功';
+    }
+
+    public function cellInfoReportList($list): string
+    {
+
+        $cellIds = [];
+        $insertData = [];
+        foreach ($list as $key => $value){
+            if($value['operatorId'] != Auth::$operatorId){
+                continue;
+            }
+
+            $item = [
+                'cell_id'         => $value['cellId'],
+                'equipment_id'    => $value['equipmentId'],
+                'operator_id'     => $value['operatorId'],
+                'update_datetime' => $value['updateDatetime'],
+                'cell_status'     => $value['cellStatus'],
+                'door_status'     => $value['doorStatus'],
+                'error_code'      => $value['errorCode'],
+                'current'         => $value['current'],
+                'voltage'         => $value['voltage'],
+                'power'           => $value['power'],
+                'quantity'        => $value['quantity'],
+                'env_temperature' => $value['envTemperature'],
+                'cir_temperature' => $value['cirTemperature'],
+            ];
+
+            if(isset($value['residualCurrent']) && !empty($value['residualCurrent'])) {
+                $item['residual_current'] = $value['residualCurrent'];
+            }
+
+            if(isset($value['startChargeSeq']) && !empty($value['startChargeSeq'])) {
+                $item['start_charge_seq'] = $value['startChargeSeq'];
+            }
+
+            $insertData[] = $item;
+            $cellIds[] = $value['cellId'];
+        }
+
+        # 全删全插
+        CellInfo::query()->where(['operator_id' => Auth::$operatorId])->whereIn('cell_id',$cellIds)->forceDelete();
+
+        CellInfo::query()->insert($insertData);
+
+        #插入流水记录
+//        CellInfoLog::query()->insert($insertData);
 
         return '上报成功';
     }

@@ -45,17 +45,11 @@ class ReportController extends Controller
             }
         }
 
-        $error = 0;
         #循环执行单条数据上报操作
-        foreach ($params as $key => $item){
-            $res = ReportServer::getInstance()->cellInfoReport($item);
-            if(!$res){
-                $error++;
-            }
+        $res = ReportServer::getInstance()->cellInfoReportList($params);
+        if(!$res){
+            return Response::apiErrorResult(Response::getMsg());
         }
-        if(!empty($error)){
-            return Response::apiErrorResult('上报失败 ' . $error . '条数据');
-        }
-        return Response::apiResult(200,'请求成功!','上报成功');
+        return Response::apiResult(200,'请求成功!',$res);
     }
 }

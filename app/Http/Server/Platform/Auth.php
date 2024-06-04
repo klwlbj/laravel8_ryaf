@@ -4,6 +4,7 @@ namespace App\Http\Server\Platform;
 
 use App\Http\Server\BaseServer;
 use App\Models\Platform\Operator;
+use App\Utils\Tools;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Session;
 
@@ -27,6 +28,7 @@ class Auth extends BaseServer
 
         $secret = Operator::query()->where(['operator_id' => $operatorId, 'status' => 1])->whereNull('deleted_at')->value('secret') ?: '';
 
+
         if(empty($secret)) {
             Response::setMsg('运营商secret不存在');
             return false;
@@ -34,7 +36,7 @@ class Auth extends BaseServer
 
         if($signature != 'ryaf2024'){
             $sign = $this->getSign($str, $secret);
-            // print_r($sign);die;
+//             print_r($sign);die;
             if($sign != $signature) {
                 Response::setMsg('签名有误');
                 return false;
@@ -46,17 +48,20 @@ class Auth extends BaseServer
 
     public function getSign($str, $secret): string
     {
-        $sign = hash_hmac('sha256', $str, $secret);
+        $sign = hash_hmac('sha256', $str, $secret,true);
 
         return base64_encode($sign);
     }
 
-    public function getToken()
+    public function getToken($operatorId = null)
     {
-        $token = md5(time() . rand(10, 99) . self::$operatorId);
-
-        Session::put('platform_token:' . $token, self::$operatorId);
-        Session::save();
+        if(empty($operatorId)){
+            $operatorId = self::$operatorId;
+        }
+        $token = md5($operatorId . '_' . 'ryaf2024');
+//
+//        Session::put('platform_token:' . $token, self::$operatorId);
+//        Session::save();
 //        Redis::set('platform_token:' . $token, self::$operatorId, 86400);
 
         return $token;

@@ -17,29 +17,29 @@ class ChargingRecordServer extends BaseServer
     public function chargingRecordValidator($data): \Illuminate\Contracts\Validation\Validator
     {
         $validate = Validator::make($data, [
-            'startChargeSeq'    => 'required',
-            'cellId'            => 'required',
-            'operatorId'        => 'required',
-            'startDatetime'     => 'required',
-            'endDatetime'       => 'required',
-            'totalPower'        => 'required',
-            'totalElecMoney'    => 'required',
-            'totalServiceMoney' => 'required',
-            'startType'         => 'required',
-            'stopReason'        => 'required',
-            'averagePower'      => 'required',
+//            'startChargeSeq'    => 'required',
+//            'cellId'            => 'required',
+//            'operatorId'        => 'required',
+//            'startDatetime'     => 'required',
+//            'endDatetime'       => 'required',
+//            'totalPower'        => 'required',
+//            'totalElecMoney'    => 'required',
+//            'totalServiceMoney' => 'required',
+//            'startType'         => 'required',
+//            'stopReason'        => 'required',
+//            'averagePower'      => 'required',
         ], [
-            'startChargeSeq.required'    => 'startChargeSeq不能为空',
-            'cellId.required'            => 'cellId不能为空',
-            'operatorId.required'        => 'operatorId不能为空',
-            'startDatetime.required'     => 'startDatetime不能为空',
-            'endDatetime.required'       => 'endDatetime不能为空',
-            'totalPower.required'        => 'totalPower不能为空',
-            'totalElecMoney.required'    => 'totalElecMoney不能为空',
-            'totalServiceMoney.required' => 'totalServiceMoney不能为空',
-            'startType.required'         => 'startType不能为空',
-            'stopReason.required'        => 'stopReason不能为空',
-            'averagePower.required'      => 'averagePower不能为空',
+//            'startChargeSeq.required'    => 'startChargeSeq不能为空',
+//            'cellId.required'            => 'cellId不能为空',
+//            'operatorId.required'        => 'operatorId不能为空',
+//            'startDatetime.required'     => 'startDatetime不能为空',
+//            'endDatetime.required'       => 'endDatetime不能为空',
+//            'totalPower.required'        => 'totalPower不能为空',
+//            'totalElecMoney.required'    => 'totalElecMoney不能为空',
+//            'totalServiceMoney.required' => 'totalServiceMoney不能为空',
+//            'startType.required'         => 'startType不能为空',
+//            'stopReason.required'        => 'stopReason不能为空',
+//            'averagePower.required'      => 'averagePower不能为空',
         ]);
 
         return $validate;
@@ -64,6 +64,10 @@ class ChargingRecordServer extends BaseServer
     {
         $insertData = [];
         foreach ($params as $key => $value) {
+            if(!strtotime($value['endDatetime'])){
+                continue;
+            }
+//            if()
             $insertData[] = Tools::snake($value);
         }
 

@@ -19,8 +19,8 @@ class CreateChargingRecordTable extends Migration
             $table->string('cell_id',50)->comment('充电口id');
             $table->string('operator_id',50)->comment('运营商ID');
 
-            $table->timestamp('start_datetime')->nullable()->comment('开始充电时间');
-            $table->timestamp('end_datetime')->nullable()->comment('结束充电时间');
+            $table->dateTime('start_datetime')->nullable()->comment('开始充电时间');
+            $table->dateTime('end_datetime')->nullable()->comment('结束充电时间');
 
             $table->decimal('total_power')->comment('累计充电量');
             $table->decimal('total_elec_money')->comment('总电费');

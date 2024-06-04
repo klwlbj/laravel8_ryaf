@@ -3,24 +3,29 @@
 namespace App\Models\Platform;
 
 use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class CellInfo extends BaseModel
 {
-    protected $table = 'cell_info';
+    use SoftDeletes;
+
+    protected $dates = ['deleted_at'];
+
+    protected $table   = 'cell_info';
     public $timestamps = null;
 
     public static array $cellStatus = [
-        '0' => '离网',
-        '1' => '空闲',
-        '2' => '占用（未充电）',
-        '3' => '占用（充电中）',
-        '4' => '占用（预约锁定）',
-        '5' => '占用（充电完成）',
+        '0'   => '离网',
+        '1'   => '空闲',
+        '2'   => '占用（未充电）',
+        '3'   => '占用（充电中）',
+        '4'   => '占用（预约锁定）',
+        '5'   => '占用（充电完成）',
         '255' => '离网',
     ];
 
     public static array $doorStatus = [
-        '0' => '未知',
+        '0'  => '未知',
         '10' => '关闭',
         '50' => '打开',
     ];

@@ -33,21 +33,24 @@ class DevicesServer extends BaseServer
 
     public function getFireDeviceId($deviceId,$creditCode)
     {
+        # 9423 + 资源吗 + 00 + 信用码 + 设备IMEI
         return "9423" . $this->resourceCode . "00" . $creditCode . '-' . $deviceId;
     }
 
     public function add($params)
     {
+        # 单位表id
         $id         = '114111';
-        $regionCode = '440111';
-        $deviceId = '868550067139399';
-        $creditCode = UnitsServer::getInstance()->getCreditCode($id, $regionCode);
+
+        # 设备imei 可换成平台设备表id
+        $imei = '868550067139399';
+        $creditCode = UnitsServer::getInstance()->getCreditCode($id);
         $unitId     = UnitsServer::getInstance()->getUnitsId($creditCode);
 
         $params = [
-            'fireDeviceId' => $this->getFireDeviceId($deviceId,$creditCode),
-            'name'         => $deviceId,
-            'deviceCode'   => $deviceId,
+            'fireDeviceId' => $this->getFireDeviceId($imei,$creditCode),
+            'name'         => $imei,
+            'deviceCode'   => $imei,
             'pointX'       => '113.224015',
             'pointY'       => '23.212011',
             'deviceType'   => '5',
@@ -69,16 +72,17 @@ class DevicesServer extends BaseServer
 
     public function update($params)
     {
+        # 单位表id
         $id         = '114111';
-        $regionCode = '440111';
-        $deviceId = '868550067139399';
-        $creditCode = UnitsServer::getInstance()->getCreditCode($id, $regionCode);
+        # 设备imei 可换成平台设备表id
+        $imei = '868550067139399';
+        $creditCode = UnitsServer::getInstance()->getCreditCode($id);
         $unitId     = UnitsServer::getInstance()->getUnitsId($creditCode);
 
         $params = [
-            'fireDeviceId' => $this->getFireDeviceId($deviceId,$creditCode),
-            'name'         => $deviceId,
-            'deviceCode'   => $deviceId,
+            'fireDeviceId' => $this->getFireDeviceId($imei,$creditCode),
+            'name'         => $imei,
+            'deviceCode'   => $imei,
             'pointX'       => '113.224015',
             'pointY'       => '23.212011',
             'deviceType'   => '5',
@@ -100,11 +104,12 @@ class DevicesServer extends BaseServer
 
     public function delete($params)
     {
+        # 单位表id
         $id         = '114111';
-        $regionCode = '440111';
-        $deviceId = '868550067139399';
-        $creditCode = UnitsServer::getInstance()->getCreditCode($id, $regionCode);
-        $fireDevicesId = $this->getFireDeviceId($deviceId,$creditCode);
+        # 设备imei 可换成平台设备表id
+        $imei = '868550067139399';
+        $creditCode = UnitsServer::getInstance()->getCreditCode($id);
+        $fireDevicesId = $this->getFireDeviceId($imei,$creditCode);
         $data = [
             'fireDeviceIds' => [
                 $fireDevicesId,
