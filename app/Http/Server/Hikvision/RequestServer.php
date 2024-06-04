@@ -3,6 +3,7 @@
 namespace App\Http\Server\Hikvision;
 
 use App\Http\Server\BaseServer;
+use App\Http\Server\HikvisionICloud;
 use GuzzleHttp\Client;
 
 class RequestServer extends BaseServer
@@ -13,8 +14,8 @@ class RequestServer extends BaseServer
     {
 
         $fullPath = $this->basePath . $path;
-        $sign     = Auth::getInstance()->getSign();
-
+        // $sign     = Auth::getInstance()->getSign();
+        $sign    = (new HikvisionICloud())->generateAuthInfo('22689412', 'cs81nNQGSqGeubA7sCL3');
         $client   = new Client(['verify' => false]);
         $response = $client->post($fullPath, [
             'headers' => [

@@ -41,10 +41,16 @@ class DevicesServer extends BaseServer
     {
         # 单位表id
         $id         = '114111';
+<<<<<<< Updated upstream
 
         # 设备imei 可换成平台设备表id
         $imei = '868550067139399';
         $creditCode = UnitsServer::getInstance()->getCreditCode($id);
+=======
+        $regionCode = '440111';
+        $deviceId = '868550067139398';
+        $creditCode = UnitsServer::getInstance()->getCreditCode($id, $regionCode);
+>>>>>>> Stashed changes
         $unitId     = UnitsServer::getInstance()->getUnitsId($creditCode);
 
         $params = [

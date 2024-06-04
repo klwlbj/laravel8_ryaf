@@ -32,7 +32,7 @@ class ChargeEquipmentController extends BaseChargeController
             'camera'                 => ['required', 'integer', new EnumValueRule(array_keys(ChargeEquipment::$formatWhetherOrNotMaps))],
         ];
 
-        return parent::baseStore($request, new ChargeEquipment(), $rules);
+        return parent::baseStore($request, new ChargeEquipment(), $rules, 'equipmentId');
     }
 
     public function update(Request $request)

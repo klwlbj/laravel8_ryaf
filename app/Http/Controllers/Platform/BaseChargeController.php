@@ -89,7 +89,7 @@ class BaseChargeController extends BaseController
         return response()->json(['status' => 200, 'message' => '请求成功!', 'data' => '删除成功！']);
     }
 
-    public function baseStore(Request $request, $model, array $rules)
+    public function baseStore(Request $request, $modelClass, array $rules, string $idString)
     {
         $input    = [];
         $valicate = $this->validateParams($request, $rules, $input);
@@ -101,10 +101,12 @@ class BaseChargeController extends BaseController
             return $validateOperatorId;
         }
 
-        foreach (array_keys($rules) as $key) {
-            $model->{$key} = $input[$key];
-        }
+        $model = $modelClass::withTrashed()->where(Str::snake($idString), $input[$idString])->first() ?? new $modelClass();
 
+        foreach (array_keys($rules) as $key) {
+            $model->{$key} = $input[$key] ?? '';
+        }
+        $model->deleted_at = null; // 不再删除
         $model->save();
 
         return response()->json(['status' => 200, 'message' => '请求成功!', 'data' => '提交成功！']);
@@ -136,7 +138,7 @@ class BaseChargeController extends BaseController
         unset($input[$idString], $input[$parentIdString], $input['operatorId']);
         foreach (array_keys($rules) as $key) {
             if (isset($input[$key])) {
-                $item->{$key} = $input[$key];
+                $item->{$key} = $input[$key] ?? '';
             }
         }
 

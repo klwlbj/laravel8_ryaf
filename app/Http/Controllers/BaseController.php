@@ -47,13 +47,15 @@ class BaseController extends \Illuminate\Routing\Controller
         return strtoupper(str_pad(dechex($checksum), 2, '0', STR_PAD_LEFT));
     }
 
-    protected function validateParams($request, $rules, &$input){
+    protected function validateParams($request, $rules, &$input)
+    {
         // 进行验证
+        $rules     = [];// todo 待删
         $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
-        $input = $request->input();
-}
+        $input = $request->all();
+    }
 }

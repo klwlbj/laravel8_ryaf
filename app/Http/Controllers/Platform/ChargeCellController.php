@@ -27,7 +27,7 @@ class ChargeCellController extends BaseChargeController
             'smokeSensation'         => ['required', 'integer', new EnumValueRule(array_keys(ChargeCell::$formatWhetherOrNotMaps))],
         ];
 
-        return parent::baseStore($request, new ChargeCell(), $rules);
+        return parent::baseStore($request, new ChargeCell(), $rules, 'cellId');
     }
 
     public function update(Request $request)

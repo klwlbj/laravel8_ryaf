@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NBController;
 use App\Http\Controllers\DaHuaController;
 use App\Http\Controllers\ExcelController;
+use App\Http\Controllers\HaoenController;
 use App\Http\Controllers\CTWingController;
 use App\Http\Controllers\LiuRuiController;
 use App\Http\Controllers\OneNetController;
@@ -114,6 +115,9 @@ Route::prefix('liurui')->group(function () {
     Route::get('toDecrypt/{string}', [LiuRuiController::class, 'toDecrypt']);
 });
 
+Route::prefix('haoen')->group(function () {
+    Route::get('/createCmdCommand/{productId}/{deviceId}/{masterKey}/{cmdType}', [HaoenController::class, 'createCmdCommand']);
+});
+
 Route::post('/haoenCtwing', [NBController::class, 'haoenCtwing']);
 Route::post('/haoen2Ctwing', [NBController::class, 'haoen2Ctwing']);
-

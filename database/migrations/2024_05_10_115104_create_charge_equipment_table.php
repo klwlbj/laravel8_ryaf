@@ -22,7 +22,7 @@ class CreateChargeEquipmentTable extends Migration
             $table->string('equipment_name')->default('')->comment('设备名称');
             $table->string('manufacturer_brand')->default('')->comment('设备品牌');
             $table->string('equipment_model')->default('')->comment('设备型号');
-            $table->integer('manufacturer_id')->default(0)->comment('生产商ID');
+            $table->string('manufacturer_id')->default('')->comment('生产商ID');
             $table->date('production_date')->comment('设备生产日期');
             $table->tinyInteger('equipment_type')->default(0)->comment('设备类别');
             $table->tinyInteger('equipment_category')->default(0)->comment('设备类型');

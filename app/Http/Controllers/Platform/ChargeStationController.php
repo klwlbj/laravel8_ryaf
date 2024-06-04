@@ -37,7 +37,7 @@ class ChargeStationController extends BaseChargeController
             'createDate'       => 'required|date_format:Y-m-d',
             'operationDate'    => 'required|date_format:Y-m-d',
         ];
-        return parent::baseStore($request, new ChargeStation(), $rules);
+        return parent::baseStore($request, new ChargeStation(), $rules, 'stationId');
     }
 
     public function update(Request $request)

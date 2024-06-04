@@ -100,6 +100,29 @@ class CTWing extends BaseIoTClient
         return $result;
     }
 
+    public function createCmdCommand($productId, $deviceId, $masterKey, $cmdType)
+    {
+
+        $result = Aep_device_command::CreateCommand(
+            env('CTWING_KEY'),
+            env('CTWING_SECRET'),
+            $masterKey,
+            json_encode([
+                "content"   => [
+                    "params"            => [
+                        "alarm_mode" => $cmdType,// 0解除报警,1火警,2紧急情况报警
+                    ],
+                    'serviceIdentifier' => "alarm_cmd",
+                ],
+                "deviceId"  => $deviceId,
+                "operator"  => "ryaf", // 操作者，暂时写死
+                "productId" => $productId,
+                // "ttl"           => 7200,
+            ])
+        );
+        return $result;
+    }
+
     /**
      * 非透传设备消声
      * @param $productId

@@ -40,18 +40,18 @@ class ChargeStation extends BaseModel
         self::STATUS_NORMAL      => '正常使用',
     ];
 
-    public const Fee_TYPE_HOUR           = 1;
-    public const Fee_TYPE_POWER          = 2;
-    public const Fee_TYPE_SERVICE_CHARGE = 3;
-    public const Fee_TYPE_QUANTITY       = 4;
-    public const Fee_TYPE_OTHER          = 5;
+    public const FEE_TYPE_HOUR           = 1;
+    public const FEE_TYPE_POWER          = 2;
+    public const FEE_TYPE_SERVICE_CHARGE = 3;
+    public const FEE_TYPE_QUANTITY       = 4;
+    public const FEE_TYPE_OTHER          = 5;
 
     public static array $formatFeeTypeMaps = [
-        self::Fee_TYPE_HOUR           => '按时计费',
-        self::Fee_TYPE_POWER          => '分功率按时计费',
-        self::Fee_TYPE_SERVICE_CHARGE => '电费另计，服务费按时计费',
-        self::Fee_TYPE_QUANTITY       => '按电度计费',
-        self::Fee_TYPE_OTHER          => '其他',
+        self::FEE_TYPE_HOUR           => '按时计费',
+        self::FEE_TYPE_POWER          => '分功率按时计费',
+        self::FEE_TYPE_SERVICE_CHARGE => '电费另计，服务费按时计费',
+        self::FEE_TYPE_QUANTITY       => '按电度计费',
+        self::FEE_TYPE_OTHER          => '其他',
     ];
 
     protected static function boot()
