@@ -57,11 +57,10 @@ class AlarmServer extends BaseServer
      */
     public function report()
     {
-        $id         = '114111';
+        $id         = '114529';
         $alarmId    = 227;
-        $regionCode = '440111';
-        $deviceId   = '868550067139398';
-        $creditCode = UnitsServer::getInstance()->getCreditCode($id, $regionCode);
+        $deviceId   = '865118076532179';
+        $creditCode = UnitsServer::getInstance()->getCreditCode($id);
 
         $params = [
             [
@@ -69,16 +68,16 @@ class AlarmServer extends BaseServer
                 "unitId"         => UnitsServer::getInstance()->getUnitsId($creditCode), // 所属单位编号
                 "deviceCategory" => 2, // 设备种类
                 "deviceId"       => DevicesServer::getInstance()->getFireDeviceId($deviceId, $creditCode), // 设备编号
-                "alarmType"      => '6', // 告警类型,详见 ALARM_TYPE
+                "alarmType"      => '11', // 告警类型,详见 ALARM_TYPE
                 'alarmLevel'     => '1', // 告警等级
                 'images'         => [
                     // 'PicInfo' => [
-                    //     [
+                         [
                     'picUrl'  => 'https://www.hikfirecloud.com/web/img/banner-default.bfacf600.png',
                     'picName' => '123',
                     // 'format' => '',
                     // 'picData' => ''
-                    // ]
+                     ]
                     // ]
 
                     // 'https://www.hikfirecloud.com/web/img/banner-default.bfacf600.png',
@@ -98,11 +97,10 @@ class AlarmServer extends BaseServer
      */
     public function confirm()
     {
-        $id         = '114111';
+        $id         = '114529';
         $alarmId    = 227; // 需与上传报警的事件id一致
-        $regionCode = '440111';
-        // $deviceId   = '868550067139398';
-        $creditCode = UnitsServer::getInstance()->getCreditCode($id, $regionCode);
+        // $deviceId   = '865118076532179';
+        $creditCode = UnitsServer::getInstance()->getCreditCode($id);
 
         $params = [
             [
@@ -110,7 +108,7 @@ class AlarmServer extends BaseServer
                 "unitId"         => UnitsServer::getInstance()->getUnitsId($creditCode), // 所属单位编号
                 'handleUserName' => '李敏华', // 确认人员名称
                 'handleTime'     => Tools::getISO8601Date(), // 事件发生时间,2020-02-17T15:00:00.000+08:00格式
-                'handleStatus'   => '1', // 确认结果：1-确认报警，2-误报
+                'handleStatus'   => '2', // 确认结果：1-确认报警，2-误报
                 'handleRemark'   => '123', // 确认意见
                 // 'handleImages'=> '',
                 // 'handleVideoUrl'=> '',

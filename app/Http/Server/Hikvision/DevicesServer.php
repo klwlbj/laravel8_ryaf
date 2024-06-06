@@ -40,28 +40,22 @@ class DevicesServer extends BaseServer
     public function add($params)
     {
         # 单位表id
-        $id         = '114111';
-<<<<<<< Updated upstream
+        $id         = '114529';
 
         # 设备imei 可换成平台设备表id
-        $imei = '868550067139399';
+        $imei = '865118076532179';
         $creditCode = UnitsServer::getInstance()->getCreditCode($id);
-=======
-        $regionCode = '440111';
-        $deviceId = '868550067139398';
-        $creditCode = UnitsServer::getInstance()->getCreditCode($id, $regionCode);
->>>>>>> Stashed changes
         $unitId     = UnitsServer::getInstance()->getUnitsId($creditCode);
 
         $params = [
-            'fireDeviceId' => $this->getFireDeviceId($imei,$creditCode),
-            'name'         => $imei,
-            'deviceCode'   => $imei,
-            'pointX'       => '113.224015',
-            'pointY'       => '23.212011',
-            'deviceType'   => '5',
-            'notifyPhone'  => '13112283032',
-            'unitId'       => $unitId,
+            'fireDeviceId' => $this->getFireDeviceId($imei,$creditCode), //设备id 9423 + 资源吗 + 00 + 信用码 + 设备IMEI
+            'name'         => $imei, //设备名称 imei
+            'deviceCode'   => $imei, //设备编码 imei
+            'pointX'       => '113.22596', //设备经度
+            'pointY'       => '23.258282', //设备纬度
+            'deviceType'   => '5', //设备类型  5为独立式感烟报警器
+            'notifyPhone'  => '18680441997', //通知号码
+            'unitId'       => $unitId, //单位id
         ];
 
         $date                 = Tools::getISO8601Date();
@@ -79,21 +73,22 @@ class DevicesServer extends BaseServer
     public function update($params)
     {
         # 单位表id
-        $id         = '114111';
+        $id         = '114529';
+
         # 设备imei 可换成平台设备表id
-        $imei = '868550067139399';
+        $imei = '865118076532179';
         $creditCode = UnitsServer::getInstance()->getCreditCode($id);
         $unitId     = UnitsServer::getInstance()->getUnitsId($creditCode);
 
         $params = [
-            'fireDeviceId' => $this->getFireDeviceId($imei,$creditCode),
-            'name'         => $imei,
-            'deviceCode'   => $imei,
-            'pointX'       => '113.224015',
-            'pointY'       => '23.212011',
-            'deviceType'   => '5',
-            'notifyPhone'  => '13112283032',
-            'unitId'       => $unitId,
+            'fireDeviceId' => $this->getFireDeviceId($imei,$creditCode), //设备id 9423 + 资源吗 + 00 + 信用码 + 设备IMEI
+            'name'         => $imei, //设备名称 imei
+            'deviceCode'   => $imei, //设备编码 imei
+            'pointX'       => '113.22596', //设备经度
+            'pointY'       => '23.258282', //设备纬度
+            'deviceType'   => '5', //设备类型  5为独立式感烟报警器
+            'notifyPhone'  => '18680441997', //通知号码
+            'unitId'       => $unitId, //单位id
         ];
 
         $date                 = Tools::getISO8601Date();
@@ -111,7 +106,7 @@ class DevicesServer extends BaseServer
     public function delete($params)
     {
         # 单位表id
-        $id         = '114111';
+        $id         = '114529';
         # 设备imei 可换成平台设备表id
         $imei = '868550067139399';
         $creditCode = UnitsServer::getInstance()->getCreditCode($id);

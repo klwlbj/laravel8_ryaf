@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\YuanLiuController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NBController;
@@ -113,6 +114,16 @@ Route::prefix('liurui')->group(function () {
     Route::any('/report', [LiuRuiController::class, 'report']);
     Route::any('/oneNetReport', [LiuRuiController::class, 'oneNetReport']);
     Route::get('toDecrypt/{string}', [LiuRuiController::class, 'toDecrypt']);
+});
+
+Route::prefix('yuanliu')->group(function () {
+    # 消音
+    Route::get('/muffling/{productId}/{deviceId}/{masterKey}', [YuanLiuController::class, 'muffling']);
+//    Route::get('/mufflingByOneNet/{imei}', [YuanLiuController::class, 'mufflingByOneNet']);
+    # 设置阈值
+    Route::get('/setThreshold/{productId}/{deviceId}/{masterKey}/{alarmValue}', [YuanLiuController::class, 'setThreshold']);
+    Route::any('/report', [YuanLiuController::class, 'report']);
+//    Route::any('/oneNetReport', [YuanLiuController::class, 'oneNetReport']);
 });
 
 Route::prefix('haoen')->group(function () {

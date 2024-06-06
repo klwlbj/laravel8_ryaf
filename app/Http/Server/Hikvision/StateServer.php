@@ -16,11 +16,10 @@ class StateServer extends BaseServer
 
     public function report(array $params)
     {
-        $id         = '114111';
+        $id         = '114529';
         $statusId   = 202;
-        $regionCode = '440111';
-        $deviceId   = '868550067139398';
-        $creditCode = UnitsServer::getInstance()->getCreditCode($id, $regionCode);
+        $deviceId   = '865118076532179';
+        $creditCode = UnitsServer::getInstance()->getCreditCode($id);
 
         $params = [
             [
