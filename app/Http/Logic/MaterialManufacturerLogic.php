@@ -31,79 +31,77 @@ class MaterialManufacturerLogic extends BaseLogic
         ];
     }
 
-//    public function getAllList($params)
-//    {
-//        $query = Manufacturer::query();
-//
-//        if(isset($params['keyword']) && $params['keyword']){
-//            $query->where('name','like','%'.$params['keyword'].'%');
-//        }
-//
-//        return $query
-//            ->orderBy('id','desc')
-//            ->get()->toArray();
-//    }
-//
-//    public function getInfo($params)
-//    {
-//        $data = Manufacturer::query()->where(['id' => $params['id']])->first();
-//
-//        if(!$data){
-//            ResponseLogic::setMsg('记录不存在');
-//            return false;
-//        }
-//
-//        return $data->toArray();
-//    }
-//
-//    public function add($params)
-//    {
-//        $insertData = [
-//            'name' => $params['name'],
-//            'remark' => $params['remark'] ?? '',
-//            'status' => $params['status'] ?? 1,
-//            'created_by' => UserLogic::getUserInfo()['id']
-//        ];
-//
-//        if(Manufacturer::query()->where(['name' => $params['name']])->exists()){
-//            ResponseLogic::setMsg('厂家名称已存在');
-//            return false;
-//        }
-//
-//        $id = Manufacturer::query()->insertGetId($insertData);
-//        if($id === false){
-//            ResponseLogic::setMsg('添加失败');
-//            return false;
-//        }
-//
-//        return ['id' => $id];
-//    }
-//
-//    public function update($params)
-//    {
-//        $insertData = [
-//            'name' => $params['name'],
-//            'remark' => $params['remark'] ?? '',
-//            'status' => $params['status'] ?? 1,
-//            'created_by' => UserLogic::getUserInfo()['id']
-//        ];
-//
-//        if(Manufacturer::query()->where('id','<>',$params['id'])->where(['name' => $params['name']])->exists()){
-//            ResponseLogic::setMsg('厂家名称已存在');
-//            return false;
-//        }
-//
-//        if(Manufacturer::query()->where(['id' => $params['id']])->update($insertData) === false){
-//            ResponseLogic::setMsg('更新失败');
-//            return false;
-//        }
-//
-//        return [];
-//    }
-//
-//    public function delete($params)
-//    {
-//        Manufacturer::query()->where(['id' => $params['id']])->delete();
-//        return [];
-//    }
+    public function getAllList($params)
+    {
+        $query = DB::connection('admin')->table('material_manufacturer');
+
+        if(isset($params['keyword']) && $params['keyword']){
+            $query->where('mama_name','like','%'.$params['keyword'].'%');
+        }
+
+        return $query
+            ->orderBy('mama_id','desc')
+            ->get()->toArray();
+    }
+
+    public function getInfo($params)
+    {
+        $data = DB::connection('admin')->table('material_manufacturer')->where(['mama_id' => $params['id']])->first();
+
+        if(!$data){
+            ResponseLogic::setMsg('记录不存在');
+            return false;
+        }
+
+        return $data;
+    }
+
+    public function add($params)
+    {
+        $insertData = [
+            'mama_name' => $params['name'],
+            'mama_remark' => $params['remark'] ?? '',
+            'mama_status' => $params['status'] ?? 1,
+        ];
+
+        if(DB::connection('admin')->table('material_manufacturer')->where(['mama_name' => $params['name']])->exists()){
+            ResponseLogic::setMsg('厂家名称已存在');
+            return false;
+        }
+
+        $id = DB::connection('admin')->table('material_manufacturer')->insertGetId($insertData);
+        if($id === false){
+            ResponseLogic::setMsg('添加失败');
+            return false;
+        }
+
+        return ['id' => $id];
+    }
+
+    public function update($params)
+    {
+        $insertData = [
+            'mama_name' => $params['name'],
+            'mama_remark' => $params['remark'] ?? '',
+            'mama_status' => $params['status'] ?? 1
+        ];
+
+        if(DB::connection('admin')->table('material_manufacturer')->where('mama_id','<>',$params['id'])->where(['mama_name' => $params['name']])->exists()){
+            ResponseLogic::setMsg('厂家名称已存在');
+            return false;
+        }
+
+        if(DB::connection('admin')->table('material_manufacturer')->where(['mama_id' => $params['id']])->update($insertData) === false){
+            ResponseLogic::setMsg('更新失败');
+            return false;
+        }
+
+        return [];
+    }
+
+    public function delete($params)
+    {
+        DB::connection('admin')->table('material_manufacturer')->where(['mama_id' => $params['id']])->delete();
+        return [];
+    }
 }

@@ -23,7 +23,7 @@
                     <a-button icon="search" v-on:click="handleFilter">查询</a-button>
                 </a-form-item>
                 <a-form-item>
-                    <a-button v-on:click="onCreate" type="primary" icon="edit">添加厂家</a-button>
+                    <a-button @click="onCreate" type="primary" icon="edit">添加厂家</a-button>
                 </a-form-item>
             </a-form>
 
@@ -59,9 +59,9 @@
                  width="800px" :footer="null">
             <manufacturer-add ref="manufacturerAdd"
                  :id="id"
-                 v-on:update="update"
-                 v-on:add="add"
-                 v-on:close="dialogFormVisible = false;"
+                 @update="update"
+                 @add="add"
+                 @close="dialogFormVisible = false;"
             >
             </manufacturer-add>
         </a-modal>
@@ -167,13 +167,51 @@
                 });
             },
             onCreate(){
+                this.status = '添加';
                 this.dialogFormVisible = true;
             },
+            onUpdate(row){
+                this.id = row.mama_id
+                this.status = '更新';
+                this.dialogFormVisible = true;
+            },
+            onDel(row){
+                axios({
+                    // 默认请求方式为get
+                    method: 'post',
+                    url: '/admin/materialManufacturer/delete',
+                    // 传递参数
+                    data: {
+                        id:row.mama_id
+                    },
+                    responseType: 'json',
+                    headers:{
+                        'Content-Type': 'multipart/form-data'
+                    }
+                }).then(response => {
+                    this.loading = false;
+                    let res = response.data;
+                    if(res.code !== 0){
+                        this.$message.error(res.message);
+                        return false;
+                    }
+                    this.$message.success('删除成功');
+                    this.handleFilter();
+                }).catch(error => {
+                    this.$message.error('请求失败');
+                });
+            },
             add(){
-
+                this.id = null;
+                this.$message.success('添加成功');
+                this.dialogFormVisible = false;
+                this.handleFilter();
             },
             update(){
-
+                this.id = null;
+                this.$message.success('编辑成功');
+                this.dialogFormVisible = false;
+                this.handleFilter();
             }
         },
 
