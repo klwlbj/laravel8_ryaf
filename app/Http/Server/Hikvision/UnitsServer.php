@@ -61,22 +61,22 @@ class UnitsServer extends BaseServer
     public function add($params)
     {
         # 单位表id
-        $id = '114529';
+        $id = $params['id'];
         # 白云区域代码
-        $regionCode = AreaCodeServer::getAreaCode('珠江村');
+        $regionCode = $params['regionCode'];
         $creditCode = $this->getCreditCode($id);
         $unitId = $this->getUnitsId($creditCode);
 
         $params = [
             'unitId' => $unitId, //海康平台所需要的id格式 9423 + 资源码 + 00 + 生成统一社会信用代码
-            'unitName' => '如约测试', //单位名称
-            'address' => '钱大妈江高配送中心一楼C区', //单位地址
-            'unitType' => '5', //单位类型 可看枚举
-            'unitNature' => '99', //单位性质
-            'mapType' => 1, //地图类型  1为高德
-            'phoneNum' => '18680441997', //联系号码
-            'pointX' => '113.22596', //经度
-            'pointY' => '23.258282', //纬度
+            'unitName' => $params['unitName'], //单位名称
+            'address' => $params['address'], //单位地址
+            'unitType' => $params['unitType'], //单位类型 可看枚举
+            'unitNature' => $params['unitNature'], //单位性质
+            'mapType' => $params['mapType'], //地图类型  1为高德
+            'phoneNum' => $params['phoneNum'], //联系号码
+            'pointX' => $params['pointX'], //经度
+            'pointY' => $params['pointY'], //纬度
             'creditCode' => $creditCode, //统一社会信用代码  目前是11 + 16位我们平台单位表id（前面补0）
             'regionCode' => $regionCode, //区域编码 需要到村/社区级别
         ];
@@ -98,22 +98,22 @@ class UnitsServer extends BaseServer
     public function update($params)
     {
         # 单位表id
-        $id = '114529';
+        $id = $params['id'];
         # 白云区域代码
-        $regionCode = AreaCodeServer::getAreaCode('珠江村');
+        $regionCode = $params['regionCode'];
         $creditCode = $this->getCreditCode($id);
         $unitId = $this->getUnitsId($creditCode);
 
         $params = [
             'unitId' => $unitId, //海康平台所需要的id格式 9423 + 资源码 + 00 + 生成统一社会信用代码
-            'unitName' => '如约测试', //单位名称
-            'address' => '钱大妈江高配送中心一楼C区', //单位地址
-            'unitType' => '5', //单位类型 可看枚举
-            'unitNature' => '99', //单位性质
-            'mapType' => 1, //地图类型  1为高德
-            'phoneNum' => '18680441997', //联系号码
-            'pointX' => '113.22596', //经度
-            'pointY' => '23.258282', //纬度
+            'unitName' => $params['unitName'], //单位名称
+            'address' => $params['address'], //单位地址
+            'unitType' => $params['unitType'], //单位类型 可看枚举
+            'unitNature' => $params['unitNature'], //单位性质
+            'mapType' => $params['mapType'], //地图类型  1为高德
+            'phoneNum' => $params['phoneNum'], //联系号码
+            'pointX' => $params['pointX'], //经度
+            'pointY' => $params['pointY'], //纬度
             'creditCode' => $creditCode, //统一社会信用代码  目前是11 + 16位我们平台单位表id（前面补0）
             'regionCode' => $regionCode, //区域编码 需要到村/社区级别
         ];
@@ -133,8 +133,6 @@ class UnitsServer extends BaseServer
 
     public function delete($params)
     {
-        $params['id'] = '114529';
-
         $creditCode = $this->getCreditCode($params['id']);
         $unitId = $this->getUnitsId($creditCode);
         $data = [

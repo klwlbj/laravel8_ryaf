@@ -40,21 +40,20 @@ class DevicesServer extends BaseServer
     public function add($params)
     {
         # 单位表id
-        $id         = '114529';
-
+        $id  = $params['unitId'];
         # 设备imei 可换成平台设备表id
-        $imei = '865118076532179';
+        $imei = $params['imei'];
         $creditCode = UnitsServer::getInstance()->getCreditCode($id);
         $unitId     = UnitsServer::getInstance()->getUnitsId($creditCode);
 
         $params = [
             'fireDeviceId' => $this->getFireDeviceId($imei,$creditCode), //设备id 9423 + 资源吗 + 00 + 信用码 + 设备IMEI
-            'name'         => $imei, //设备名称 imei
+            'name'         => $params['deviceName'], //设备名称 imei
             'deviceCode'   => $imei, //设备编码 imei
-            'pointX'       => '113.22596', //设备经度
-            'pointY'       => '23.258282', //设备纬度
-            'deviceType'   => '5', //设备类型  5为独立式感烟报警器
-            'notifyPhone'  => '18680441997', //通知号码
+            'pointX'       => $params['pointX'], //设备经度
+            'pointY'       => $params['pointY'], //设备纬度
+            'deviceType'   => $params['deviceType'], //设备类型  5为独立式感烟报警器
+            'notifyPhone'  => $params['notifyPhone'], //通知号码
             'unitId'       => $unitId, //单位id
         ];
 
@@ -73,21 +72,20 @@ class DevicesServer extends BaseServer
     public function update($params)
     {
         # 单位表id
-        $id         = '114529';
-
+        $id  = $params['unitId'];
         # 设备imei 可换成平台设备表id
-        $imei = '865118076532179';
+        $imei = $params['imei'];
         $creditCode = UnitsServer::getInstance()->getCreditCode($id);
         $unitId     = UnitsServer::getInstance()->getUnitsId($creditCode);
 
         $params = [
             'fireDeviceId' => $this->getFireDeviceId($imei,$creditCode), //设备id 9423 + 资源吗 + 00 + 信用码 + 设备IMEI
-            'name'         => $imei, //设备名称 imei
+            'name'         => $params['deviceName'], //设备名称 imei
             'deviceCode'   => $imei, //设备编码 imei
-            'pointX'       => '113.22596', //设备经度
-            'pointY'       => '23.258282', //设备纬度
-            'deviceType'   => '5', //设备类型  5为独立式感烟报警器
-            'notifyPhone'  => '18680441997', //通知号码
+            'pointX'       => $params['pointX'], //设备经度
+            'pointY'       => $params['pointY'], //设备纬度
+            'deviceType'   => $params['deviceType'], //设备类型  5为独立式感烟报警器
+            'notifyPhone'  => $params['notifyPhone'], //通知号码
             'unitId'       => $unitId, //单位id
         ];
 
@@ -106,9 +104,9 @@ class DevicesServer extends BaseServer
     public function delete($params)
     {
         # 单位表id
-        $id         = '114529';
+        $id = $params['unitId'];
         # 设备imei 可换成平台设备表id
-        $imei = '868550067139399';
+        $imei = $params['imei'];
         $creditCode = UnitsServer::getInstance()->getCreditCode($id);
         $fireDevicesId = $this->getFireDeviceId($imei,$creditCode);
         $data = [

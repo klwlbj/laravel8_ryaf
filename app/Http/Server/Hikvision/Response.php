@@ -6,7 +6,7 @@ use App\Http\Server\BaseServer;
 
 class Response extends BaseServer
 {
-    protected static $status = 200;
+    protected static $code = 200;
     protected static $message = '';
     protected static $data;
 
@@ -24,10 +24,10 @@ class Response extends BaseServer
         return response()->json($result, 200);
     }
 
-    public static function apiResult($status = 200,$message = '',$data = []): \Illuminate\Http\JsonResponse
+    public static function apiResult($code = 200,$message = '',$data = []): \Illuminate\Http\JsonResponse
     {
         $result = [
-            'status' => $status,
+            'code' => $code,
             'message' => $message,
             'data' => $data,
         ];
@@ -37,7 +37,7 @@ class Response extends BaseServer
     public static function apiErrorResult($message = ''): \Illuminate\Http\JsonResponse
     {
         $result = [
-            'status' => -1,
+            'code' => -1,
             'message' => $message,
             'data' => $message,
         ];

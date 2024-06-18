@@ -15,7 +15,34 @@ class UnitsController extends Controller
     public function add(Request $request){
         $params = $request->all();
 
-//        print_r(Tools::calculateCheckDigit('11440111000114111'));die;
+        $validate = Validator::make($params, [
+            'id' => 'required',
+            'unitName' => 'required',
+            'regionCode' => 'required',
+            'address' => 'required',
+            'unitType' => 'required',
+            'unitNature' => 'required',
+            'mapType' => 'required',
+            'phoneNum' => 'required',
+            'pointX' => 'required',
+            'pointY' => 'required',
+        ],[
+            'id.required' => 'ID 不得为空',
+            'unitName.required' => 'unitName 不得为空',
+            'regionCode.required' => 'regionCode 不得为空',
+            'address.required' => 'address 不得为空',
+            'unitType.required' => 'unitType 不得为空',
+            'unitNature.required' => 'unitNature 不得为空',
+            'mapType.required' => 'mapType 不得为空',
+            'phoneNum.required' => 'ID 不得为空',
+            'pointX.required' => 'ID 不得为空',
+            'pointY.required' => 'ID 不得为空',
+        ]);
+
+        if($validate->fails())
+        {
+            return Response::returnJson(['code' => -1,'message' => $validate->errors()->first(),'date' => []]);
+        }
 
         $res = UnitsServer::getInstance()->add($params);
 
@@ -25,9 +52,34 @@ class UnitsController extends Controller
     public function update(Request $request){
         $params = $request->all();
 
-//        if(!UnitsServer::getInstance()->verifyParams($params)){
-//            return Response::apiErrorResult(Response::getMsg());
-//        }
+        $validate = Validator::make($params, [
+            'id' => 'required',
+            'unitName' => 'required',
+            'regionCode' => 'required',
+            'address' => 'required',
+            'unitType' => 'required',
+            'unitNature' => 'required',
+            'mapType' => 'required',
+            'phoneNum' => 'required',
+            'pointX' => 'required',
+            'pointY' => 'required',
+        ],[
+            'id.required' => 'ID 不得为空',
+            'unitName.required' => 'unitName 不得为空',
+            'regionCode.required' => 'regionCode 不得为空',
+            'address.required' => 'address 不得为空',
+            'unitType.required' => 'unitType 不得为空',
+            'unitNature.required' => 'unitNature 不得为空',
+            'mapType.required' => 'mapType 不得为空',
+            'phoneNum.required' => 'ID 不得为空',
+            'pointX.required' => 'ID 不得为空',
+            'pointY.required' => 'ID 不得为空',
+        ]);
+
+        if($validate->fails())
+        {
+            return Response::returnJson(['code' => -1,'message' => $validate->errors()->first(),'date' => []]);
+        }
 
         $res = UnitsServer::getInstance()->update($params);
 
@@ -38,9 +90,16 @@ class UnitsController extends Controller
     {
         $params = $request->all();
 
-//        if(!UnitsServer::getInstance()->verifyParams($params)){
-//            return Response::apiErrorResult(Response::getMsg());
-//        }
+        $validate = Validator::make($params, [
+            'id' => 'required',
+        ],[
+            'id.required' => 'ID 不得为空',
+        ]);
+
+        if($validate->fails())
+        {
+            return Response::returnJson(['code' => -1,'message' => $validate->errors()->first(),'date' => []]);
+        }
 
         $res = UnitsServer::getInstance()->delete($params);
 

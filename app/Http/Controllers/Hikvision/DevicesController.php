@@ -12,7 +12,28 @@ class DevicesController extends Controller
     public function add(Request $request){
         $params = $request->all();
 
-//        print_r(Tools::calculateCheckDigit('11440111000114111'));die;
+        $validate = Validator::make($params, [
+            'unitId' => 'required',
+            'imei' => 'required',
+            'deviceName' => 'required',
+            'deviceType' => 'required',
+            'notifyPhone' => 'required',
+            'pointX' => 'required',
+            'pointY' => 'required',
+        ],[
+            'unitId.required' => 'unitId 不得为空',
+            'imei.required' => 'imei 不得为空',
+            'deviceName.required' => 'deviceName 不得为空',
+            'deviceType.required' => 'deviceType 不得为空',
+            'notifyPhone.required' => 'notifyPhone 不得为空',
+            'pointX.required' => 'ID 不得为空',
+            'pointY.required' => 'ID 不得为空',
+        ]);
+
+        if($validate->fails())
+        {
+            return Response::returnJson(['code' => -1,'message' => $validate->errors()->first(),'date' => []]);
+        }
 
         $res = DevicesServer::getInstance()->add($params);
 
@@ -22,9 +43,28 @@ class DevicesController extends Controller
     public function update(Request $request){
         $params = $request->all();
 
-//        if(!UnitsServer::getInstance()->verifyParams($params)){
-//            return Response::apiErrorResult(Response::getMsg());
-//        }
+        $validate = Validator::make($params, [
+            'unitId' => 'required',
+            'imei' => 'required',
+            'deviceName' => 'required',
+            'deviceType' => 'required',
+            'notifyPhone' => 'required',
+            'pointX' => 'required',
+            'pointY' => 'required',
+        ],[
+            'unitId.required' => 'unitId 不得为空',
+            'imei.required' => 'imei 不得为空',
+            'deviceName.required' => 'deviceName 不得为空',
+            'deviceType.required' => 'deviceType 不得为空',
+            'notifyPhone.required' => 'notifyPhone 不得为空',
+            'pointX.required' => 'ID 不得为空',
+            'pointY.required' => 'ID 不得为空',
+        ]);
+
+        if($validate->fails())
+        {
+            return Response::returnJson(['code' => -1,'message' => $validate->errors()->first(),'date' => []]);
+        }
 
         $res = DevicesServer::getInstance()->update($params);
 
@@ -35,9 +75,18 @@ class DevicesController extends Controller
     {
         $params = $request->all();
 
-//        if(!UnitsServer::getInstance()->verifyParams($params)){
-//            return Response::apiErrorResult(Response::getMsg());
-//        }
+        $validate = Validator::make($params, [
+            'unitId' => 'required',
+            'imei' => 'required'
+        ],[
+            'unitId.required' => 'unitId 不得为空',
+            'imei.required' => 'imei 不得为空'
+        ]);
+
+        if($validate->fails())
+        {
+            return Response::returnJson(['code' => -1,'message' => $validate->errors()->first(),'date' => []]);
+        }
 
         $res = DevicesServer::getInstance()->delete($params);
 

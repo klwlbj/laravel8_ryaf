@@ -299,7 +299,12 @@ class LiuRui
         // 遍历 $subArray，将每个值依次赋给 $structure 中的对应键
         foreach ($structure as $key => $value) {
             if (!empty($subArray)) {
-                $structure[$key] = array_shift($subArray);
+                if(in_array($key,['rsrp','snr'])){
+                    $structure[$key] = array_shift($subArray) / 10;
+                }else{
+                    $structure[$key] = array_shift($subArray);
+                }
+
             } else {
                 break; // 如果 $arr 已经遍历完，则跳出循环
             }
