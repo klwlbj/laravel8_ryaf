@@ -75,6 +75,13 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 60,
         ],
+        // 海康烟感专用
+        'hikvision_smoke' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/hikvision/hikvision_smoke.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 60,
+        ],
         'liurui' => [
             'driver' => 'daily',
             'path' => storage_path('logs/liurui/liurui.log'),

@@ -55,12 +55,17 @@ class AlarmServer extends BaseServer
     /*
      * 9.6.1.2 上传报警数据接口
      */
-    public function report()
+    public function report(array $input)
     {
-        $id         = '114529';
-        $alarmId    = 227;
-        $deviceId   = '865118076532179';
-        $creditCode = UnitsServer::getInstance()->getCreditCode($id);
+        $unitId   = $input['unitId'];
+        $alarmId  = $input['alarmId'];
+        $deviceId = $input['imei'];
+        $dateTime = $input['dateTime'];
+
+        // $id         = '114529';
+        // $alarmId    = 227;
+        // $deviceId   = '865118076532179';
+        $creditCode = UnitsServer::getInstance()->getCreditCode($unitId);
 
         $params = [
             [
@@ -68,16 +73,16 @@ class AlarmServer extends BaseServer
                 "unitId"         => UnitsServer::getInstance()->getUnitsId($creditCode), // 所属单位编号
                 "deviceCategory" => 2, // 设备种类
                 "deviceId"       => DevicesServer::getInstance()->getFireDeviceId($deviceId, $creditCode), // 设备编号
-                "alarmType"      => '11', // 告警类型,详见 ALARM_TYPE
-                'alarmLevel'     => '1', // 告警等级
+                "alarmType"      => $input['alarmType'], // 告警类型,详见 ALARM_TYPE
+                'alarmLevel'     => $input['alarmLevel'], // 告警等级
                 'images'         => [
                     // 'PicInfo' => [
-                         [
-                    'picUrl'  => 'https://www.hikfirecloud.com/web/img/banner-default.bfacf600.png',
-                    'picName' => '123',
-                    // 'format' => '',
-                    // 'picData' => ''
-                     ]
+                    [
+                        'picUrl'  => 'https://www.hikfirecloud.com/web/img/banner-default.bfacf600.png',
+                        'picName' => '123',
+                        // 'format' => '',
+                        // 'picData' => ''
+                    ],
                     // ]
 
                     // 'https://www.hikfirecloud.com/web/img/banner-default.bfacf600.png',
@@ -85,7 +90,7 @@ class AlarmServer extends BaseServer
                 // 'cameraId'       => '', // 报警关联监控点id
                 // 'videoUrl'       => '', // 告警视频数据url，多个url通过逗号分隔
                 // 'audioUrl'       => '', // 告警音频数据url，多个url通过逗号分隔。
-                "eventTime"      => Tools::getISO8601Date(), // 事件发生时间,2020-02-17T15:00:00.000+08:00格式
+                "eventTime"      => Tools::getISO8601Date($dateTime), // 事件发生时间,2020-02-17T15:00:00.000+08:00格式
             ],
         ];
 
@@ -95,21 +100,25 @@ class AlarmServer extends BaseServer
     /*
      * 9.6.1.3 上传报警确认数据接口
      */
-    public function confirm()
+    public function confirm(array $input)
     {
-        $id         = '114529';
-        $alarmId    = 227; // 需与上传报警的事件id一致
+        $unitId   = $input['unitId'];
+        $alarmId  = $input['alarmId']; // 需与上传报警的事件id一致
+        $dateTime = $input['dateTime'];
+
+        // $id      = '114529';
+        // $alarmId = 227; // 需与上传报警的事件id一致
         // $deviceId   = '865118076532179';
-        $creditCode = UnitsServer::getInstance()->getCreditCode($id);
+        $creditCode = UnitsServer::getInstance()->getCreditCode($unitId);
 
         $params = [
             [
                 'eventId'        => $this->getAlarmId($alarmId, $creditCode), // 报警数据事件唯一编码
                 "unitId"         => UnitsServer::getInstance()->getUnitsId($creditCode), // 所属单位编号
-                'handleUserName' => '李敏华', // 确认人员名称
-                'handleTime'     => Tools::getISO8601Date(), // 事件发生时间,2020-02-17T15:00:00.000+08:00格式
-                'handleStatus'   => '2', // 确认结果：1-确认报警，2-误报
-                'handleRemark'   => '123', // 确认意见
+                'handleUserName' => $input['handleUserName'], // 确认人员名称
+                'handleTime'     => Tools::getISO8601Date($dateTime), // 事件发生时间,2020-02-17T15:00:00.000+08:00格式
+                'handleStatus'   => $input['handleStatus'], // 确认结果：1-确认报警，2-误报
+                'handleRemark'   => $input['handleRemark'] ?? '', // 确认意见,可为空
                 // 'handleImages'=> '',
                 // 'handleVideoUrl'=> '',
                 // 'handleAudioUrl'=> '',
@@ -119,7 +128,7 @@ class AlarmServer extends BaseServer
     }
 
     /*
-     * 9.6.1.4 上传报警复核数据接口
+     * 9.6.1.4 上传报警复核数据接口,暂时不用
      */
     public function reConfirm()
     {

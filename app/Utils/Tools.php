@@ -4,6 +4,7 @@ namespace App\Utils;
 
 use DateTime;
 use DateTimeZone;
+use Illuminate\Support\Facades\Validator;
 use Monolog\Logger;
 use Illuminate\Support\Str;
 use Ramsey\Uuid\Nonstandard\Uuid;
@@ -18,12 +19,12 @@ class Tools
      */
     public static function jsonDecode($data)
     {
-        if(is_array($data)) {
+        if (is_array($data)) {
             return $data;
         }
 
         $newData = json_decode($data, true);
-        if(is_array($newData)) {
+        if (is_array($newData)) {
             return $newData;
         }
 
@@ -37,7 +38,7 @@ class Tools
      */
     public static function jsonEncode($data, $option = 256)
     {
-        if(!is_array($data)) {
+        if (!is_array($data)) {
             return $data;
         }
 
@@ -51,27 +52,27 @@ class Tools
      */
     public static function writeLog($msg, $path = null, $data = [], $filename = '', $output = null)
     {
-        if(empty($path)) {
+        if (empty($path)) {
             $actions = explode('\\', \Route::current()->getActionName());
             $func    = explode('@', $actions[count($actions) - 1]);
             $path    = $func[0] . '-' . $func[1];
         }
 
-        if(empty($filename)) {
+        if (empty($filename)) {
             $filename = $path;
         }
 
         $path = 'logs/' . $path . '/' . $filename . '.log';
 
-        if(!is_array($data) && !empty($data)) {
+        if (!is_array($data) && !empty($data)) {
             $data = ['data' => $data];
         }
 
-        if(empty($data)) {
+        if (empty($data)) {
             $data = array_merge($_GET, $_POST);
         }
 
-        if(!is_array($data)) {
+        if (!is_array($data)) {
             $data = self::jsonDecode($data);
         }
 
@@ -100,9 +101,9 @@ class Tools
         })->toArray();
     }
 
-    public static function getISO8601Date()
+    public static function getISO8601Date($dateTime = 'now')
     {
-        $date = new DateTime();
+        $date = new DateTime($dateTime);
 
         // 设置时区为东八区（亚洲/上海）
         $date->setTimezone(new DateTimeZone('Asia/Shanghai'));
@@ -128,5 +129,16 @@ class Tools
     {
         $logFileName = date('YmdHis') . '-' . $type . '-' . $imei . '-' . md5(Uuid::uuid4()->toString());
         Tools::writeLog('', $path, $data, $logFileName, '%message%%context% %extra%');
+    }
+
+    public static function validateParams($request, $rules, &$input)
+    {
+        // 进行验证
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+        $input = $request->all();
     }
 }

@@ -12,25 +12,28 @@ class BaseIoTClient
     public const FAULT_SILENCE     = 5;
     public const MICROWAVE_SETTING = 6;
     public const GAS               = 7;
-    public const GAS_LONG_SILENCE = 8;
+    public const GAS_LONG_SILENCE  = 8;
     public const COMMAND           = [
-        self::LONG_SILENCE      => ["9000000192000c00", "0000ffff000C00023D"], // 长消音
-        self::GAS_LONG_SILENCE =>  ['900000019200000C', '0000FFFF0000000000'],
+        self::LONG_SILENCE      => ["9000000192000c00", "0000ffff000C00023D"], // 长消音（燃气也可用，有周期）
         self::SHORT_SILENCE     => ["9000000192000C00", "0000FFFF00002E"], // 短消音
         self::RESET             => ["9000040192000C00", "0000FFFF000537"], // 复位
         self::MASK              => ["9000050192000c00", "0000ffff00083a"], // 屏蔽
         self::UNMASK            => ["9000040192000c00", "0000ffff00093a"], // 解除屏蔽
         self::FAULT_SILENCE     => ["9000000192000c00", "0000ffff000B00073F"], // 欠压故障消音
+
         self::MICROWAVE_SETTING => ['9000000191000C000000000000000019FFFF000C', 'FF'], // 配置烟感fy310
+
+        self::GAS_LONG_SILENCE  => ['900000019200000C', '0000FFFF0000000000'], // 燃气长消音
         self::GAS               => ['9000000191000c00000000000001001AFFFF00040401'], // 燃气
-                                   //9000000191000c00000000000001001AFFFF0004040100D222
-                                   //9000000191000c00000000000001001AFFFF0004040100D222
+        //9000000191000c00000000000001001AFFFF0004040100D222
+        //9000000191000c00000000000001001AFFFF0004040100D222
     ];
 
     public function generateCommand($command = self::LONG_SILENCE, $dwPackageNo = '', $checkSum = false, $params = []): string
     {
         $args = self::COMMAND[$command] ?? self::COMMAND[self::LONG_SILENCE];
         switch ($command) {
+            // 燃气重置，todo 验证
             case self::GAS:
                 extract($params);
                 $gasAlarmCorrection = sprintf("%04X", $gasAlarmCorrection); //10进制转16进制

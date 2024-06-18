@@ -4,6 +4,7 @@ use App\Http\Controllers\YuanLiuController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NBController;
+use App\Http\Controllers\HikvisionSmoke;
 use App\Http\Controllers\DaHuaController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\HaoenController;
@@ -79,15 +80,18 @@ Route::prefix('ctwing')->group(function () {
 Route::get('/nbWarm', [NBController::class, 'nbWarm']);
 Route::get('/hkWarm', [NBController::class, 'nbWarm']);
 Route::post('/nbWarm', [NBController::class, 'nbReceived']);
-Route::post('/hkWarm', [NBController::class, 'hkReceived']);
-Route::post('/hkCTWingWarm', [NBController::class, 'hkCTWingWarm']);
-Route::post('/dhCTWingWarm', [NBController::class, 'dhCTWingWarm']);
-Route::post('/hkCTWing4GWarm', [NBController::class, 'hkCTWing4GWarm']);
+
+// 海康烟感回调
+Route::post('/hkWarm', [HikvisionSmoke::class, 'hkOnenetWarm']);// 移动
+Route::post('/hkCTWingWarm', [HikvisionSmoke::class, 'hkCTWingWarm']);
+Route::post('/hkCTWing4GWarm', [HikvisionSmoke::class, 'hkCTWing4GWarm']);
+
+Route::post('/dhCTWingWarm', [DaHuaController::class, 'dhCTWingWarm']);
 
 Route::any('/hmCTWing4GWarm/{string}', [NBController::class, 'hmCTWing4GWarm']);
 
 // 海康指令解析测试
-Route::get('/analyze/{string}', [NBController::class, 'analyze']);
+Route::get('hikvision/analyze/{string}', [HikvisionSmoke::class, 'analyze']);
 
 // 大华指令解析测试
 Route::get('dahua/analyze/{string}', [DaHuaController::class, 'analyze']);
@@ -97,8 +101,9 @@ Route::get('dahua/analyze3/{string}', [DaHuaController::class, 'analyze3']);
 // 六瑞解密
 
 Route::post('excel', [ExcelController::class, 'handleImportExport']);
-Route::get('hik', [HikvisionCloudController::class, 'index']);
 
+// 海康云平台
+Route::get('hik', [HikvisionCloudController::class, 'index']);
 Route::get('hikvision/addSubcription', [HikvisionCloudController::class, 'addSubcription']);
 Route::get('hikvision/subcriptionList/{msgType?}', [HikvisionCloudController::class, 'subcriptionList']);
 Route::post('hikvision/getTraditionMsg', [HikvisionCloudController::class, 'getTraditionMsg']);
@@ -130,5 +135,7 @@ Route::prefix('haoen')->group(function () {
     Route::get('/createCmdCommand/{productId}/{deviceId}/{masterKey}/{cmdType}', [HaoenController::class, 'createCmdCommand']);
 });
 
-Route::post('/haoenCtwing', [NBController::class, 'haoenCtwing']);
-Route::post('/haoen2Ctwing', [NBController::class, 'haoen2Ctwing']);
+// 豪恩声光报警器
+Route::post('/haoenCtwing', [HaoenController::class, 'haoenSoundLigntAlarm']);
+// 豪恩手动报警器
+Route::post('/haoen2Ctwing', [HaoenController::class, 'haoenManualAlarm']);

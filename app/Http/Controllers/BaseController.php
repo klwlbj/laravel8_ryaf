@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class BaseController extends \Illuminate\Routing\Controller
@@ -57,5 +58,33 @@ class BaseController extends \Illuminate\Routing\Controller
             return response()->json(['error' => $validator->errors()], 400);
         }
         $input = $request->all();
+    }
+
+    /**
+     * 验签
+     * @param string $msg
+     * @param string $nonce
+     * @param string $signature
+     * @return bool
+     */
+    protected function checkSign(string $msg, string $nonce, string $signature): bool
+    {
+        $token = env('NB_TOKEN');
+
+        $sign = base64_encode(md5($token . $nonce . $msg, true));
+
+        Log::info('sign:' . $sign);
+        Log::info('signature:' . $signature);
+
+        // 验证token
+        if ($signature === $sign) {
+            return true;
+        }
+        return false;
+    }
+
+    protected function aesDecrypt($encryptedData)
+    {
+        return openssl_decrypt($encryptedData, 'AES-128-CBC', env('NB_KEY'), OPENSSL_RAW_DATA, env('NB_KEY'));
     }
 }
