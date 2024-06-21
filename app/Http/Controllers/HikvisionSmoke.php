@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Utils\Tools;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -80,11 +81,12 @@ class HikvisionSmoke extends BaseController
         }
 
         $value = $serviceData['msg'] ?? ''; // 16进制字符串
-        $imei  = $serviceData['IMEI'] ?? '';
         if (!empty($value)) {
-            $array = $this->client->parseString(strtolower($value));
+            $jsonData['payload_data'] = $this->client->parseString(strtolower($value));
             // 解析后处理todo
-            Log::channel('hikvision_smoke')->info('hk_ctwing_array:' . json_encode($array));
+            // unset($jsonData['payload']);
+            Tools::deviceLog('aep', $jsonData['IMEI'], 'hikvision', $jsonData);
+            // Log::channel('hikvision_smoke')->info('hk_ctwing_array:' . json_encode($array));
         }
         return response('', 200);
     }

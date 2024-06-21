@@ -5,14 +5,17 @@ namespace App\Utils;
 class HikvisionSmoke
 {
     public const HK_PARAM_TYPE = [
-        '0001' => ['name' => '燃气浓度', 'unit' => '%LEL'],
-        '0015' => ['name' => '电量', 'unit' => '%'], //电量
-        '0017' => ['name' => '烟雾浓度', 'unit' => 'db/m'], // 烟雾浓度
-        '0018' => ['name' => '污染程度', 'unit' => '%'], // 污染程度
-        '0004' => ['name' => '温度', 'unit' => '*0.1摄氏度'], // 温度
-        '001a' => ['name' => '湿度', 'unit' => '%RH'], // 湿度
-        '002e' => ['name' => '水汽浓度', 'unit' => '%'], // 水汽浓度
-        '0036' => ['name' => '232', 'unit' => 'asd'], // 燃气浓度
+        // name参数名， unit单位，multiple倍数，默认为1时，则不写
+        '0001' => ['name' => '燃气浓度', 'unit' => '%LEL', 'multiple' => '0.1'],
+        '0015' => ['name' => '电量', 'unit' => '%'],
+        '0017' => ['name' => '烟雾浓度', 'unit' => 'db/m' ,'multiple' => '0.01'],
+        '0018' => ['name' => '污染程度', 'unit' => '%'], // 0-100
+        '0004' => ['name' => '温度', 'unit' => '摄氏度', 'multiple' => '0.1'],
+        '001a' => ['name' => '湿度', 'unit' => '%RH', 'multiple' => '0.01'],
+        '002e' => ['name' => '水汽浓度', 'unit' => '%'], // 0-100
+        '0036' => ['name' => '燃气配置参数', 'unit' => ''],
+        '003b' => ['name' => '发包时延参数', 'unit' => 's'],
+        '0038' => ['name' => '开卡参数', 'unit' => ''],
     ];
 
     // byMessageId
@@ -23,6 +26,15 @@ class HikvisionSmoke
         '05' => '故障',
         '0f' => '操作响应',
         '11' => '信息上报',
+    ];
+
+    public const HK_PARAM_DEV_TYPE = [
+        '02' => '烟感',
+        '03' => '燃气',
+        '82' => '多通道烟感',
+        '8A' => '手报',
+        '87' => '智慧用电640设备',
+        // todo 暂时加那么多，之后有新设备再加
     ];
 
     public const HK_PARAM_MESSAGE_MSG_TYPE = [
@@ -108,6 +120,12 @@ class HikvisionSmoke
     public function parseString(string $string)
     {
         $parsedData = [];
+        $checkSum   = strtoupper(substr($string, -2));
+        $string     = substr($string, 0, -2); // 去除校验和
+
+        if ($checkSum != Tools::checkSum($string)) {
+            return $parsedData;
+        }
 
         $substrArray = [
             // ['字段名','字段长度','字段是否需要解析']
@@ -137,7 +155,6 @@ class HikvisionSmoke
             ['byDeviceModel', 40, true], // 设备型号
             ['byProtocolVersion', 20, true], // 协议版本
             ['keepByte1', 2, false], //
-            // 0无事件 1报警 2报警复位 3故障 4故障复位 5消音 6自检 7信号查询 8复位 9注册 11注销 12 屏蔽 13 解除屏蔽 14偷盗报警复位 15本地按键消音 16遥控器消音 17远程报警消音 18远程故障消音 19微波检测活跃度 20设备调零 21指示灯开启 22指示灯关闭
             ['MsgType', 2, true],
             ['keepByte2', 4, false],
             ['dataBytes', 4, true], // 数据总字节数
@@ -194,12 +211,19 @@ class HikvisionSmoke
                 $littleString = substr($string, $offset, $value[1]);
                 switch ($value[0]) {
                     case 'byMessageId':
-                        $parsedData['byMessageId']   = $littleString;
+                        $parsedData[$value[0]]       = $littleString;
                         $parsedData['byMessageName'] = self::HK_PARAM_MESSAGE_NAME[$littleString] ?? '';
                         break;
                     case 'MsgType':
-                        $parsedData['MsgType']     = $littleString;
+                        $parsedData[$value[0]]     = $littleString;
                         $parsedData['MsgTypeName'] = self::HK_PARAM_MESSAGE_MSG_TYPE[(int) $littleString] ?? '';
+                        break;
+                    case 'byDevType':
+                        $parsedData[$value[0]]     = $littleString;
+                        $parsedData['DevTypeName'] = self::HK_PARAM_DEV_TYPE[(int) $littleString] ?? '未知设备';
+                        break;
+                    case 'dwUpHeaderLen':
+                        $parsedData[$value[0]] = $littleString;
                         break;
                     case 'EventType1':
                     case 'EventType2':
@@ -207,8 +231,10 @@ class HikvisionSmoke
                     case 'EventType4':
                     case 'EventType5':
                     case 'EventType6':
-                        $lastChar                                          = substr($value[0], -1);
-                        $parsedData['channel'][$lastChar - 1]['eventType'] = $littleString;
+                        $lastChar = substr($value[0], -1);
+                        if ($lastChar <= $parsedData['definiteChannels']) {
+                            $parsedData['channel'][$lastChar - 1]['eventType'] = $littleString;
+                        }
                         break;
                     case 'EventValue1':
                     case 'EventValue2':
@@ -217,18 +243,20 @@ class HikvisionSmoke
                     case 'EventValue5':
                     case 'EventValue6':
                         $lastChar = substr($value[0], -1);
-                        // 16进制转2进制
-                        $eventValue                                         = base_convert($littleString, 16, 2);
-                        $parsedData['channel'][$lastChar - 1]['eventValue'] = $eventValue;
-                        switch ($parsedData['channel'][$lastChar - 1]['eventType']) {
-                            case 62:
-                                break;
-                            case 63:
-                                $parsedData['channel'][$lastChar - 1]['fault'] = $this->getBitValue($eventValue, self::HK_PARAM_FAULT_TYPE);
-                                break;
-                            case 64:
-                                $parsedData['channel'][$lastChar - 1]['warm'] = $this->getBitValue($eventValue, self::HK_PARAM_WARM_TYPE);
-                                break;
+                        if ($lastChar <= $parsedData['definiteChannels']) {
+                            // 16进制转2进制
+                            $eventValue                                         = base_convert($littleString, 16, 2);
+                            $parsedData['channel'][$lastChar - 1]['eventValue'] = $eventValue;
+                            switch ($parsedData['channel'][$lastChar - 1]['eventType']) {
+                                case 62:
+                                    break;
+                                case 63:
+                                    $parsedData['channel'][$lastChar - 1]['fault'] = $this->getBitValue($eventValue, self::HK_PARAM_FAULT_TYPE);
+                                    break;
+                                case 64:
+                                    $parsedData['channel'][$lastChar - 1]['warm'] = $this->getBitValue($eventValue, self::HK_PARAM_WARM_TYPE);
+                                    break;
+                            }
                         }
                         break;
                     case 'paramType1':
@@ -237,10 +265,16 @@ class HikvisionSmoke
                     case 'paramType4':
                     case 'paramType5':
                     case 'paramType6':
-                        $lastChar                                              = substr($value[0], -1);
-                        $parsedData['channel'][$lastChar - 1]['paramType']     = $littleString;
-                        $parsedData['channel'][$lastChar - 1]['paramTypeName'] = self::HK_PARAM_TYPE[$littleString]['name'] ?? '';
-                        $parsedData['channel'][$lastChar - 1]['paramTypeUnit'] = self::HK_PARAM_TYPE[$littleString]['unit'] ?? '';
+                        $lastChar = substr($value[0], -1);
+                        if ($lastChar <= $parsedData['definiteChannels']) {
+                            if($littleString != '0000'){
+                            $parsedData['channel'][$lastChar - 1]['paramType']     = $littleString;
+                            $parsedData['channel'][$lastChar - 1]['paramTypeName'] = self::HK_PARAM_TYPE[$littleString]['name'] ?? '未知';
+                            $parsedData['channel'][$lastChar - 1]['paramTypeUnit'] = self::HK_PARAM_TYPE[$littleString]['unit'] ?? '';
+                            $parsedData['channel'][$lastChar - 1]['multiple']      = self::HK_PARAM_TYPE[$littleString]['multiple'] ?? 1;
+
+                            }
+                        }
                         break;
                     case 'value6':
                     case 'value5':
@@ -249,12 +283,14 @@ class HikvisionSmoke
                     case 'value2':
                     case 'value1':
                         $lastChar = substr($value[0], -1);
-                        $string   = $littleString;
-                        // if($littleString === 'FFFF' || $littleString === 'ffff'){
-                        //     // 可变长
-                        //     // $offset += $value[1];
-                        // }
-                        $parsedData['channel'][$lastChar - 1]['paramValue'] = hexdec($string);
+                        if (strtolower($littleString) === 'ffff') {
+                            // 可变长
+                            $offset += $value[1];
+                        }
+                        if ($lastChar <= $parsedData['definiteChannels'] && isset($parsedData['channel'][$lastChar - 1]['paramType'])) {
+                            $parsedData['channel'][$lastChar - 1]['paramValue'] = bcmul(hexdec($littleString), $parsedData['channel'][$lastChar - 1]['multiple'], 2); // 保留2位小数
+                            unset($parsedData['channel'][$lastChar - 1]['multiple']);
+                        }
                         break;
                     case 'byTime':
                         $parsedData[$value[0]] = date('Y-m-d H:i:s', hexdec($littleString));
@@ -268,15 +304,14 @@ class HikvisionSmoke
                     case 'wRsrp': // 信号强度
                         $parsedData[$value[0]] = hexdec($littleString) - 65536;
                         break;
-                    case 'dwUpHeaderLen':
-                        $parsedData[$value[0]] = $littleString;
-                        break;
                     default:
                         $parsedData[$value[0]] = $this->hexToStr($littleString);
                         break;
                 }
             } else {
-                $parsedData[$value[0]] = substr($string, $offset, $value[1]);
+                if ($subString = substr($string, $offset, $value[1])) {
+                    $parsedData[$value[0]] = $subString;
+                }
             }
             $offset += $value[1];
         }
@@ -294,11 +329,10 @@ class HikvisionSmoke
     private function getBitValue(string $string, array $typeArray): array
     {
         $returnArray = [];
-        foreach (str_split($string) as $key => $bit) {
-            if ($bit == 1) {
+        foreach (str_split(strrev($string)) as $key => $bit) {
+            if ($bit === '1') {
                 $returnArray[] = $typeArray[$key];
             }
-            return $returnArray;
         }
 
         return $returnArray;

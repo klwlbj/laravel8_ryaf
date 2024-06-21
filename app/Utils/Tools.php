@@ -4,12 +4,12 @@ namespace App\Utils;
 
 use DateTime;
 use DateTimeZone;
-use Illuminate\Support\Facades\Validator;
 use Monolog\Logger;
 use Illuminate\Support\Str;
 use Ramsey\Uuid\Nonstandard\Uuid;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
+use Illuminate\Support\Facades\Validator;
 
 class Tools
 {
@@ -29,6 +29,28 @@ class Tools
         }
 
         return $data;
+    }
+
+    /**
+     * 和校验
+     * @param $string
+     * @return string
+     */
+    public static function checkSum($string): string
+    {
+        // 将字符串按两个字符分割成数组元素
+        $hexArray = str_split($string, 2);
+
+        // 将每个数组元素从十六进制转换为十进制
+        $decArray = array_map('hexdec', $hexArray);
+
+        // 对数组中的所有元素求和
+        $sum = array_sum($decArray);
+
+        // 取和的低8位（和对256取模）
+        $checksum = $sum % 256;
+
+        return strtoupper(str_pad(dechex($checksum), 2, '0', STR_PAD_LEFT));
     }
 
     /**
