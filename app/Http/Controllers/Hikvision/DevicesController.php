@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Hikvision;
 use App\Http\Controllers\Controller;
 use App\Http\Server\Hikvision\DevicesServer;
 use App\Http\Server\Hikvision\Response;
+use App\Utils\Tools;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -11,7 +12,7 @@ class DevicesController extends Controller
 {
     public function add(Request $request){
         $params = $request->all();
-
+        Tools::writeLog('device add params','haikan',$params);
         $validate = Validator::make($params, [
             'unitId' => 'required',
             'imei' => 'required',
@@ -42,7 +43,7 @@ class DevicesController extends Controller
 
     public function update(Request $request){
         $params = $request->all();
-
+        Tools::writeLog('device update param','haikan',$params);
         $validate = Validator::make($params, [
             'unitId' => 'required',
             'imei' => 'required',
@@ -74,7 +75,7 @@ class DevicesController extends Controller
     public function delete(Request $request)
     {
         $params = $request->all();
-
+        Tools::writeLog('device delete param','haikan',$params);
         $validate = Validator::make($params, [
             'unitId' => 'required',
             'imei' => 'required'

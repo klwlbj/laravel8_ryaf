@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\Hikvision\CheckIp;
 use App\Http\Middleware\Platform\CheckSign;
 use App\Http\Middleware\Platform\CheckToken;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
@@ -67,5 +68,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'platformCheckToken' => CheckToken::class,
         'platformCheckSign' => CheckSign::class,
+        'hikvisionCheckSign' => CheckIp::class,
     ];
 }

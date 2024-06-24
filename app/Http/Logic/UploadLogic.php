@@ -8,6 +8,7 @@ class UploadLogic extends BaseLogic
 {
     protected $type = [
         'material'  => 'material',
+        'material_flow' => 'material_flow'
     ];
 
     /**
@@ -52,6 +53,7 @@ class UploadLogic extends BaseLogic
         $fileName = $this->getFileName($path,$fileExtension,$originalName);
         if (Storage::disk('public')->put($fileName, file_get_contents($tmpFile))) {
             return Storage::url($fileName);
+//            return 'storage/app/public/' . $fileName;
         }
         ResponseLogic::setMsg('上传失败');
         return false;
@@ -60,6 +62,7 @@ class UploadLogic extends BaseLogic
     private function getFileName($path,$fileExtension, $originalName){
         $index = 1;
         $path = $path . '/' . date('Y-m-d');
+        $originalName = md5($originalName);
         $fileName = $path . '/' . $originalName . '.' . $fileExtension;
         while (file_exists(storage_path('app/public/' . $fileName))) {
             $fileName = $path . '/' . $originalName . "({$index})" . '.' . $fileExtension;

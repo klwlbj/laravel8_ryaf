@@ -17,18 +17,34 @@
         <div>
             <a-form layout="inline" >
                 <a-form-item>
-                    <a-input v-model="listQuery.keyword" placeholder="厂家名称" style="width: 200px;" />
+                    <a-input v-model="listQuery.keyword" placeholder="类型名称" style="width: 200px;" />
+                </a-form-item>
+                <a-form-item label="是否出库">
+                    <a-select v-model="listQuery.is_deliver" show-search placeholder="请选择" :max-tag-count="1"
+                              style="width: 200px;" allow-clear>
+                        <a-select-option :value="1">
+                            是
+                        </a-select-option>
+                        <a-select-option :value="0">
+                            否
+                        </a-select-option>
+                    </a-select>
                 </a-form-item>
                 <a-form-item>
-                    <a-button icon="search" v-on:click="handleFilter">查询</a-button>
+                    <a-button icon="search" @click="handleFilter">查询</a-button>
                 </a-form-item>
                 <a-form-item>
-                    <a-button @click="onCreate" type="primary" icon="edit">添加厂家</a-button>
+                    <a-button @click="onCreate" type="primary" icon="edit">添加类型</a-button>
                 </a-form-item>
             </a-form>
 
             <a-table :columns="columns" :data-source="listSource" :loading="listLoading" :row-key="(record, index) => { return index }"
                      :pagination="pagination">
+
+                <div slot="is_deliver" slot-scope="text, record">
+                    <a-tag v-if="record.is_deliver == 0"  color="red">否</a-tag>
+                    <a-tag v-else color="green">是</a-tag>
+                </div>
 
                 <div slot="status" slot-scope="text, record">
                     <a-tag v-if="record.status == 0"  color="red">禁用</a-tag>
@@ -44,7 +60,7 @@
                         title="是否确定删除商品?"
                         ok-text="确认"
                         cancel-text="取消"
-                        v-on:confirm="onDel(record)"
+                        @confirm="onDel(record)"
                     >
                         <a style="margin-right: 8px">
                             删除
@@ -55,16 +71,17 @@
         </div>
 
         <a-modal :mask-closable="false" v-model="dialogFormVisible"
-                 :title="status"
+                 :title="dialogStatus"
                  width="800px" :footer="null">
-            <manufacturer-add ref="manufacturerAdd"
+            <category-add ref="categoryAdd"
                  :id="id"
                  @update="update"
                  @add="add"
                  @close="dialogFormVisible = false;"
             >
-            </manufacturer-add>
+            </category-add>
         </a-modal>
+
 
     </a-card>
 </div>
@@ -84,7 +101,7 @@
             },
             listSource: [],
             listLoading:false,
-            status:'新增',
+            dialogStatus:'新增',
             pagination: {
                 pageSize: 10,
                 total: 0,
@@ -95,26 +112,35 @@
             columns:[
                 {
                     title: 'Id',
-                    dataIndex: 'mama_id',
+                    dataIndex: 'maca_id',
                     width: 80
                 },
                 {
-                    title: '厂家名称',
-                    dataIndex: 'mama_name',
+                    title: '类别名称',
+                    dataIndex: 'maca_name',
                     width: 100
                 },
                 {
+                    title: '是否出库',
+                    scopedSlots: { customRender: 'is_deliver' },
+                    dataIndex: 'maca_is_deliver'
+                },
+                {
+                    title: '排序',
+                    dataIndex: 'maca_sort'
+                },
+                {
                     title: '备注',
-                    dataIndex: 'mama_remark'
+                    dataIndex: 'maca_remark'
                 },
                 {
                     title: '状态',
                     scopedSlots: { customRender: 'status' },
-                    dataIndex: 'mama_status'
+                    dataIndex: 'maca_status'
                 },
                 {
                     title: '提交时间',
-                    dataIndex: 'mama_crt_time'
+                    dataIndex: 'maca_crt_time'
                 },
                 {
                     title: '操作',
@@ -129,7 +155,7 @@
             this.handleFilter()
         },
         components: {
-          "manufacturer-add":  httpVueLoader('/statics/components/material/manufacturerAdd.vue')
+          "category-add":  httpVueLoader('/statics/components/material/categoryAdd.vue')
         },
         methods: {
             paginationChange (current, pageSize) {
@@ -150,7 +176,7 @@
                 axios({
                     // 默认请求方式为get
                     method: 'post',
-                    url: '/admin/materialManufacturer/getList',
+                    url: '/admin/materialCategory/getList',
                     // 传递参数
                     data: this.listQuery,
                     responseType: 'json',
@@ -171,7 +197,7 @@
                 this.dialogFormVisible = true;
             },
             onUpdate(row){
-                this.id = row.mama_id
+                this.id = row.maca_id
                 this.status = '更新';
                 this.dialogFormVisible = true;
             },
@@ -179,10 +205,10 @@
                 axios({
                     // 默认请求方式为get
                     method: 'post',
-                    url: '/admin/materialManufacturer/delete',
+                    url: '/admin/materialCategory/delete',
                     // 传递参数
                     data: {
-                        id:row.mama_id
+                        id:row.maca_id
                     },
                     responseType: 'json',
                     headers:{

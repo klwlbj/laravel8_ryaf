@@ -17,16 +17,19 @@
         <div>
             <a-form layout="inline" >
                 <a-form-item>
-                    <a-input v-model="listQuery.keyword" placeholder="厂家名称" style="width: 200px;" />
+                    <a-input v-model="listQuery.keyword" placeholder="类型名称" style="width: 200px;" />
                 </a-form-item>
                 <a-form-item>
-                    <a-button icon="search" v-on:click="handleFilter">查询</a-button>
+                    <category-select @change="categoryChange"></category-select>
                 </a-form-item>
                 <a-form-item>
-                    <a-button @click="onCreate" type="primary" icon="edit">添加厂家</a-button>
+                    <a-button icon="search" @click="handleFilter">查询</a-button>
                 </a-form-item>
-            </a-form>
+                <a-form-item>
+                    <a-button @click="onCreate" type="primary" icon="edit">添加类型</a-button>
+                </a-form-item>
 
+            </a-form>
             <a-table :columns="columns" :data-source="listSource" :loading="listLoading" :row-key="(record, index) => { return index }"
                      :pagination="pagination">
 
@@ -44,7 +47,7 @@
                         title="是否确定删除商品?"
                         ok-text="确认"
                         cancel-text="取消"
-                        v-on:confirm="onDel(record)"
+                        @confirm="onDel(record)"
                     >
                         <a style="margin-right: 8px">
                             删除
@@ -55,16 +58,17 @@
         </div>
 
         <a-modal :mask-closable="false" v-model="dialogFormVisible"
-                 :title="status"
+                 :title="dialogStatus"
                  width="800px" :footer="null">
-            <manufacturer-add ref="manufacturerAdd"
+            <specification-add ref="specificationAdd"
                  :id="id"
                  @update="update"
                  @add="add"
                  @close="dialogFormVisible = false;"
             >
-            </manufacturer-add>
+            </specification-add>
         </a-modal>
+
 
     </a-card>
 </div>
@@ -81,10 +85,11 @@
         data: {
             listQuery: {
                 keyword: "",
+                category_id:"",
             },
             listSource: [],
             listLoading:false,
-            status:'新增',
+            dialogStatus:'新增',
             pagination: {
                 pageSize: 10,
                 total: 0,
@@ -95,26 +100,31 @@
             columns:[
                 {
                     title: 'Id',
-                    dataIndex: 'mama_id',
+                    dataIndex: 'masp_id',
                     width: 80
                 },
                 {
-                    title: '厂家名称',
-                    dataIndex: 'mama_name',
+                    title: '类别',
+                    dataIndex: 'masp_category_name',
                     width: 100
                 },
                 {
-                    title: '备注',
-                    dataIndex: 'mama_remark'
+                    title: '规格',
+                    dataIndex: 'masp_name',
+                    width: 100
+                },
+                {
+                    title: '排序',
+                    dataIndex: 'masp_sort'
                 },
                 {
                     title: '状态',
                     scopedSlots: { customRender: 'status' },
-                    dataIndex: 'mama_status'
+                    dataIndex: 'masp_status'
                 },
                 {
                     title: '提交时间',
-                    dataIndex: 'mama_crt_time'
+                    dataIndex: 'masp_crt_time'
                 },
                 {
                     title: '操作',
@@ -129,7 +139,8 @@
             this.handleFilter()
         },
         components: {
-          "manufacturer-add":  httpVueLoader('/statics/components/material/manufacturerAdd.vue')
+            "specification-add":  httpVueLoader('/statics/components/material/specificationAdd.vue'),
+            "category-select":  httpVueLoader('/statics/components/material/categorySelect.vue')
         },
         methods: {
             paginationChange (current, pageSize) {
@@ -150,7 +161,7 @@
                 axios({
                     // 默认请求方式为get
                     method: 'post',
-                    url: '/admin/materialManufacturer/getList',
+                    url: '/admin/materialSpecification/getList',
                     // 传递参数
                     data: this.listQuery,
                     responseType: 'json',
@@ -158,10 +169,10 @@
                         'Content-Type': 'multipart/form-data'
                     }
                 }).then(response => {
+                    this.listLoading = false
                     let res = response.data;
                     this.listSource = res.data.list
                     this.pagination.total = res.data.total
-                    this.listLoading = false
                 }).catch(error => {
                     this.$message.error('请求失败');
                 });
@@ -171,7 +182,7 @@
                 this.dialogFormVisible = true;
             },
             onUpdate(row){
-                this.id = row.mama_id
+                this.id = row.masp_id
                 this.status = '更新';
                 this.dialogFormVisible = true;
             },
@@ -179,10 +190,10 @@
                 axios({
                     // 默认请求方式为get
                     method: 'post',
-                    url: '/admin/materialManufacturer/delete',
+                    url: '/admin/materialSpecification/delete',
                     // 传递参数
                     data: {
-                        id:row.mama_id
+                        id:row.masp_id
                     },
                     responseType: 'json',
                     headers:{
@@ -212,6 +223,9 @@
                 this.$message.success('编辑成功');
                 this.dialogFormVisible = false;
                 this.handleFilter();
+            },
+            categoryChange(value){
+                this.listQuery.category_id = value;
             }
         },
 

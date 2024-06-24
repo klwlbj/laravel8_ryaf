@@ -67,7 +67,7 @@ class LiuRuiController
                 $data                          = $util->toDecrypt($params['msg']['value']);
                 $params['msg']['analyze_data'] = $data;
             } catch (\Exception $e) {
-                Tools::writeLog('' . $e->getMessage() . ' this json:','liurui_exception',$params,'exception');
+                Tools::writeLog('' . $e->getMessage() .$e->getLine() . ' this json:','liurui_exception',$params,'exception');
 //                Log::channel('liurui_ontnet')->info('liurui_ontnet analyze exception: ' . $e->getMessage());
             }
         }

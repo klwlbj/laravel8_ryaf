@@ -18,16 +18,19 @@ use App\Http\Controllers\Hikvision\MonitorController;
 |
 */
 //不需要token的接口
-Route::post('/units/add', [UnitsController::class, 'add']);
-Route::post('/units/update', [UnitsController::class, 'update']);
-Route::post('/units/delete', [UnitsController::class, 'delete']);
+Route::group(['middleware' => ['hikvisionCheckSign']], function () {
+    Route::post('/units/add', [UnitsController::class, 'add']);
+    Route::post('/units/update', [UnitsController::class, 'update']);
+    Route::post('/units/delete', [UnitsController::class, 'delete']);
 
-Route::post('/devices/add', [DevicesController::class, 'add']);
-Route::post('/devices/update', [DevicesController::class, 'update']);
-Route::post('/devices/delete', [DevicesController::class, 'delete']);
+    Route::post('/devices/add', [DevicesController::class, 'add']);
+    Route::post('/devices/update', [DevicesController::class, 'update']);
+    Route::post('/devices/delete', [DevicesController::class, 'delete']);
 
-Route::post('/reportState', [StateController::class, 'report']);
-Route::post('/reportMonitor', [MonitorController::class, 'report']);
-Route::post('/reportAlarm', [AlarmController::class, 'report']);
-Route::post('/confirmAlarm', [AlarmController::class, 'confirm']);
-Route::post('/reConfirmAlarm', [AlarmController::class, 'reConfirm']);
+    Route::post('/reportState', [StateController::class, 'report']);
+    Route::post('/reportMonitor', [MonitorController::class, 'report']);
+    Route::post('/reportAlarm', [AlarmController::class, 'report']);
+    Route::post('/confirmAlarm', [AlarmController::class, 'confirm']);
+    Route::post('/reConfirmAlarm', [AlarmController::class, 'reConfirm']);
+});
+

@@ -14,7 +14,7 @@ class UnitsController extends Controller
 {
     public function add(Request $request){
         $params = $request->all();
-
+        Tools::writeLog('units add param','haikan',$params);
         $validate = Validator::make($params, [
             'id' => 'required',
             'unitName' => 'required',
@@ -51,7 +51,7 @@ class UnitsController extends Controller
 
     public function update(Request $request){
         $params = $request->all();
-
+        Tools::writeLog('units update param','haikan',$params);
         $validate = Validator::make($params, [
             'id' => 'required',
             'unitName' => 'required',
@@ -89,7 +89,7 @@ class UnitsController extends Controller
     public function delete(Request $request)
     {
         $params = $request->all();
-
+        Tools::writeLog('units delete param','haikan',$params);
         $validate = Validator::make($params, [
             'id' => 'required',
         ],[

@@ -101,6 +101,11 @@ class MaterialManufacturerLogic extends BaseLogic
 
     public function delete($params)
     {
+        if(DB::connection('admin')->table('material')->where(['mate_manufacturer_id',$params['id']])->exists()){
+            ResponseLogic::setMsg('该厂家下存在物品，请删除物品后再删除厂家');
+            return false;
+        }
+
         DB::connection('admin')->table('material_manufacturer')->where(['mama_id' => $params['id']])->delete();
         return [];
     }

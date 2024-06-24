@@ -127,6 +127,10 @@ Route::prefix('yuanliu')->group(function () {
 //    Route::get('/mufflingByOneNet/{imei}', [YuanLiuController::class, 'mufflingByOneNet']);
     # 设置阈值
     Route::get('/setThreshold/{productId}/{deviceId}/{masterKey}/{alarmValue}', [YuanLiuController::class, 'setThreshold']);
+    # 设置报警检测时间
+    Route::get('/setDetectionTime/{productId}/{deviceId}/{masterKey}/{time}', [YuanLiuController::class, 'setDetectionTime']);
+    # 设置永久消声
+    Route::get('/setSilencing/{productId}/{deviceId}/{masterKey}/{state}', [YuanLiuController::class, 'setSilencing']);
     Route::any('/report', [YuanLiuController::class, 'report']);
 //    Route::any('/oneNetReport', [YuanLiuController::class, 'oneNetReport']);
 });
