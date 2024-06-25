@@ -72,7 +72,7 @@ Route::prefix('ctwing')->group(function () {
     Route::get('/createCommandLwm2mProfile/{productId}/{deviceId}/{masterKey}/{command}/{dwPackageNo}', [CTWingController::class, 'createCommandLwm2mProfile']);
     Route::get('/createMicrowaveSettingCommand/{productId}/{deviceId}/{masterKey}', [CTWingController::class, 'createMicrowaveSettingCommand']);
     Route::get('/createGasSettingCommand/{productId}/{deviceId}/{masterKey}/{gasAlarmCorrection}', [CTWingController::class, 'createGasSettingCommand']);
-    Route::get('/createCommand/{productId}/{deviceId}/{masterKey}/{command}/{dwPackageNo}', [CTWingController::class, 'createCommand']);
+    Route::get('/createCommand/{productId}/{deviceId}/{masterKey}/{command}/{dwPackageNo}', [CTWingController::class, 'createCommand']);// 4g用
     Route::get('/createNTTCommand/{productId}/{deviceId}/{masterKey}/{second}', [CTWingController::class, 'createNTTCommand']);
 });
 

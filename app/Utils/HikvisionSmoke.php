@@ -205,6 +205,8 @@ class HikvisionSmoke
             ['value6', 4, true],
         ];
 
+        $parsedData['definiteChannels'] = 0;
+
         foreach ($substrArray as $value) {
             static $offset = 0;
             if ($value[2] === true) {
