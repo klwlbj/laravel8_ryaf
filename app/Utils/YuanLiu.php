@@ -71,6 +71,13 @@ class YuanLiu
         ["dbm" => 0.554, "value" => 3500],
     ];
 
+    /**设置烟雾阈值
+     * @param $productId
+     * @param $deviceId
+     * @param $masterKey
+     * @param $alarmValue
+     * @return 返回响应：bool|null
+     */
     public function setThreshold($productId, $deviceId, $masterKey, $alarmValue)
     {
         #nb设备
@@ -123,6 +130,13 @@ class YuanLiu
         return $res;
     }
 
+    /**设置报报警持续监测时间
+     * @param $productId
+     * @param $deviceId
+     * @param $masterKey
+     * @param $time
+     * @return 返回响应：bool|null
+     */
     public function setDetectionTime($productId, $deviceId, $masterKey, $time)
     {
         $res = Aep_device_command::CreateCommand(
@@ -145,6 +159,13 @@ class YuanLiu
         return $res;
     }
 
+    /**设置永久消音
+     * @param $productId
+     * @param $deviceId
+     * @param $masterKey
+     * @param $state
+     * @return 返回响应：bool|null
+     */
     public function setSilencing($productId, $deviceId, $masterKey, $state)
     {
         $res = Aep_device_command::CreateCommand(
@@ -157,6 +178,35 @@ class YuanLiu
                         'Permanent_Silencing' => $state
                     ],
                     'serviceIdentifier' => 'Silencing_down'
+                ],
+                "deviceId"  => $deviceId,
+                "operator"  => "ryaf", // 操作者，暂时写死
+                "productId" => $productId,
+            ])
+        );
+
+        return $res;
+    }
+
+    /**设置温度阈值
+     * @param $productId
+     * @param $deviceId
+     * @param $masterKey
+     * @param $value
+     * @return 返回响应：bool|null
+     */
+    public function setTempThreshold($productId, $deviceId, $masterKey, $value)
+    {
+        $res = Aep_device_command::CreateCommand(
+            env('CTWING_KEY'),
+            env('CTWING_SECRET'),
+            $masterKey,
+            json_encode([
+                "content"   => [
+                    'params' => [
+                        'High_Temperature' => $value
+                    ],
+                    'serviceIdentifier' => 'High_Temp_down'
                 ],
                 "deviceId"  => $deviceId,
                 "operator"  => "ryaf", // 操作者，暂时写死

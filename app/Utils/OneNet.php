@@ -354,4 +354,24 @@ class OneNet extends BaseIoTClient
             Log::info($e);
         }
     }
+
+
+    public function deviceInfo($projectId,$imei)
+    {
+        try {
+            $response = $this->client->request('GET', 'https://iot-api.heclouds.com/device/detail', [
+                'query'   => [
+                    "product_id" => $projectId,
+                    "imei" => $imei,
+                ],
+                'headers' => ['authorization' => $this->getSign()],
+            ]);
+
+            if ($response->getStatusCode() === 200) {
+                return json_decode($response->getBody()->getContents(), true);
+            }
+        } catch (GuzzleException $e) {
+            Log::info($e);
+        }
+    }
 }

@@ -76,4 +76,10 @@ class OneNetController extends BaseController
         $client = new OneNet();
         return $client->logQuery($imei, $uuid);
     }
+
+    public function deviceInfo($projectId,$imei)
+    {
+        $client = new OneNet();
+        return $client->deviceInfo($projectId,$imei);
+    }
 }

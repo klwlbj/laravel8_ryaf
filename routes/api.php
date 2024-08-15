@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\LiuRuiCloudController;
 use App\Http\Controllers\YuanLiuController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -52,6 +53,7 @@ Route::prefix('onenet')->group(function () {
     Route::get('/execute/{imei}/{args}/{dwPackageNo}', [OneNetController::class, 'execute']);
     Route::get('/realTimewriteResource/{imei}/{args}/{dwPackageNo}', [OneNetController::class, 'realTimewriteResource']);
     Route::get('/logQuery/{imei}/{uuid}', [OneNetController::class, 'logQuery']);
+    Route::get('/deviceInfo/{projectId}/{imei}', [OneNetController::class, 'deviceInfo']);
 });
 
 // 电信ctwing
@@ -131,8 +133,14 @@ Route::prefix('yuanliu')->group(function () {
     Route::get('/setDetectionTime/{productId}/{deviceId}/{masterKey}/{time}', [YuanLiuController::class, 'setDetectionTime']);
     # 设置永久消声
     Route::get('/setSilencing/{productId}/{deviceId}/{masterKey}/{state}', [YuanLiuController::class, 'setSilencing']);
+    #设置温度阈值
+    Route::get('/setTempThreshold/{productId}/{deviceId}/{masterKey}/{value}', [YuanLiuController::class, 'setTempThreshold']);
     Route::any('/report', [YuanLiuController::class, 'report']);
 //    Route::any('/oneNetReport', [YuanLiuController::class, 'oneNetReport']);
+});
+
+Route::prefix('liuruicould')->group(function () {
+    Route::any('/report', [LiuRuiCloudController::class, 'report']);
 });
 
 Route::prefix('haoen')->group(function () {

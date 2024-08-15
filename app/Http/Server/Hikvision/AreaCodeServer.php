@@ -51,10 +51,22 @@ class AreaCodeServer
         '南浦村'   => 452,
         '罗溪村'   => 453,
         '井岗村'   => 454,
+        '如约设备组'   => 6666,
     ];
 
-    public static function getAreaCode($area)
+    public static function getAreaCode($nodeName)
     {
-        return self::$cityCode[$area] ?? '1000005';
+        $nodeName = match ($nodeName) {
+            '神山消防救援专职队' => '神山社区',
+            '高唐社区' => '高塘社区',
+            '泉溪村委' => '泉溪村',
+            '五丰村委' => '五丰村',
+            '朱江村委' => '珠江村',
+            '茅山村委' => '茅山村',
+            '何㘵村委','何㘵村新庄经济合作社','何㘵村上庄经济合作社','何㘵村南一经济合作社','何㘵村南二经济合作社','何㘵村叶家经济合作社','何㘵村大巷经济合作社','何㘵村细巷经济合作社','何㘵村蔡南经济合作社','何㘵村蔡北经济合作社','何㘵村东头经济合作社','何㘵村西边经济合作社' => '何布村',
+            default => $nodeName,
+        };
+//        print_r($nodeName);
+        return self::$cityCode[$nodeName] ?? '6666';
     }
 }

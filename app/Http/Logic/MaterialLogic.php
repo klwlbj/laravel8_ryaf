@@ -26,6 +26,10 @@ class MaterialLogic extends BaseLogic
             $query->where(['material.mate_category_id' => $params['category_id']]);
         }
 
+        if(isset($params['is_deliver']) && $params['is_deliver']){
+            $query->where(['material.mate_is_deliver' => $params['is_deliver']]);
+        }
+
         if(isset($params['manufacturer_id']) && $params['manufacturer_id']){
             $query->where(['material.mate_manufacturer_id' => $params['manufacturer_id']]);
         }
@@ -82,10 +86,12 @@ class MaterialLogic extends BaseLogic
     public function add($params)
     {
         $insertData = [
+            'mate_warehouse_id' => $params['warehouse_id'] ?: 2,
             'mate_manufacturer_id' => $params['manufacturer_id'],
             'mate_category_id' => $params['category_id'],
             'mate_specification_id' => $params['specification_id'],
             'mate_name' => $params['name'],
+            'mate_is_deliver' => $params['is_deliver'] ?? 0,
             'mate_number' => $params['number'] ?? 0,
             'mate_unit' => $params['unit'],
             'mate_warning' => $params['warning'] ?? 0,
@@ -113,10 +119,12 @@ class MaterialLogic extends BaseLogic
     public function update($params)
     {
         $insertData = [
+            'mate_warehouse_id' => $params['warehouse_id'] ?: 2,
             'mate_manufacturer_id' => $params['manufacturer_id'],
             'mate_category_id' => $params['category_id'],
             'mate_specification_id' => $params['specification_id'],
             'mate_name' => $params['name'],
+            'mate_is_deliver' => $params['is_deliver'] ?? 0,
             'mate_unit' => $params['unit'],
             'mate_warning' => $params['warning'],
             'mate_image' => $params['image'] ?? '',

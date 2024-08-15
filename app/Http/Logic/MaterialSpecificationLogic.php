@@ -46,6 +46,10 @@ class MaterialSpecificationLogic extends BaseLogic
             $query->where('masp_name','like','%'.$params['keyword'].'%');
         }
 
+        if(isset($params['category_id']) && $params['category_id']){
+            $query->where(['masp_category_id' => $params['category_id']]);
+        }
+
         return $query
             ->orderBy('masp_sort','desc')
             ->orderBy('masp_id','desc')

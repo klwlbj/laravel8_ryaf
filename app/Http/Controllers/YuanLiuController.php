@@ -52,6 +52,10 @@ class YuanLiuController
                     }
                 } elseif ($params['serviceId'] == 'heartbeat') { #心跳包
                     $params['analyze_data']['cmd_type'] = 'CMD_BEAT';
+
+                    if(isset($params['analyze_data']['rsrp']) && is_numeric($params['analyze_data']['rsrp'])){
+                        $params['analyze_data']['rsrp'] = $params['analyze_data']['rsrp'] / 10;
+                    }
                 } elseif ($params['serviceId'] == 'muffling_report') { #消音
                     $params['analyze_data']['cmd_type'] = 'CMD_MUFFLING';
                 } elseif ($params['serviceId'] == 'temperature_report') { #消音
@@ -69,6 +73,8 @@ class YuanLiuController
 
         if(!empty($imei) && isset($params['analyze_data'])){
             Tools::deviceLog('aep',$imei,'yuanliu',$params);
+        }else{
+//            Tools::writeLog('this json:','yuanliu_ignore',$params,'exception');
         }
 
         return response()->json(['code' => 0, 'message' => 0]);
@@ -92,5 +98,10 @@ class YuanLiuController
     public function setSilencing($productId, $deviceId, $masterKey, $state)
     {
         return (new YuanLiu())->setSilencing($productId, $deviceId, $masterKey, $state);
+    }
+
+    public function setTempThreshold($productId, $deviceId, $masterKey, $value)
+    {
+        return (new YuanLiu())->setTempThreshold($productId, $deviceId, $masterKey, $value);
     }
 }

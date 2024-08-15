@@ -9,6 +9,7 @@
     "license": "MIT",
     "require": {
         "php": "^7.4",
+        "doctrine/dbal": "^3.8",
         "fideloper/proxy": "^4.4",
         "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
@@ -19,7 +20,8 @@
         "php-mqtt/laravel-client": "^1.3",
         "react/socket": "^1.14",
         "react/stream": "^1.3",
-        "workerman/workerman": "^4.1"
+        "workerman/workerman": "^4.1",
+        "ext-bcmath": "*"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

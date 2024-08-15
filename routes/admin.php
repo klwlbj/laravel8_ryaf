@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\MaterialFlowController;
 use App\Http\Controllers\Admin\MaterialManufacturerController;
 use App\Http\Controllers\Admin\MaterialSpecificationController;
 use App\Http\Controllers\Admin\UploadController;
+use App\Http\Controllers\Admin\WarehouseController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -25,6 +26,10 @@ Route::any('/upload', [UploadController::class, 'upload']);
 //管理员
 Route::prefix('admin')->group(function () {
     Route::post('/getAllList', [AdminController::class, 'getAllList']);
+});
+
+Route::prefix('warehouse')->group(function () {
+    Route::post('/getAllList', [WarehouseController::class, 'getAllList']);
 });
 
 //物品厂家

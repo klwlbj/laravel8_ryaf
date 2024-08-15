@@ -1,25 +1,20 @@
 <template>
     <a-select v-model="id" show-search placeholder="请选择" :max-tag-count="1"
               :mode="mode" style="width: 200px;" allow-clear @change="handleChange" option-filter-prop="label">
-        <a-select-option v-for="(item, key) in list" :key="key" :value="item.masp_id" :label="item.masp_name">
-            {{ item.masp_name }}
+        <a-select-option v-for="(item, key) in list" :key="key" :value="item.waho_id" :label="item.waho_name">
+            {{ item.waho_name }}
         </a-select-option>
     </a-select>
 </template>
 
 <script>
 module.exports = {
-    name: 'specificationSelect',
+    name: 'categorySelect',
     components: {},
     props: {
         mode: {
             default:function(){
                 return 'default'
-            },
-        },
-        categoryId: {
-            default:function(){
-                return null
             },
         },
         defaultData: {
@@ -35,14 +30,13 @@ module.exports = {
         }
     },
     methods: {
-        getList (categoryId) {
+        getList () {
             axios({
                 // 默认请求方式为get
                 method: 'post',
-                url: '/admin/materialSpecification/getAllList',
+                url: '/admin/warehouse/getAllList',
                 // 传递参数
                 data: {
-                    category_id:categoryId
                 },
                 responseType: 'json',
                 headers:{
@@ -73,9 +67,7 @@ module.exports = {
         }else{
             this.id = [];
         }
-        if(this.categoryId){
-            this.getList(this.categoryId);
-        }
+        this.getList();
         if(this.defaultData){
             this.id = this.defaultData;
             this.$emit('change',this.defaultData);
@@ -88,18 +80,6 @@ module.exports = {
             }
 
             this.id = newData;
-        },
-        categoryId(newData,oldData){
-            if(newData === oldData){
-                return false
-            }
-
-            if(!newData){
-                this.list = [];
-                return false;
-            }
-
-            this.getList(newData);
         }
     },
     computed: {

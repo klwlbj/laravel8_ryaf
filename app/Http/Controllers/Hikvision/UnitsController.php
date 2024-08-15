@@ -18,7 +18,7 @@ class UnitsController extends Controller
         $validate = Validator::make($params, [
             'id' => 'required',
             'unitName' => 'required',
-            'regionCode' => 'required',
+//            'nodeName' => 'required|nullable',
             'address' => 'required',
             'unitType' => 'required',
             'unitNature' => 'required',
@@ -29,14 +29,14 @@ class UnitsController extends Controller
         ],[
             'id.required' => 'ID 不得为空',
             'unitName.required' => 'unitName 不得为空',
-            'regionCode.required' => 'regionCode 不得为空',
+//            'nodeName.required' => 'nodeName 不得为空',
             'address.required' => 'address 不得为空',
             'unitType.required' => 'unitType 不得为空',
             'unitNature.required' => 'unitNature 不得为空',
             'mapType.required' => 'mapType 不得为空',
-            'phoneNum.required' => 'ID 不得为空',
-            'pointX.required' => 'ID 不得为空',
-            'pointY.required' => 'ID 不得为空',
+            'phoneNum.required' => 'phoneNum 不得为空',
+            'pointX.required' => 'pointX 不得为空',
+            'pointY.required' => 'pointY 不得为空',
         ]);
 
         if($validate->fails())
@@ -55,7 +55,7 @@ class UnitsController extends Controller
         $validate = Validator::make($params, [
             'id' => 'required',
             'unitName' => 'required',
-            'regionCode' => 'required',
+//            'nodeName' => 'required|nullable',
             'address' => 'required',
             'unitType' => 'required',
             'unitNature' => 'required',
@@ -66,14 +66,14 @@ class UnitsController extends Controller
         ],[
             'id.required' => 'ID 不得为空',
             'unitName.required' => 'unitName 不得为空',
-            'regionCode.required' => 'regionCode 不得为空',
+//            'nodeName.required' => 'nodeName 不得为空',
             'address.required' => 'address 不得为空',
             'unitType.required' => 'unitType 不得为空',
             'unitNature.required' => 'unitNature 不得为空',
             'mapType.required' => 'mapType 不得为空',
-            'phoneNum.required' => 'ID 不得为空',
-            'pointX.required' => 'ID 不得为空',
-            'pointY.required' => 'ID 不得为空',
+            'phoneNum.required' => 'phoneNum 不得为空',
+            'pointX.required' => 'pointX 不得为空',
+            'pointY.required' => 'pointY 不得为空',
         ]);
 
         if($validate->fails())

@@ -63,7 +63,7 @@ class UnitsServer extends BaseServer
         # 单位表id
         $id = $params['id'];
         # 白云区域代码
-        $regionCode = $params['regionCode'];
+        $regionCode = AreaCodeServer::getAreaCode($params['nodeName'] ?? '');
         $creditCode = $this->getCreditCode($id);
         $unitId = $this->getUnitsId($creditCode);
 
@@ -100,7 +100,7 @@ class UnitsServer extends BaseServer
         # 单位表id
         $id = $params['id'];
         # 白云区域代码
-        $regionCode = $params['regionCode'];
+        $regionCode = AreaCodeServer::getAreaCode($params['nodeName'] ?? '');
         $creditCode = $this->getCreditCode($id);
         $unitId = $this->getUnitsId($creditCode);
 
