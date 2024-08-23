@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Utils\Tools;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Server\HikvisionICloud;
 
 class HikvisionCloudController
 {
-    public const SUBSCRIBE_MESSAGE_TYPE = [
+    public const MSG_TYPE = [
         980001 => "资源信息变更通知",
         980002 => "报警实时信息",
         980003 => "报警处理信息",
@@ -21,6 +22,43 @@ class HikvisionCloudController
         980015 => "充电桩消息",
         980016 => "设备事件消息",
         980019 => "远程远程配置消息",
+    ];
+
+    public const NOTIFY_TYPE = [
+        980001001 => '添加',
+        980001002 => '修改',
+        980001003 => '删除',
+    ];
+
+    public const DATA_TYPE = [
+        980001101 => '运营公司',
+        980001102 => '单位',
+        980001103 => '建筑物',
+        980001104 => '消防设备',
+        980001105 => '传感器',
+        980001106 => '视频设备',
+        980001107 => '监控点',
+
+        980002101 => '设备报警实时信息',
+        980003101 => '设备报警处理信息',
+        980004101 => '设备故障实时信息',
+        980005101 => '设备故障处理信息',
+        980006101 => '设备在离线消息',
+        980007101 => '监控点在离线消息',
+        980008101 => '设备监测实时信息',
+        980009101 => '指令下发状态信息',
+        980010101 => '实时巡查记录',
+        980011101 => '实时维保记录',
+        980012101 => '实时隐患消息',
+        980013101 => '隐患处理消息',
+        980014101 => '在离岗消息',
+        980015101 => '充电事件',
+        980015102 => '充电状态',
+        980016101 => '设备事件实时信息',
+        980019101 => '参数配置下发结果',
+        980019102 => '设备参数变更通知',
+        980019103 => '传感器阈值下发结果',
+        980019104 => '传感器阈值变更通知',
     ];
 
     public HikvisionICloud $cloudClient;
@@ -42,10 +80,38 @@ class HikvisionCloudController
     public function callback(Request $request, string $code)
     {
         $jsonData = $request->json()->all();
-        if ($jsonData) {
-            Log::channel('hikvision')->info('Received HIK JSON ' . $code . ' data: ' . json_encode($jsonData));
+        // if ($jsonData) {
+        //     Log::channel('hikvision')->info('Received HIK JSON ' . $code . ' data: ' . json_encode($jsonData));
+        // }
+
+        // 判断型号deviceSerial，单独打印日志
+
+        if (isset($jsonData['fps']['msgList'][0]['body']['data'][0]['systemType'])) {
+            $systemType = $jsonData['fps']['msgList'][0]['body']['data'][0]['systemType'];
+
+            if ($systemType == "500006") {
+                // 打印日志
+                // dd($jsonData);
+
+                if (isset($jsonData['fps']['msgList'][0]['msgType'])) {
+                    $jsonData['fps']['msgList'][0]['msgTypeName'] = self::MSG_TYPE[$jsonData['fps']['msgList'][0]['msgType']] ?? '';
+                }
+
+                if (isset($jsonData['fps']['msgList'][0]['body']['dataType'])) {
+                    $jsonData['fps']['msgList'][0]['body']['dataTypeName'] = self::DATA_TYPE[$jsonData['fps']['msgList'][0]['body']['dataType']] ?? '';
+                }
+
+                if (isset($jsonData['fps']['msgList'][0]['body']['dataType'])) {
+                    $jsonData['fps']['msgList'][0]['body']['notifyTypeName'] = self::NOTIFY_TYPE[$jsonData['fps']['msgList'][0]['body']['notifyType']] ?? '';
+                }
+
+                $resourceSerial = $jsonData['fps']['msgList'][0]['body']['data'][0]['resourceSerial'] ?? ($jsonData['fps']['msgList'][0]['body']['data'][0]['deviceSerial'] ?? '');
+
+                if (!empty($resourceSerial)) {
+                    Tools::deviceLog('camera-' . $code, $resourceSerial, 'hikvision', $jsonData);
+                }
+            }
         }
-        // 处理 JSON 数据的代码 todo
         return response()->json(['status' => 'success']);
     }
 
@@ -197,6 +263,33 @@ class HikvisionCloudController
     }
 
     /*
+     * 消防传感器增加
+     */
+    public function addVideoDevice(Request $request)
+    {
+        $jsonData = $request->json()->all();
+        return $this->cloudClient->doRequest('/api/videoDevice/v2/add', $jsonData);
+    }
+
+    /*
+     * 摄像头地址
+     */
+    public function getCameraPlayURL(Request $request)
+    {
+        $jsonData = $request->json()->all();
+        return $this->cloudClient->doRequest('/api/videoDevice/v2/liveAddress', $jsonData);
+    }
+
+    /*
+     * 获取报警
+     */
+    public function getAlarm(Request $request)
+    {
+        $jsonData = $request->json()->all();
+        return $this->cloudClient->doRequest('/api/businessData/v2/getAlarm', $jsonData);
+    }
+
+    /*
      * 消防设备添加
      */
     public function addDevice(Request $request)
@@ -218,6 +311,24 @@ class HikvisionCloudController
         // }
         $jsonData = $request->json()->all();
         return $this->cloudClient->doRequest('/api/device/v2/add', $jsonData);
+    }
+
+    /*
+     * 获取视频监控点列表
+     */
+    public function getCamera(Request $request)
+    {
+        $jsonData = $request->json()->all();
+        return $this->cloudClient->doRequest('/api/videoDevice/v2/getCamera', $jsonData);
+    }
+
+    /*
+     * 获取视频设备列表
+     */
+    public function getVideoDevice(Request $request)
+    {
+        $jsonData = $request->json()->all();
+        return $this->cloudClient->doRequest('/api/videoDevice/v2/getVideoDevice', $jsonData);
     }
 
     /*

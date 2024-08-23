@@ -7,11 +7,11 @@ use GuzzleHttp\Client;
 
 class HikvisionICloud
 {
-    // public $base_url      = "https://open.hikfirecloud.com";
-    // public $base_path     = "/artemis";
-    public $base_url = "https://www.hikfirecloud.com/api/ncg";
-
-    public $base_path     = "";
+    public $base_url      = "https://open.hikfirecloud.com";
+    public $base_path     = "/artemis";
+    // public $base_url = "https://www.hikfirecloud.com/api/ncg";
+    //
+    // public $base_path     = "";
     protected $app_key    = "";
     protected $app_secret = "";
     public $content_type  = "application/json";

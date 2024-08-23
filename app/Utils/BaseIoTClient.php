@@ -14,9 +14,9 @@ class BaseIoTClient
     public const GAS               = 7;
     public const GAS_LONG_SILENCE  = 8;
     public const COMMAND           = [
-        self::LONG_SILENCE      => ["9000000192000c00", "0000ffff000C00023D"], // 长消音（燃气也可用，有周期）
+        self::LONG_SILENCE      => ["9000000192000c00", "0000ffff000C000e3D"], // 长消音（燃气也可用，有周期）14分钟
         self::SHORT_SILENCE     => ["9000000192000C00", "0000FFFF00002E"], // 短消音
-        self::RESET             => ["9000040192000C00", "0000FFFF000537"], // 复位
+        self::RESET             => ["9000040192000C00", "0000FFFF000537"], // 复位 TODO
         self::MASK              => ["9000050192000c00", "0000ffff00083a"], // 屏蔽
         self::UNMASK            => ["9000040192000c00", "0000ffff00093a"], // 解除屏蔽
         self::FAULT_SILENCE     => ["9000000192000c00", "0000ffff000B00073F"], // 欠压故障消音

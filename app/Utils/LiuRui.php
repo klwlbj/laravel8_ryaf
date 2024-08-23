@@ -287,7 +287,7 @@ class LiuRui
             // 'status'         => '', // 状态
             'timestamp'      => '', // 时间戳
             'battery'        => '', // 电量
-            'rsrp'           => '', // 信号强度
+            'signalPower'           => '', // 信号强度
             'snr'            => '', // 信噪比
             'ecl'            => '', // 信号覆盖等级
             'cell_id'        => '', // 小区位置信息
@@ -300,7 +300,7 @@ class LiuRui
         foreach ($structure as $key => $value) {
             if (!empty($subArray)) {
                 $structure[$key] = array_shift($subArray);
-                if(in_array($key,['rsrp','snr']) && is_numeric($structure[$key])){
+                if(in_array($key,['signalPower','snr']) && is_numeric($structure[$key])){
                     $structure[$key] = $structure[$key] / 10;
                 }
 
