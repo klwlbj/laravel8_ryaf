@@ -272,6 +272,15 @@ class HikvisionCloudController
     }
 
     /*
+     * 视频设备删除
+     */
+    public function deleteVideoDevice(Request $request)
+    {
+        $jsonData = $request->json()->all();
+        return $this->cloudClient->doRequest('/api/videoDevice/v2/delete', $jsonData);
+    }
+
+    /*
      * 摄像头地址
      */
     public function getCameraPlayURL(Request $request)

@@ -112,6 +112,7 @@ Route::post('hikvision/getParamConfig/{deviceID}', [HikvisionCloudController::cl
 Route::post('hikvision/deviceTypeDict', [HikvisionCloudController::class, 'deviceTypeDict']);
 Route::post('hikvision/deleteDevice', [HikvisionCloudController::class, 'deleteDevice']);
 Route::post('hikvision/addVideoDevice', [HikvisionCloudController::class, 'addVideoDevice']);
+Route::post('hikvision/deleteVideoDevice', [HikvisionCloudController::class, 'deleteVideoDevice']);
 Route::post('hikvision/getCameraPlayURL', [HikvisionCloudController::class, 'getCameraPlayURL']);
 Route::post('hikvision/getAlarm', [HikvisionCloudController::class, 'getAlarm']);
 Route::post('hikvision/getCamera', [HikvisionCloudController::class, 'getCamera']);
