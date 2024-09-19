@@ -68,6 +68,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'platformCheckToken' => CheckToken::class,
         'platformCheckSign' => CheckSign::class,
-        'hikvisionCheckSign' => CheckIp::class,
+        'checkIp' => CheckIp::class,
     ];
 }

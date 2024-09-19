@@ -139,7 +139,7 @@ Route::prefix('yuanliu')->group(function () {
 //    Route::any('/oneNetReport', [YuanLiuController::class, 'oneNetReport']);
 });
 
-Route::prefix('liuruicould')->group(function () {
+Route::prefix('liuruicloud')->group(function () {
     Route::any('/report', [LiuRuiCloudController::class, 'report']);
 });
 

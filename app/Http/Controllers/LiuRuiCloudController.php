@@ -6,6 +6,7 @@ use App\Utils\LiuRui;
 use App\Utils\Tools;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Ramsey\Uuid\Nonstandard\Uuid;
 
 class LiuRuiCloudController
 {
@@ -30,26 +31,31 @@ class LiuRuiCloudController
         $params = $request->all();
         //        print_r($params);die;
         $params = Tools::jsonDecode($params);
-//        $util   = new LiuRui();
-//
-//        if (isset($params['messageType']) && $params['messageType'] == 'dataReport' && isset($params['payload']['APPdata'])) {
-//            $decodeCode = base64_decode($params['payload']['APPdata']);
-//            try {
-//                $data                   = $util->toDecrypt($decodeCode);
-//                $params['analyze_data'] = $data;
-//            } catch (\Exception $e) {
-//                Tools::writeLog('liurui analyze exception: ' . $e->getMessage() . ' this json:', 'liurui_exception', $params, 'exception');
-//                //                Log::channel('liurui')->info('liurui analyze exception: ' . $e->getMessage() . ' this json:' . json_encode($params));
-//            }
-//        }
-//
-//        if(isset($params['analyze_data']['cmd_type'])){
-//            Tools::deviceLog('aep',$params['IMEI'],'liurui',$params);
-////            $logFileName = 'aep-'.date('YmdHis').'-'.$params['IMEI']. '-' .md5(Uuid::uuid4()->toString());
-////            Tools::writeLog('', 'liurui', $params, $logFileName , '%message%%context% %extra%');
-//                //            Log::channel('liurui')->info('liurui analyze data: ' . json_encode($params));
-//        }
-        Tools::writeLog('','liuruicloud',$params);
+
+        if(isset($params['streamId']) && !in_array($params['streamId'],['heartbeat','integral','self_check','fireAlarm'])){
+            return response()->json(['code' => 0, 'message' => '']);
+        }
+
+        $util   = new LiuRui();
+
+        if (isset($params['rawData'])) {
+            try {
+                $data                   = $util->toDecrypt($params['rawData']);
+                $params['analyze_data'] = $data;
+                if(isset($params['analyze_data']['data']['smoke_concentration'])){
+                    $params['analyze_data']['data']['sensitivity']['value'] = round($params['analyze_data']['data']['smoke_concentration']['value'] / 255,2);
+                }
+            } catch (\Exception $e) {
+                Tools::writeLog('liurui analyze exception: ' . $e->getMessage() . ' this json:', 'liuruicloud_exception', $params, 'exception');
+                //                Log::channel('liurui')->info('liurui analyze exception: ' . $e->getMessage() . ' this json:' . json_encode($params));
+            }
+        }
+
+        if(isset($params['analyze_data']['cmd_type'])){
+            $logFileName = date('YmdHis') . '-' . $params['ext']['IMEI'] . '-' . md5(Uuid::uuid4()->toString());
+            Tools::writeLog('', 'liuruicloud', $params, $logFileName, '%message%%context% %extra%');
+        }
+
         return response()->json(['code' => 0, 'message' => 0]);
     }
 }

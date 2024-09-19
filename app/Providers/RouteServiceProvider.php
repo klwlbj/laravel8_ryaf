@@ -57,6 +57,11 @@ class RouteServiceProvider extends ServiceProvider
                 ->namespace($this->namespace)
                 ->group(base_path('routes/hikvision.php'));
 
+            Route::prefix('dahua')
+                ->middleware('api')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/dahua.php'));
+
             Route::prefix('admin')
                 ->middleware('api')
                 ->namespace($this->namespace)

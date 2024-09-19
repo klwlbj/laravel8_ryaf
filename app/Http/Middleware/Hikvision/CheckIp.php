@@ -19,9 +19,9 @@ class CheckIp
 
         $localIps = ['127.0.0.1','47.104.10.228', $localIP];
 
-//        if(!in_array($clientIp,$localIps)){
-//            return Response::returnJson(['code' => 405,'message' => 'ip有误','date' => []]);
-//        }
+        if(!in_array($clientIp,$localIps)){
+            return Response::returnJson(['code' => 405,'message' => 'ip有误','date' => []]);
+        }
         return $next($request);
     }
 }
