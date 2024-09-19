@@ -1,7 +1,5 @@
 <?php
 
-use App\Http\Controllers\LiuRuiCloudController;
-use App\Http\Controllers\YuanLiuController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NBController;
@@ -12,7 +10,9 @@ use App\Http\Controllers\HaoenController;
 use App\Http\Controllers\CTWingController;
 use App\Http\Controllers\LiuRuiController;
 use App\Http\Controllers\OneNetController;
+use App\Http\Controllers\YuanLiuController;
 use App\Http\Controllers\WanLinYunController;
+use App\Http\Controllers\LiuRuiCloudController;
 use App\Http\Controllers\HikvisionCloudController;
 
 /*
@@ -100,18 +100,23 @@ Route::get('dahua/analyze/{string}', [DaHuaController::class, 'analyze']);
 Route::get('dahua/analyze2/{string}', [DaHuaController::class, 'analyze2']);
 Route::get('dahua/analyze3/{string}', [DaHuaController::class, 'analyze3']);
 
-// 六瑞解密
-
 Route::post('excel', [ExcelController::class, 'handleImportExport']);
 
 // 海康云平台
 Route::get('hik', [HikvisionCloudController::class, 'index']);
-Route::get('hikvision/addSubcription', [HikvisionCloudController::class, 'addSubcription']);
-Route::get('hikvision/subcriptionList/{msgType?}', [HikvisionCloudController::class, 'subcriptionList']);
+Route::post('hikvision/addSubcription', [HikvisionCloudController::class, 'addSubcription']);
+Route::post('hikvision/subcriptionList/{msgType?}', [HikvisionCloudController::class, 'subcriptionList']);
 Route::post('hikvision/getTraditionMsg', [HikvisionCloudController::class, 'getTraditionMsg']);
 Route::post('hikvision/getFireDeviceStatus', [HikvisionCloudController::class, 'getFireDeviceStatus']);
 Route::post('hikvision/getParamConfig/{deviceID}', [HikvisionCloudController::class, 'getParamConfig']);
 Route::post('hikvision/deviceTypeDict', [HikvisionCloudController::class, 'deviceTypeDict']);
+Route::post('hikvision/deleteDevice', [HikvisionCloudController::class, 'deleteDevice']);
+Route::post('hikvision/addVideoDevice', [HikvisionCloudController::class, 'addVideoDevice']);
+Route::post('hikvision/deleteVideoDevice', [HikvisionCloudController::class, 'deleteVideoDevice']);
+Route::post('hikvision/getCameraPlayURL', [HikvisionCloudController::class, 'getCameraPlayURL']);
+Route::post('hikvision/getAlarm', [HikvisionCloudController::class, 'getAlarm']);
+Route::post('hikvision/getCamera', [HikvisionCloudController::class, 'getCamera']);
+Route::post('hikvision/getVideoDevice', [HikvisionCloudController::class, 'getVideoDevice']);
 
 Route::post('hikvision/callback/{code}', [HikvisionCloudController::class, 'callback']);
 

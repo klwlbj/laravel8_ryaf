@@ -1,12 +1,11 @@
 <?php
 
-use Illuminate\Support\Facades\Cache;
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
+use Illuminate\Support\Facades\Cache;
 use Monolog\Handler\SyslogUdpHandler;
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Log Channel
@@ -18,7 +17,7 @@ return [
     |
     */
 
-    'default' => env('LOG_CHANNEL', 'stack'),
+    'default'  => env('LOG_CHANNEL', 'stack'),
 
     /*
     |--------------------------------------------------------------------------
@@ -36,70 +35,70 @@ return [
     */
 
     'channels' => [
-        'stack' => [
-            'driver' => 'stack',
-            'channels' => ['single'],
+        'stack'           => [
+            'driver'            => 'stack',
+            'channels'          => ['single'],
             'ignore_exceptions' => false,
         ],
 
-        'single' => [
+        'single'          => [
             'driver' => 'single',
-            'path' => storage_path('logs/laravel.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
+            'path'   => storage_path('logs/laravel.log'),
+            'level'  => env('LOG_LEVEL', 'debug'),
         ],
 
         // 心跳
-        'heartbeat' => [
+        'heartbeat'       => [
             'driver' => 'daily',
-            'path' => storage_path('logs/heartbeat/laravel.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => null,
+            'path'   => storage_path('logs/heartbeat/laravel.log'),
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => null,
         ],
         // 漏电
-        'alarm' => [
+        'alarm'           => [
             'driver' => 'daily',
-            'path' => storage_path('logs/alarm/laravel.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => null,
+            'path'   => storage_path('logs/alarm/laravel.log'),
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => null,
         ],
 
-        'heartbeat_log' => [
+        'heartbeat_log'   => [
             'driver' => 'single',
-            'path' => storage_path('logs/heartbeat/my_custom_log.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
+            'path'   => storage_path('logs/heartbeat/my_custom_log.log'),
+            'level'  => env('LOG_LEVEL', 'debug'),
         ],
 
-        'hikvision' => [
+        'hikvision'       => [
             'driver' => 'daily',
-            'path' => storage_path('logs/hikvision/hikvision.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 60,
+            'path'   => storage_path('logs/hikvision/hikvision.log'),
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => 60,
         ],
         // 海康烟感专用
         'hikvision_smoke' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/hikvision/hikvision_smoke.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 60,
+            'path'   => storage_path('logs/hikvision/hikvision_smoke.log'),
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => 60,
         ],
-        'liurui' => [
+        'liurui'          => [
             'driver' => 'daily',
-            'path' => storage_path('logs/liurui/liurui.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 60,
+            'path'   => storage_path('logs/liurui/liurui.log'),
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => 60,
         ],
-        'liurui_ontnet' => [
+        'liurui_ontnet'   => [
             'driver' => 'daily',
-            'path' => storage_path('logs/liurui/liurui_ontnet.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 60,
+            'path'   => storage_path('logs/liurui/liurui_ontnet.log'),
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => 60,
         ],
 
-        'haiman' => [
+        'haiman'          => [
             'driver' => 'daily',
-            'path' => storage_path('logs/haiman/haiman.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 60,
+            'path'   => storage_path('logs/haiman/haiman.log'),
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => 60,
         ],
 
         // 'my_custom_log' => [
@@ -116,69 +115,68 @@ return [
         //     'level' => 'debug',
         // ],
 
-        'alarm_log' => [
+        'alarm_log'       => [
             'driver' => 'single',
-            'path' => 'logs/alarm/my_custom_log.log',
-            'level' => env('LOG_LEVEL', 'debug'),
+            'path'   => 'logs/alarm/my_custom_log.log',
+            'level'  => env('LOG_LEVEL', 'debug'),
         ],
 
-        'daily' => [
+        'daily'           => [
             'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
-            'level' => env('LOG_LEVEL', 'debug'),
-            'days' => 60,
+            'path'   => storage_path('logs/laravel.log'),
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => 60,
         ],
 
-        'dynamiclog' => [
+        'dynamiclog'      => [
             'driver' => 'custom',
-            'via' => \App\Logging\CreateDynamicLogger::class,
+            'via'    => \App\Logging\CreateDynamicLogger::class,
         ],
 
-        'slack' => [
-            'driver' => 'slack',
-            'url' => env('LOG_SLACK_WEBHOOK_URL'),
+        'slack'           => [
+            'driver'   => 'slack',
+            'url'      => env('LOG_SLACK_WEBHOOK_URL'),
             'username' => 'Laravel Log',
-            'emoji' => ':boom:',
-            'level' => env('LOG_LEVEL', 'critical'),
+            'emoji'    => ':boom:',
+            'level'    => env('LOG_LEVEL', 'critical'),
         ],
 
-        'papertrail' => [
-            'driver' => 'monolog',
-            'level' => env('LOG_LEVEL', 'debug'),
-            'handler' => SyslogUdpHandler::class,
+        'papertrail'      => [
+            'driver'       => 'monolog',
+            'level'        => env('LOG_LEVEL', 'debug'),
+            'handler'      => SyslogUdpHandler::class,
             'handler_with' => [
                 'host' => env('PAPERTRAIL_URL'),
                 'port' => env('PAPERTRAIL_PORT'),
             ],
         ],
 
-        'stderr' => [
-            'driver' => 'monolog',
-            'handler' => StreamHandler::class,
+        'stderr'          => [
+            'driver'    => 'monolog',
+            'handler'   => StreamHandler::class,
             'formatter' => env('LOG_STDERR_FORMATTER'),
-            'with' => [
+            'with'      => [
                 'stream' => 'php://stderr',
             ],
         ],
 
-        'syslog' => [
+        'syslog'          => [
             'driver' => 'syslog',
-            'level' => env('LOG_LEVEL', 'debug'),
+            'level'  => env('LOG_LEVEL', 'debug'),
         ],
 
-        'errorlog' => [
+        'errorlog'        => [
             'driver' => 'errorlog',
-            'level' => env('LOG_LEVEL', 'debug'),
+            'level'  => env('LOG_LEVEL', 'debug'),
         ],
 
-        'null' => [
-            'driver' => 'monolog',
+        'null'            => [
+            'driver'  => 'monolog',
             'handler' => NullHandler::class,
         ],
 
-        'emergency' => [
+        'emergency'       => [
             'path' => storage_path('logs/laravel.log'),
         ],
     ],
-
 ];
