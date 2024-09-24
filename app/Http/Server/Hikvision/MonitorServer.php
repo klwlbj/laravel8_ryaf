@@ -41,8 +41,12 @@ class MonitorServer extends BaseServer
                     ],
                     [ // 环境温度
                         'monitorTypeCode' => '80',
-                        'monitorValue'    => $input['humidness'],
+                        'monitorValue'    => $input['temperature'],
                     ],
+                    // [ // 环境湿度
+                    //     'monitorTypeCode' => '90',
+                    //     'monitorValue'    => $input['humidness'],
+                    // ],
                     [ // 信号强度
                         'monitorTypeCode' => '10',
                         'monitorValue'    => $input['signal'],

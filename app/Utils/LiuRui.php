@@ -287,7 +287,7 @@ class LiuRui
             // 'status'         => '', // 状态
             'timestamp'      => '', // 时间戳
             'battery'        => '', // 电量
-            'signalPower'           => '', // 信号强度
+            'signalPower'    => '', // 信号强度
             'snr'            => '', // 信噪比
             'ecl'            => '', // 信号覆盖等级
             'cell_id'        => '', // 小区位置信息
@@ -300,10 +300,9 @@ class LiuRui
         foreach ($structure as $key => $value) {
             if (!empty($subArray)) {
                 $structure[$key] = array_shift($subArray);
-                if(in_array($key,['signalPower','snr']) && is_numeric($structure[$key])){
+                if (in_array($key, ['signalPower', 'snr']) && is_numeric($structure[$key])) {
                     $structure[$key] = $structure[$key] / 10;
                 }
-
             } else {
                 break; // 如果 $arr 已经遍历完，则跳出循环
             }
@@ -378,7 +377,7 @@ class LiuRui
 
                         $length = 1;
                         #如果存在多字节
-                        if (isset($dataConfig['length']) && !empty($dataConfig['length'])) {
+                        if (!empty($dataConfig['length'])) {
                             $length = $dataConfig['length'];
                         }
                         // dd($dataConfig);
@@ -416,9 +415,15 @@ class LiuRui
                             }
                         } else {
                             if (isset($dataConfig['to_last']) && $dataConfig['to_last']) {
+                                $decimalNumbers = [];
+                                foreach ($byte as $binary) {
+                                    // 取后4位并转换为10进制
+                                    $last4Bits        = bindec(substr($binary, 4));
+                                    $decimalNumbers[] = $last4Bits;
+                                }
                                 $data[$key] = [
                                     // 剩余字段，转成10进制
-                                    'value' => $this->longBinToDec(implode('', array_slice($byte, $byteNum))),
+                                    'value' => implode("", $decimalNumbers),
                                     'name'  => $dataConfig['name'] ?? '',
                                 ];
                             } else {
@@ -473,7 +478,7 @@ class LiuRui
 
     private function binToFloat($bin): string
     {
-        if(empty(intval($bin))){
+        if (empty(intval($bin))) {
             return 0;
         }
         $symbol = substr($bin, 0, 1);
