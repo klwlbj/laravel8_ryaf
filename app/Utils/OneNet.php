@@ -153,6 +153,25 @@ class OneNet extends BaseIoTClient
         }
     }
 
+    public function callService($data = [])
+    {
+        try {
+            $response = $this->client->request('POST', 'https://iot-api.heclouds.com/thingmodel/call-service', [
+                'query'   => [
+//                    'timeout'        => 30,
+                ],
+                'json'    => $data,
+                'headers' => ['authorization' => $this->getSign()],
+            ]);
+
+            if ($response->getStatusCode() === 200) {
+                return json_decode($response->getBody()->getContents(), true);
+            }
+        } catch (GuzzleException $e) {
+            Log::info($e);
+        }
+    }
+
     /**
      * 缓存写设备资源（烟感用这个）
      * @param $imei

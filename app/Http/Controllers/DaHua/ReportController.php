@@ -48,7 +48,7 @@ class ReportController
             Tools::writeLog('dahuacloud analyze exception: ' . $e->getMessage() . ' this json:', 'dahuacloud_exception', $params, 'exception');
         }
 
-        Tools::writeLog('params:','dahuacloud', $params);
+//        Tools::writeLog('params:','dahuacloud', $params);
         return Response::returnJson(['code' => 0,'message' => '','date' => []]);
     }
 }
