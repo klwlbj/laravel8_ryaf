@@ -12,15 +12,16 @@ class MonitorController
     public function report(Request $request)
     {
         $rule = [
-            'unitId'     => 'required|integer',
-            'monitorId'  => 'required',
-            'imei'       => 'required|integer',
-            'deviceName' => 'required',
-            'dateTime'   => 'required|date_format:Y-m-d H:i:s',
-            'battery'    => 'required|integer',
-            'humidness'  => 'required|integer',
-            'signal'     => 'required|integer',
-            'pollution'  => 'required|integer',
+            'unitId'      => 'required|integer',
+            'monitorId'   => 'required',
+            'imei'        => 'required|integer',
+            'deviceName'  => 'required',
+            'dateTime'    => 'required|date_format:Y-m-d H:i:s',
+            'battery'     => 'required|integer',
+            // 'humidness'   => 'required|integer',
+            'temperature' => 'required|integer',
+            'signal'      => 'required|integer',
+            'pollution'   => 'required|integer',
         ];
         $input    = [];
         $valicate = Tools::validateParams($request, $rule, $input);
