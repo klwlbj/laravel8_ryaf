@@ -33,8 +33,6 @@ class HuiXiao
     ];
 
     public const INFO_TYPE = [
-        // 信息类型小于20H时，状态字代表探测器类型，范围0X00-0XFF
-        // 信息类型等于20H时，状态字代表消防主机状态，等于21H时，状态字代表用户信息传输装置状态
         '00' => '未定义',
         '01' => '火警',
         '02' => '监管',
@@ -120,7 +118,7 @@ class HuiXiao
         '2D' => '预留',
     ];
 
-    /*    public const EQUIPMENT_TYPE = [
+        public const EQUIPMENT_TYPE = [
             '00'  => '未定义',
             '01'  => '离子感烟',
             '02'  => '点型感温',
@@ -229,7 +227,7 @@ class HuiXiao
             '105' => '输入/输出模块',
             '106' => '中继模块',
             '107' => '未定义',
-        ];*/
+        ];
 
     // 心跳包字符串分隔规则
     public const HEART_BEAT_SUBSTR_ARRAY = [
@@ -301,9 +299,31 @@ class HuiXiao
                         'value' => $this->hexToDateTime(substr($substring, $length)),
                         'name'  => $value['name'], ];
                 } elseif (isset($value['type']) && $value['type'] === 'enum') {
+                    // 信息类型小于20H时，状态字代表探测器类型，范围0X00-0XFF
+                    // 信息类型等于20H时，状态字代表消防主机状态，等于21H时，状态字代表用户信息传输装置状态
+                    if($value['append_list'] === self::STATUS && !empty($infoType)){
+                        $dec = hexdec($infoType);  // 将第一个十六进制数转换为十进制数
+                        if ($dec < hexdec(20)) {
+                            // 探测器类型
+                            $trueValue = $this->getEnum(hexdec($currentString), self::EQUIPMENT_TYPE);
+                        } elseif ($dec === hexdec(20)) {
+                            // 消防主机状态
+                            $trueValue = '消防主机状态';
+
+                        } elseif($dec === hexdec(21)) {
+                            // 用户信息传输装置状态
+                            $trueValue = '用户信息传输装置状态';
+                        }
+                    }else{
+                        $trueValue = $this->getEnum($currentString, $value['append_list']);
+                        if($value['append_list'] === self::INFO_TYPE){
+                            $infoType = $trueValue;
+                        }
+                    }
+
                     $parsedData[$i][$key] = [
                         'original_value' => $currentString,
-                        'value'          => $this->getEnum($currentString, $value['append_list']),
+                        'value'          => $trueValue,
                         'name'           => $value['name'],
                     ];
                 } elseif (isset($value['type']) && $value['type'] === 'ascii') {
