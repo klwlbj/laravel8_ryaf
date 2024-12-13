@@ -4,6 +4,7 @@ namespace App\Utils;
 
 use App\Utils\Apis\Aep_device_event;
 use App\Utils\Apis\Aep_device_command;
+use App\Utils\Apis\Aep_nb_device_management;
 use App\Utils\Apis\Aep_subscribe_north;
 use App\Utils\Apis\Core\返回响应：bool;
 use App\Utils\Apis\Aep_device_command_cancel;
@@ -16816,6 +16817,23 @@ class CTWing extends BaseIoTClient
             env('CTWING_SECRET'),
             $productId,
             $subId,
+            $masterKey
+        );
+    }
+
+    /**
+     * @param $productId
+     * @param $masterKey
+     * @param string $subId
+     * @return 返回响应：bool|null
+     */
+    public function QueryDeviceByImei($productId, $imei, $masterKey)
+    {
+        return Aep_nb_device_management::QueryDeviceByImei(
+            env('CTWING_KEY'),
+            env('CTWING_SECRET'),
+            $productId,
+            $imei,
             $masterKey
         );
     }

@@ -18,6 +18,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::any('imeiCheck/view', [\App\Http\Controllers\IMEICheckController::class, 'view']);
+
 
 //Route::get('/myCommand', function () {
 //    print_r(Artisan::call('storage:link'));die;

@@ -160,3 +160,10 @@ Route::prefix('haoen')->group(function () {
 Route::post('/haoenCtwing', [HaoenController::class, 'haoenSoundLigntAlarm']);
 // 豪恩手动报警器
 Route::post('/haoen2Ctwing', [HaoenController::class, 'haoenManualAlarm']);
+
+Route::get('/xiaohui/toDecrypt/{string}', [LiuRuiController::class, 'xiaohuiToDecrypt']);
+
+
+Route::post('/queryImei', [\App\Http\Controllers\IMEICheckController::class, 'queryImei'])->name('submit.form');
+
+
