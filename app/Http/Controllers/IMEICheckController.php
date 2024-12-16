@@ -17,6 +17,10 @@ class IMEICheckController extends BaseController
     }
     public const PRODUCT_MASTERKEY_ARRAY = [
         16922967 => "0434f19136324920a51ba7287fffb667", // '平安穗粤-海曼HM608/618NB透传版'
+        17085637 => "9c6f31f078024c0c8ab9d288eeaec206", // '平安穗粤-六瑞-如约4G定制版'
+        15084506 => "32fcdd66128548629c1cf93771afd22b", // '小微安全-东昂JTY-YG-002NB'
+        17038132 => "66289024a00d49578a77933298ee2b5a", // '小微安全-海曼HM608/618NB透传版'
+        15599428 => "08d3fbc2c028477c8afc3e9ce60d714d", // '平安穗粤-海曼HM608NB'
         // todo
     ];
 
@@ -57,7 +61,7 @@ class IMEICheckController extends BaseController
 
                 $cwtingDeviceStatus = '未导入';
                 $cwtingNetStatus    = '';
-                if ($res['code'] == 0) {
+                if ($res['code'] == 0 && isset($res['result'])) {
                     // return $res;
                     $cwtingDeviceStatus = self::CWTING_DEVICE_STATUS_ARRAY[$res['result']['deviceStatus'] ?? ''] ?? '未导入';
                     $cwtingNetStatus    = self::CWTING_NET_STATUS_ARRAY[$res['result']['netStatus'] ?? ''] ?? '';
@@ -77,7 +81,7 @@ class IMEICheckController extends BaseController
             return response()->json([
                 'message'   => '查询成功',
                 'data'      => '电信cwting状态： ' . $cwtingDeviceStatus . $cwtingNetStatus . '; ' . '移动onenet状态： ' . $onenetStatus,
-                'smde_imei' => SmokeDetector::query()->where('smde_imei', $imei)->value('smde_nb_iid'),
+                'smde_imei' => SmokeDetector::query()->where('smde_imei', $imei)->value('smde_nb_iid') ?: '空',
             ]);
         }if ($type == 2) {
             $response = (new Client(['verify' => false]))->post('https://api.wl1688.net/iotc/getway', [
@@ -101,7 +105,7 @@ class IMEICheckController extends BaseController
             return response()->json([
                 'message'   => '查询成功',
                 'data'      => $data,
-                'smde_imei' => SmokeDetector::query()->where('smde_nb_iid2', $iccid)->value('smde_nb_iid'),
+                'smde_imei' => SmokeDetector::query()->where('smde_nb_iid2', $iccid)->value('smde_nb_iid') ?: '空',
             ]);
         }
     }
