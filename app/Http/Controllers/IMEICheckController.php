@@ -36,13 +36,15 @@ class IMEICheckController extends BaseController
     ];
 
     public const ONET_STATUS_ARRAY = [
-        0 => '离线', 1 => '在线', 2 => '未激活',
+        0 => '离线',
+        1 => '在线',
+        2 => '未激活',
     ];
 
     public const CARD_STATUS_ARRAY = [
-        2  => '沉默期',
-        4  => '已停机',
-        5  => '已断网',
+        2  => '沉默期', // 不使用不计费，过了沉默期系统自动计费，进入待激活
+        4  => '已停机', // 电信
+        5  => '已断网', // 移动
         8  => '待激活',
         9  => '正常使用',
         20 => '期满,关停',
@@ -104,7 +106,7 @@ class IMEICheckController extends BaseController
 
             return response()->json([
                 'message'   => '查询成功',
-                'data'      => $data,
+                'data'      => $data ?? '',
                 'smde_imei' => SmokeDetector::query()->where('smde_nb_iid2', $iccid)->value('smde_nb_iid') ?: '空',
             ]);
         }

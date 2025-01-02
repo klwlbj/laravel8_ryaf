@@ -81,12 +81,14 @@ Route::prefix('ctwing')->group(function () {
 // http回调
 Route::get('/nbWarm', [NBController::class, 'nbWarm']);
 Route::get('/hkWarm', [NBController::class, 'nbWarm']);
+Route::get('/hmOneNet4GWarm', [NBController::class, 'nbWarm']);
 Route::post('/nbWarm', [NBController::class, 'nbReceived']);
 
 // 海康烟感回调
 Route::post('/hkWarm', [HikvisionSmoke::class, 'hkOnenetWarm']);// 移动
 Route::post('/hkCTWingWarm', [HikvisionSmoke::class, 'hkCTWingWarm']);
 Route::post('/hkCTWing4GWarm', [HikvisionSmoke::class, 'hkCTWing4GWarm']);
+Route::post('/hmOneNet4GWarm', [NBController::class, 'hmOneNet4GWarm']);
 
 Route::post('/dhCTWingWarm', [DaHuaController::class, 'dhCTWingWarm']);
 

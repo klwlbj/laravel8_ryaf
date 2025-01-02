@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -34,12 +35,24 @@ class NBController extends BaseController
     /**
      * 电信海曼烟感4G回调地址
      * @param Request $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @return Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
     public function hmCTWing4GWarm(Request $request, string $url)
     {
         $jsonData = $request->all();
         Log::channel('haiman')->info("海曼电信4G {$url}:" . json_encode($jsonData));
+        return response('', 200);
+    }
+
+    /**
+     * 移动海曼烟感4G回调地址
+     * @param Request $request
+     * @return Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
+    public function hmOneNet4GWarm(Request $request)
+    {
+        $jsonData = $request->all();
+        Log::channel('haiman')->info("海曼移动4G:" . json_encode($jsonData));
         return response('', 200);
     }
 
