@@ -81,12 +81,14 @@ Route::prefix('ctwing')->group(function () {
 // http回调
 Route::get('/nbWarm', [NBController::class, 'nbWarm']);
 Route::get('/hkWarm', [NBController::class, 'nbWarm']);
+Route::get('/hmOneNet4GWarm', [NBController::class, 'nbWarm']);
 Route::post('/nbWarm', [NBController::class, 'nbReceived']);
 
 // 海康烟感回调
 Route::post('/hkWarm', [HikvisionSmoke::class, 'hkOnenetWarm']);// 移动
 Route::post('/hkCTWingWarm', [HikvisionSmoke::class, 'hkCTWingWarm']);
 Route::post('/hkCTWing4GWarm', [HikvisionSmoke::class, 'hkCTWing4GWarm']);
+Route::post('/hmOneNet4GWarm', [NBController::class, 'hmOneNet4GWarm']);
 
 Route::post('/dhCTWingWarm', [DaHuaController::class, 'dhCTWingWarm']);
 
@@ -160,3 +162,10 @@ Route::prefix('haoen')->group(function () {
 Route::post('/haoenCtwing', [HaoenController::class, 'haoenSoundLigntAlarm']);
 // 豪恩手动报警器
 Route::post('/haoen2Ctwing', [HaoenController::class, 'haoenManualAlarm']);
+
+Route::get('/xiaohui/toDecrypt/{string}', [LiuRuiController::class, 'xiaohuiToDecrypt']);
+
+
+Route::post('/queryImei', [\App\Http\Controllers\IMEICheckController::class, 'queryImei'])->name('submit.form');
+
+
