@@ -2,7 +2,9 @@
 
 namespace App\Utils;
 
+use App\Http\Logic\ToolsLogic;
 use App\Utils\Apis\Aep_device_command;
+use GuzzleHttp\Client;
 
 class YuanLiu
 {
@@ -419,6 +421,48 @@ class YuanLiu
             ]
         ]);
 
+        return $res;
+    }
+
+    public function getCommandByOneNet($imei)
+    {
+        return [];
+        if(!in_array($imei,['863705079999249','867708075680744'])){
+            return [];
+        }
+        $client = new Client(['verify' => false]);
+        $response = $client->post(
+            'https://pingansuiyue2.crzfxjzn.com/device/smokeDetector/getOneNetCommand',
+            [
+                'headers' => [
+
+                ],
+                'json'    => (object)[
+                    'imei' => $imei
+                ],
+            ]);
+
+        $res = $response->getBody()->getContents();
+
+        $res = ToolsLogic::jsonDecode($res);
+
+        if($res['code'] != 0){
+            return [];
+        }
+
+        return $res['data'];
+    }
+
+    public function sendCommandByOneNet($imei,$identifier,$params)
+    {
+        $ontNet = new OneNet();
+        $res = $ontNet->callService([
+            "device_name"        => $imei,
+            "product_id"      => $this->productIdByOneNet,
+            'identifier' => $identifier,
+            'params' => $params
+        ]);
+        Tools::writeLog('res：','yuanliutest',$res);
         return $res;
     }
 }

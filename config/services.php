@@ -29,5 +29,11 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
-
+    'fire_alarm_panel' => [
+        'push_api' => env('PUSH_API'),
+    ],
+    'onenet' => [
+        'user_id' => env("ONE_NET_USERID"),
+        'access_key' => env('ONE_NET_ACCESS_KEY')
+    ]
 ];

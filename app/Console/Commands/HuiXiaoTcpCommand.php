@@ -3,8 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Utils\Apis\Aep_device_command;
+use App\Utils\HuiXiao;
 use App\Utils\Tools;
 use Exception;
+use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Workerman\Worker;
@@ -34,6 +36,7 @@ class HuiXiaoTcpCommand extends Command
     public function __construct()
     {
         parent::__construct();
+        self::$client   = new Client(['verify' => false]);
     }
 
     public static $connections = [];
@@ -45,8 +48,10 @@ class HuiXiaoTcpCommand extends Command
     public $successCommand = [
         '0d0a8Eaa0d0a',
         '0d0a8caa0d0a',
-        '0D0A9FAA0D0A'
+        '0d0a9faa0d0a'
     ];
+
+    public static $client = null;
 
     /**
      * Execute the console command.
@@ -63,8 +68,14 @@ class HuiXiaoTcpCommand extends Command
             // 启动4个进程对外提供服务
             $tcpWorker->count = 1;
 
+            $tcpWorker->onConnect = function($connection) {
+                $ip = $connection->getRemoteIp();
+                echo '远程连接ip : ' . $ip . "\n";
+            };
+
             // 当客户端发来数据时
             $tcpWorker->onMessage = function (TcpConnection $connection, $data) {
+
                 $data = bin2hex($data);
                 $connectionId = $connection->id;
 
@@ -75,7 +86,7 @@ class HuiXiaoTcpCommand extends Command
                 }
 
 
-                Tools::writeLog('data','tcp',$data);
+
                 echo '接收到数据:' . Tools::jsonEncode($data) . "\r\n";
 
                 #接收到下发成功指令
@@ -91,34 +102,17 @@ class HuiXiaoTcpCommand extends Command
                     return true;
                 }
 
-                $analyzeData = $this->analyze($data);
+                //如果是执行命令
+                if(str_starts_with($data, '7c7c')){
+                    $deviceId = substr($data, 4,10);
+                    $executeStr = substr($data, 14);
 
-
-                if(!$analyzeData){
-                    return false;
-                }
-                echo '解析数据:' . Tools::jsonEncode($analyzeData) . "\r\n";
-
-                if(isset($analyzeData['type']) && $analyzeData['type'] == 'heartbeat'){
-                    if(!isset(self::$connectionIdRelation[$analyzeData['id']])){
-                        self::$connectionIdRelation[$analyzeData['id']] = $connectionId;
-                        echo '添加设备关系id:' . $analyzeData['id'] . "\n";
-                        echo '设备关联关系:' . Tools::jsonEncode(self::$connectionIdRelation) . "\r\n";
-                    }
-                    elseif(self::$connectionIdRelation[$analyzeData['id']] != $connectionId){
-                        self::$connectionIdRelation[$analyzeData['id']] = $connectionId;
-                        echo '修改设备关系id:' . $analyzeData['id'] . "\n";
-                        echo '设备关联关系:' . Tools::jsonEncode(self::$connectionIdRelation) . "\r\n";
-                    }
-
-                }
-
-                if(isset($analyzeData['type']) && $analyzeData['type'] == 'execute'){
                     echo '关联关系:' . Tools::jsonEncode(self::$connectionIdRelation) . "\r\n";
-                    if(!isset(self::$connectionIdRelation[$analyzeData['id']])){
+                    if(!isset(self::$connectionIdRelation[$deviceId])){
                         return false;
                     }
-                    $sendConnectionId = self::$connectionIdRelation[$analyzeData['id']];
+
+                    $sendConnectionId = self::$connectionIdRelation[$deviceId];
                     echo '关联id:' . $sendConnectionId . "\r\n";
                     if(!isset(self::$connections[$sendConnectionId])){
                         return false;
@@ -129,13 +123,123 @@ class HuiXiaoTcpCommand extends Command
                     }
 
                     $sendConnection = self::$connections[$sendConnectionId];
-                    echo '向设备id:' . $analyzeData['id'] . ' 发送消息：' . $analyzeData['str'] . "\r\n";
-                    $sendConnection->send(hex2bin($analyzeData['str']));
-
+                    echo '向设备id:' . $deviceId . ' 发送消息：' . $executeStr . "\r\n";
+                    $sendConnection->send(hex2bin($executeStr));
+                    return true;
                 }
 
+                $util = new HuiXiao();
 
+                $analyzeList = $util->parseString($data);
 
+                if(!$analyzeList){
+                    #如果解析失败并且不在成功命令里
+                    if(!in_array($data,$this->successCommand)){
+                        $ip = $connection->getRemoteIp();
+                        $connection->close();
+                        echo '断开连接 ip:' . $ip . "\r\n";
+                        return false;
+                    }
+                }
+                Tools::writeLog('原始数据','tcp',$data);
+                Tools::writeLog('解析后数据','tcp',$analyzeList);
+                $pushApi = config('services.fire_alarm_panel.push_api');
+
+                foreach ($analyzeList as $key => $analyzeData){
+                    echo '解析数据:' . Tools::jsonEncode($analyzeData) . "\r\n";
+//                    return false;
+                    #如果心跳 则推送到接口
+                    if(isset($analyzeData['type']) && $analyzeData['type']['value'] == 'heart_beat'){
+                        $deviceId = $analyzeData['gateway_id']['value'];
+                        if(!isset(self::$connectionIdRelation[$deviceId])){
+                            self::$connectionIdRelation[$deviceId] = $connectionId;
+                            echo '添加设备关系id:' . $deviceId . "\n";
+                            echo '设备关联关系:' . Tools::jsonEncode(self::$connectionIdRelation) . "\r\n";
+                        }
+                        elseif(self::$connectionIdRelation[$deviceId] != $connectionId){
+                            self::$connectionIdRelation[$deviceId] = $connectionId;
+                            echo '修改设备关系id:' . $deviceId . "\n";
+                            echo '设备关联关系:' . Tools::jsonEncode(self::$connectionIdRelation) . "\r\n";
+                        }
+
+                        $req = [
+                            'id' =>   $deviceId,
+                            'type' => 'heartbeat',
+                            'data' => Tools::jsonEncode($analyzeData)
+                        ];
+
+                        $response = self::$client->post(
+                            $pushApi,
+                                [
+                                'headers' => [
+
+                                ],
+                                'json'    => (object)$req,
+                            ]);
+
+                        echo '推送心跳包res：' . $response->getBody() . "\r\n";
+                    }elseif(isset($analyzeData['type']) && $analyzeData['type']['value'] == 'alarm' && $analyzeData['info_type']['value'] == '火警'){
+
+                        #如果火警 推送
+                        $deviceId = $analyzeData['gateway_id']['value'];
+
+                        $req = [
+                            'id' =>   $deviceId,
+                            'type' => 'fire_alert',
+                            'data' => Tools::jsonEncode($analyzeData)
+                        ];
+
+                        $response = self::$client->post(
+                            $pushApi,
+                            [
+                                'headers' => [
+
+                                ],
+                                'json'    => (object)$req,
+                            ]);
+
+                        echo '推送火警res：' . $response->getBody() . "\r\n";
+                    }elseif(isset($analyzeData['type']) && $analyzeData['type']['value'] == 'alarm' && $analyzeData['info_type']['value'] == '故障'){
+                        #如果故障 推送
+                        $deviceId = $analyzeData['gateway_id']['value'];
+
+                        $req = [
+                            'id' => $deviceId,
+                            'type' => 'malfunction',
+                            'data' => Tools::jsonEncode($analyzeData)
+                        ];
+
+                        $response = self::$client->post(
+                            $pushApi,
+                            [
+                                'headers' => [
+
+                                ],
+                                'json'    => (object)$req,
+                            ]);
+
+                        echo '推送故障res：' . $response->getBody() . "\r\n";
+                    }else{
+                        $deviceId = $analyzeData['gateway_id']['value'];
+
+                        $req = [
+                            'id' =>   $deviceId,
+                            'type' => 'other',
+                            'data' => Tools::jsonEncode($analyzeData)
+                        ];
+
+                        $response = self::$client->post(
+                            $pushApi,
+                            [
+                                'headers' => [
+
+                                ],
+                                'json'    => (object)$req,
+                            ]);
+
+                        echo '推送其他消息res：' . $response->getBody() . "\r\n";
+                    }
+                }
             };
 
             $tcpWorker->onClose = function ($connection){
@@ -156,33 +260,5 @@ class HuiXiaoTcpCommand extends Command
             $this->error('An error occurred: ' . $e->getMessage());
         }
 
-    }
-
-    public function analyze($str)
-    {
-        $start = substr($str, 0, 4);
-        if ($start == '7a7a') {
-            $id = substr($str, 4, 10);
-            echo '用传id : ' . $id . "\r\n";
-            return [
-                'type' => 'heartbeat',
-                'id' => $id,
-            ];
-        }
-
-
-        if($start == '7c7c'){
-            $id = substr($str, 4, 10);
-            return [
-                'type' => 'execute',
-                'id' => $id,
-                'str' => substr($str, 14),
-            ];
-        }
-        return false;
-        $start = substr($str, 0, 6);
-        if($start == '7b7b7b'){
-
-        }
     }
 }

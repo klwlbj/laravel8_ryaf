@@ -39,8 +39,8 @@ class OneNet extends BaseIoTClient
      */
     public function getSign()
     {
-        $userId             = env("ONE_NET_USERID");
-        $accessKey          = env('ONE_NET_ACCESS_KEY');
+        $userId             = config('services.onenet.user_id');
+        $accessKey          = config('services.onenet.access_key');
         $time               = time() + 30;
         $method             = 'md5';
         $res                = 'userid/' . $userId;
@@ -50,7 +50,7 @@ class OneNet extends BaseIoTClient
         $decodedAccessKey = base64_decode($accessKey);
         $hmac             = hash_hmac($method, utf8_encode($stringForSignature), $decodedAccessKey, true);
         $signature        = base64_encode($hmac);
-
+//        Tools::writeLog('sign：' . ('version=' . $version . '&res=' . urlencode($res) . '&et=' . $time . '&method=' . $method . '&sign=' . urlencode($signature)),'yuanliutest');
         return 'version=' . $version . '&res=' . urlencode($res) . '&et=' . $time . '&method=' . $method . '&sign=' . urlencode($signature);
     }
 

@@ -105,7 +105,8 @@ class Tools
         (new Logger('local', [], [], new DateTimeZone('Asia/Shanghai')))
             ->pushHandler((new RotatingFileHandler(storage_path($path), 14))
                 ->setFilenameFormat('{filename}{date}', 'ymd')
-                ->setFormatter(new LineFormatter($output, null, true, true)))
+                ->setFormatter((new LineFormatter($output, null, true, true))
+                    ->setMaxNormalizeDepth(12)))
             ->info($msg, $data);
     }
 

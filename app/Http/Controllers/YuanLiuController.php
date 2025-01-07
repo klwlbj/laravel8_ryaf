@@ -114,17 +114,65 @@ class YuanLiuController
         $params = $request->all();
 
         $params = Tools::jsonDecode($params);
-        $params['msg'] = Tools::jsonDecode($params['msg']);
-//        Tools::writeLog('params:','yuanliu',$params);
-        $imei = $params['msg']['deviceName'] ?? '';
-        $params = (new YuanLiu())->handleOneNetReport($params);
-
-        if(!empty($imei) && !empty($params['msg']['analyze_data'])){
-            Tools::deviceLog('onenet',$imei,'yuanliu',$params);
-        }else{
-//            Tools::writeLog('this json:','yuanliu_ignore',$params,'exception');
+        if(!isset($params['msg'])){
+            return true;
         }
+        $params['msg'] = Tools::jsonDecode($params['msg']);
+        $yuanLiu = (new YuanLiu());
+        try {
+            $imei = $params['msg']['deviceName'] ?? '';
+            $params = $yuanLiu->handleOneNetReport($params);
+            if(!empty($imei) && !empty($params['msg']['analyze_data'])){
+                $arr = [
+                    'CMD_BEAT' => 'heartbeat',
+                    'CMD_FIRE' => 'smoke_state_report',
+                    'CMD_FIRE_RM' => 'smoke_state_report',
+                    'CMD_SELF_CHECK' => 'smoke_state_report',
+                    'CMD_TEMPERATURE' => 'temperature_report',
+                    'CMD_TEMPERATURE_RM' => 'temperature_report',
+                    'CMD_FIX_ON' => 'tamper_report',
+                    'CMD_PULL_DOWN' => 'tamper_report'
+                ];
 
+                $aepData = [
+                    'upPacketSN' => -1,
+                    "upDataSN" => -1,
+                    'topic' => -1,
+                    'timestamp' => time() . '000',
+                    'tenantId' => null,
+                    'serviceId' => $arr[$params['msg']['analyze_data']['cmd_type'] ?? ''] ?? '',
+                    'messageType' => 'dataReport',
+                    'deviceType' => null,
+                    'assocAssetId' => null,
+                    'deviceSn' => $imei,
+                    'IMSI' => null,
+                    'IMEI' => $imei,
+                    'analyze_data' => $params['msg']['analyze_data'],
+                ];
+//                Tools::deviceLog('onenet',$imei,'yuanliutest',$aepData);
+                Tools::deviceLog('onenet',$imei,'yuanliu',$aepData);
+//                $commandList = $yuanLiu->getCommandByOneNet($imei);
+//                if(!empty($commandList)){
+//                    foreach ($commandList as $command){
+//                        $yuanLiu->sendCommandByOneNet($imei,$command['identifier'],$command['params']);
+//                    }
+//                }
+            }else{
+                if(isset($params['msg']['type']) && isset($params['msg']['status']) && $params['msg']['status'] == 1 && isset($params['msg']['dev_name'])){
+                    $commandList = $yuanLiu->getCommandByOneNet($params['msg']['dev_name']);
+                    if(!empty($commandList)){
+                        sleep(1);
+                        Tools::writeLog('onenet','yuanliutest',$params);
+                        Tools::writeLog('command','yuanliutest',$commandList);
+                        foreach ($commandList as $command){
+                            $yuanLiu->sendCommandByOneNet($params['msg']['dev_name'],$command['identifier'],$command['params']);
+                        }
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            Tools::writeLog('' . $e->getMessage() .$e->getLine() . ' this json:','yuanliu_exception',$params,'exception');
+        }
 
         return $params['msg'];
     }
