@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\HaimanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NBController;
@@ -88,7 +89,7 @@ Route::post('/nbWarm', [NBController::class, 'nbReceived']);
 Route::post('/hkWarm', [HikvisionSmoke::class, 'hkOnenetWarm']);// 移动
 Route::post('/hkCTWingWarm', [HikvisionSmoke::class, 'hkCTWingWarm']);
 Route::post('/hkCTWing4GWarm', [HikvisionSmoke::class, 'hkCTWing4GWarm']);
-Route::post('/hmOneNet4GWarm', [NBController::class, 'hmOneNet4GWarm']);
+Route::post('/hmOneNet4GWarm', [HaimanController::class, 'hmOneNet4GWarm']);
 
 Route::post('/dhCTWingWarm', [DaHuaController::class, 'dhCTWingWarm']);
 
@@ -167,5 +168,10 @@ Route::get('/xiaohui/toDecrypt/{string}', [LiuRuiController::class, 'xiaohuiToDe
 
 
 Route::post('/queryImei', [\App\Http\Controllers\IMEICheckController::class, 'queryImei'])->name('submit.form');
+
+Route::prefix('haiman')->group(function () {
+    Route::any('/mufflingByOneNet/{imei}', [HaimanController::class, 'mufflingByOneNet']);
+    Route::get('/mufflingByCTWing/{productId}/{deviceId}/{masterKey}', [HaimanController::class, 'mufflingByCTWing']);
+});
 
 

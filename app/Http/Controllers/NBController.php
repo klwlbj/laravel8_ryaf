@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Contracts\Foundation\Application;
+use App\Utils\Haiman;
 use Illuminate\Http\Request;
+use App\Models\DeviceCacheCommands;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Contracts\Foundation\Application;
 
 /**
  * NB手报专用
@@ -21,15 +23,14 @@ class NBController extends BaseController
         $params = $request->query();
 
         // 用于验证签名
-        $msg       = $request->query('msg');
-        $nonce     = $request->query('nonce');
-        $signature = $request->query('signature');
+        $msg = $request->query('msg');
+        // $nonce     = $request->query('nonce');
+        // $signature = $request->query('signature');
 
-        if ($this->checkSign($msg, $nonce, $signature)) {
-            Log::info('success:' . json_encode($params));
-            echo $msg;
-        }
-        Log::info('failed:' . json_encode($params));
+        // if ($this->checkSign($msg, $nonce, $signature)) {
+        Log::info('success:' . json_encode($params));
+        echo $msg;
+        // }
     }
 
     /**
@@ -51,9 +52,43 @@ class NBController extends BaseController
      */
     public function hmOneNet4GWarm(Request $request)
     {
-        $jsonData = $request->all();
-        Log::channel('haiman')->info("海曼移动4G:" . json_encode($jsonData));
-        return response('', 200);
+        $data  = $request->input();
+        $msg   = $data['msg'];
+        $nonce = $data['nonce'];
+        // $signature = $data['signature'];
+
+        // if ($this->checkSign($msg, $nonce, $signature)) {
+        Log::info('data:' . json_encode($data));
+
+        // 解密处理
+        // $msg = $this->aesDecrypt(base64_decode($msg));
+        Log::info('msg2:' . $msg);
+
+        $msg = json_decode($msg, true);
+        Log::channel('haiman')->info("海曼移动4G msg:" . json_encode([
+            'msg'   => $msg,
+            'nonce' => $nonce,
+            'time'  => $data['time'],
+            'id'    => $data['id'],
+        ]));
+
+            // Log::info('msg:' . json_encode($msg));
+        $imei = $msg['deviceName'] ?? ($msg['dev_name'] ?? 0); // 设备imei
+        $type = $msg['type'] ?? 0;
+        if (!empty($imei) && $type == 2) { // 心跳包时才下发
+            // 从命令缓存表中，获取命令，马上下发
+            DeviceCacheCommands::where('imei', $imei)->where('is_success', 0)->get()->each(function ($item) use ($data) {
+                // 下发命令
+                $res = (new Haiman())->mufflingByOneNet($item->json);
+                if ($res['code'] == 0) {
+                    $item->is_success = 1;
+                    $item->msg_id     = $data['id'] ?? '';
+                    $item->save();
+                }
+            });
+        }
+
+        return response()->json(['message' => 'Success']);
     }
 
     /**

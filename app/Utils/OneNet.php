@@ -163,6 +163,7 @@ class OneNet extends BaseIoTClient
                 'json'    => $data,
                 'headers' => ['authorization' => $this->getSign()],
             ]);
+            Log::info('消音json:' . json_encode($data));
 
             if ($response->getStatusCode() === 200) {
                 return json_decode($response->getBody()->getContents(), true);

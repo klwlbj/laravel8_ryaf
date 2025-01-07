@@ -33,8 +33,8 @@ class CTWing extends BaseIoTClient
     public function queryDeviceEventList($productId, $deviceId, $masterKey)
     {
         $result = Aep_device_event::QueryDeviceEventList(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "productId" => $productId, //必填
@@ -56,8 +56,8 @@ class CTWing extends BaseIoTClient
     public function queryDeviceEventTotal($productId, $deviceId, $masterKey)
     {
         $result = Aep_device_event::QueryDeviceEventTotal(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "productId" => $productId, //必填
@@ -70,7 +70,7 @@ class CTWing extends BaseIoTClient
     }
 
     /**
-     * 下发命令（4G卡用）
+     * 下发命令（4G卡用）海康
      * @param $productId
      * @param $deviceId
      * @param $masterKey
@@ -83,8 +83,8 @@ class CTWing extends BaseIoTClient
         $cmd = $this->generateCommand($command, $dwPackageNo, true);
 
         $result = Aep_device_command::CreateCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "content"   => [
@@ -105,8 +105,8 @@ class CTWing extends BaseIoTClient
     {
 
         $result = Aep_device_command::CreateCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "content"   => [
@@ -135,8 +135,8 @@ class CTWing extends BaseIoTClient
     public function createNTTCommand($productId, $deviceId, $masterKey, int $second = 120)
     {
         $result = Aep_device_command::CreateCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "content"   => [
@@ -169,8 +169,8 @@ class CTWing extends BaseIoTClient
         $cmd = empty($cmd) ? $this->generateCommand($command, $dwPackageNo, false) : $cmd;
 
         return Aep_device_command_lwm_profile::CreateCommandLwm2mProfile(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             json_encode([
                 "command"   => [
                     "serviceId" => "Msg",
@@ -204,8 +204,8 @@ class CTWing extends BaseIoTClient
         // $cmd = empty($cmd) ? $this->generateCommand($command, $dwPackageNo, false) : $cmd;
         $deviceId = '1e686348a4d04ada84f1cfb7e11b2e51';
         return Aep_device_command_lwm_profile::CreateCommandLwm2mProfile(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             json_encode([
                 "command"   => [
                     "serviceId" => "Msg",
@@ -16608,8 +16608,8 @@ class CTWing extends BaseIoTClient
 
         foreach($deviceIds as $deviceId){
             $result = Aep_device_command::CreateCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "content"   => [
@@ -16665,8 +16665,8 @@ class CTWing extends BaseIoTClient
     public function queryCommandList($productId, $deviceId, $masterKey)
     {
         return Aep_device_command::QueryCommandList(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             $productId,
             $deviceId,
@@ -16684,8 +16684,8 @@ class CTWing extends BaseIoTClient
     public function queryCommand($productId, $deviceId, $masterKey, string $commandId = '')
     {
         $result = Aep_device_command::QueryCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             $commandId,
             $productId,
@@ -16705,8 +16705,8 @@ class CTWing extends BaseIoTClient
     public function cancelCommand($productId, $deviceId, $masterKey, string $commandId = '')
     {
         $result = Aep_device_command::CancelCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "commandId" => $commandId,
@@ -16727,8 +16727,8 @@ class CTWing extends BaseIoTClient
     public function cancelAllCommand($productId, $deviceId, $masterKey)
     {
         $result = Aep_device_command_cancel::CancelAllCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "deviceId"  => $deviceId,
@@ -16748,8 +16748,8 @@ class CTWing extends BaseIoTClient
     public function getSubscriptionsList($productId, $masterKey, int $pageNow = 1, int $pageSize = 10)
     {
         $result = Aep_subscribe_north::GetSubscriptionsList(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $productId,
             $pageNow,
             $pageSize,
@@ -16768,8 +16768,8 @@ class CTWing extends BaseIoTClient
     public function deleteSubscription($productId, $masterKey, string $subId = '', string $subLevel = '')
     {
         $result = Aep_subscribe_north::DeleteSubscription(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $subId,
             $productId,
             $subLevel,
@@ -16789,8 +16789,8 @@ class CTWing extends BaseIoTClient
     public function createSubscription($productId, $deviceId, $masterKey, string $subUrl = '', string $subLevel = '')
     {
         $result = Aep_subscribe_north::CreateSubscription(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "deviceId"  => $deviceId,
@@ -16813,8 +16813,8 @@ class CTWing extends BaseIoTClient
     public function getSubscription($productId, $masterKey, string $subId = '')
     {
         return Aep_subscribe_north::GetSubscription(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $productId,
             $subId,
             $masterKey
@@ -16830,8 +16830,8 @@ class CTWing extends BaseIoTClient
     public function QueryDeviceByImei($productId, $imei, $masterKey)
     {
         return Aep_nb_device_management::QueryDeviceByImei(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $productId,
             $imei,
             $masterKey

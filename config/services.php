@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Third Party Services
@@ -14,26 +13,37 @@ return [
     |
     */
 
-    'mailgun' => [
-        'domain' => env('MAILGUN_DOMAIN'),
-        'secret' => env('MAILGUN_SECRET'),
+    'mailgun'          => [
+        'domain'   => env('MAILGUN_DOMAIN'),
+        'secret'   => env('MAILGUN_SECRET'),
         'endpoint' => env('MAILGUN_ENDPOINT', 'api.mailgun.net'),
     ],
 
-    'postmark' => [
+    'postmark'         => [
         'token' => env('POSTMARK_TOKEN'),
     ],
 
-    'ses' => [
-        'key' => env('AWS_ACCESS_KEY_ID'),
+    'ses'              => [
+        'key'    => env('AWS_ACCESS_KEY_ID'),
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    // 电信AEP平台
+    'ctwing'           => [
+        'key'    => env('CTWING_KEY'),
+        'secret' => env('CTWING_SECRET'),
+    ],
+    // NB手报
+    'nb_manual_alarm'  => [
+        'key' => env('NB_KEY'),
+    ],
+    // 消控主机
     'fire_alarm_panel' => [
         'push_api' => env('PUSH_API'),
     ],
-    'onenet' => [
-        'user_id' => env("ONE_NET_USERID"),
-        'access_key' => env('ONE_NET_ACCESS_KEY')
-    ]
+    // 移动平台
+    'onenet'           => [
+        'user_id'    => env("ONE_NET_USERID"),
+        'access_key' => env('ONE_NET_ACCESS_KEY'),
+    ],
 ];

@@ -550,8 +550,8 @@ class LiuRui
         #获取参数日志
 
         $res = Aep_device_command::CreateCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "content"   => $content,
@@ -612,8 +612,8 @@ class LiuRui
         #获取参数日志
 
         $res = Aep_device_command::CreateCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "content"   => $content,

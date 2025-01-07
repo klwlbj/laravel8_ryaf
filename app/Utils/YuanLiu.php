@@ -203,8 +203,8 @@ class YuanLiu
 
         #4G设备
         $res = Aep_device_command::CreateCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "content"   => [
@@ -253,8 +253,8 @@ class YuanLiu
 
         #4g设备
         $res = Aep_device_command::CreateCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "content"   => [
@@ -282,8 +282,8 @@ class YuanLiu
     public function setDetectionTime($productId, $deviceId, $masterKey, $time)
     {
         $res = Aep_device_command::CreateCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "content"   => [
@@ -311,8 +311,8 @@ class YuanLiu
     public function setSilencing($productId, $deviceId, $masterKey, $state)
     {
         $res = Aep_device_command::CreateCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "content"   => [
@@ -340,8 +340,8 @@ class YuanLiu
     public function setTempThreshold($productId, $deviceId, $masterKey, $value)
     {
         $res = Aep_device_command::CreateCommand(
-            env('CTWING_KEY'),
-            env('CTWING_SECRET'),
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
             $masterKey,
             json_encode([
                 "content"   => [

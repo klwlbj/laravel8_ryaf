@@ -2,6 +2,7 @@
 
 namespace App\Utils;
 
+use App\Models\DeviceCacheCommands;
 use DateTime;
 use DateTimeZone;
 use Monolog\Logger;
@@ -163,5 +164,16 @@ class Tools
             return response()->json(['error' => $validator->errors()], 400);
         }
         $input = $request->all();
+    }
+
+    public static function insertDeviceCacheCMD($imei, $cmdJson)
+    {
+        return DeviceCacheCommands::query()->insert([
+            'imei'       => $imei,
+            'json'       => $cmdJson,
+            'type'       => 1, // 1:消音 2:解除消音...写死
+            'is_success' => 0, // 设定是否成功
+            'created_at' => now(),
+        ]);
     }
 }
