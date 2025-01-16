@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Utils\Haiman;
-use App\Utils\Tools;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use App\Models\DeviceCacheCommands;
-use App\Utils\Apis\Aep_device_command;
 use Illuminate\Support\Facades\Log;
+use App\Utils\Apis\Aep_device_command;
+use Illuminate\Contracts\Foundation\Application;
 
 class HaimanController extends BaseController
 {
@@ -55,34 +52,57 @@ class HaimanController extends BaseController
      */
     public function hmOneNet4GWarm(Request $request)
     {
-        $data  = $request->input();
-        $msg   = $data['msg'];
-        $nonce = $data['nonce'];
-        // $signature = $data['signature'];
+        $data        = $request->input();
+        $msg         = json_decode($data['msg'], true);
+        $data['msg'] = $msg;
+        $nonce       = $data['nonce'];
 
-        // if ($this->checkSign($msg, $nonce, $signature)) { // todo验签
-        Log::info('data:' . json_encode($data));
-
-        // 解密处理
-        // $msg = $this->aesDecrypt(base64_decode($msg));
-        Log::info('msg2:' . $msg);
-
-        $msg = json_decode($msg, true);
+        // Log::info('data:' . json_encode($data));
         Log::channel('haiman')->info("海曼移动4G msg:" . json_encode([
-                'msg'   => $msg,
-                'nonce' => $nonce,
-                'time'  => $data['time'],
-                'id'    => $data['id'],
-            ]));
+            'msg'   => $msg,
+            'nonce' => $nonce,
+            'time'  => $data['time'],
+            'id'    => $data['id'],
+        ]));
 
         $imei = $msg['deviceName'] ?? ($msg['dev_name'] ?? 0); // 设备imei
-        // $type = $msg['type'] ?? 0;
-        // $status = $msg['status'] ?? 0;
         if (!empty($imei) /*&& $type == 2*/) { // 心跳包时才下发 todo
+            // 区分消息类型
+            if (isset($msg['dev_name']) && $msg['type'] == 2) {
+                // 在离线状态 不处理
+                $infoType = 1;
+            }
+            if (isset($msg['notifyType']) && $msg['notifyType'] === 'event' && isset($msg['deviceName'])) {
+                // 事件上报 不处理
+                $infoType = 2;
+            }
+            if (isset($msg['notifyType']) && $msg['notifyType'] === 'property' && isset($msg['deviceName'], $msg['data']['params']) && count($msg['data']['params']) !== 5) {
+                // 设备属性变更
+                $infoType = 3;
+                // 保存消息
+                $this->insertIOT($data, $imei, $infoType);
+            }
             // 从命令缓存表中，获取命令，马上下发
-            $this->getAndSendDeviceCacheCMD($imei, $data['id'] ?? '');
+            $this->getAndSendDeviceCacheCMD($imei, $data['id'] ?? '', 3);
         }
 
         return response()->json(['message' => 'Success']);
+    }
+
+    public function insertSmokeDetector(string $imei)
+    {
+        $smde_type       = "烟感";
+        $smde_brand_name = "海曼";
+        $smde_model_name = "HM-618PH-4G";
+        $smde_model_tag  = "";
+        $smde_part_id    = 1; // 如约自己的设备
+        return DB::connection('mysql2')->table('smoke_detector')->insert([
+            "smde_type"       => $smde_type,
+            "smde_brand_name" => $smde_brand_name,
+            "smde_model_name" => $smde_model_name,
+            "smde_imei"       => $imei,
+            "smde_model_tag"  => $smde_model_tag,
+            "smde_part_id"    => $smde_part_id,
+        ]);
     }
 }
