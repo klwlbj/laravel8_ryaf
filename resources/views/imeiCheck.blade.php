@@ -5,7 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>平安穗粤卡号查询系统</title>
 </head>
 <body>
 <!-- resources/views/form.blade.php -->
@@ -15,8 +15,8 @@
     @csrf
     <label for="imei">请输入:</label>
     <select id="type" name="type">
-        <option value="1">IMEI</option>
-        <option value="2">ICCID</option>
+        <option value="1">机器码IMEI</option>
+        <option value="2">卡号ICCID</option>
     </select>
     <input type="text" name="key" id="key" required>
     <button type="submit">查询</button>
@@ -39,8 +39,7 @@
         })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('response').innerHTML = data.message + "<br>" + JSON.stringify(data.data)
-                + "<br>" + "平安穗粤卡段IMSI： " +data.smde_imei;
+                document.getElementById('response').innerHTML = data.message + "<br>" + data.data;
             })
             .catch(error => console.error('Error:', error));
     });
