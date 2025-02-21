@@ -48,11 +48,18 @@ class OneNetController extends BaseController
         return $client->createGasSettingCommand($imei, $gasAlarmCorrection);
     }
 
-    public function writeResource($imei, $command, $dwPackageNo)
+    public function customWriteResource($imei, $command, $dwPackageNo)
     {
         $client = new OneNet();
-        return $client->writeResource($imei, $command, $dwPackageNo);
+        return $client->customWriteResource($imei, $command, $dwPackageNo);
     }
+
+    public function writeResource($imei, $cmd)
+    {
+        $client = new OneNet();
+        return $client->writeResource($imei,$cmd);
+    }
+
     public function execute($imei, $command, $dwPackageNo)
     {
         $client = new OneNet();

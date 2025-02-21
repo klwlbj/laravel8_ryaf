@@ -62,37 +62,37 @@ class IMEICheckController extends BaseController
     public const ONENET_PRODUCT_MASTERKEY_ARRAY = [
         'E2dMYR85jh' => [
             'type'     => "4G",
-            "net_type" => "4G",
+            "net_type" => "MQTT",
             'name'     => "海曼4g烟感",
         ],
         'HzFl9NvY5q' => [
             'type'     => "4G",
-            "net_type" => "4G",
+            "net_type" => "MQTT",
             'name'     => "源流4G烟感",
         ],
         '8Sq1N7k9OB' => [
             'type'     => "NB",
-            "net_type" => "NB",
+            "net_type" => "LWM2M",
             'name'     => "安宁消防",
         ],
         "kC06Yb93QB" => [
             'type'     => "4G",
-            "net_type" => "4G",
+            "net_type" => "LWM2M",
             'name'     => "六瑞4G烟感",
         ],
         '407478'     => [
             'type'     => "NB",
-            "net_type" => "NB",
+            "net_type" => "LWM2M",
             'name'     => "平安穗粤",
         ],
         '426083'     => [
             'type'     => "NB",
-            "net_type" => "NB",
+            "net_type" => "LWM2M",
             'name'     => "小微安全",
         ],
         '341854'     => [
             'type'     => "NB",
-            "net_type" => "NB",
+            "net_type" => "LWM2M",
             'name'     => "智慧消防",
         ],
     ];
@@ -205,7 +205,7 @@ class IMEICheckController extends BaseController
                     '是否绑定用户'     => $smokeDetector->smde_user_id ? '是' : '否',
                     '是否绑定地址'     => $smokeDetector->smde_place_id ? '是' : '否',
                     '是否连接区平台'    => $smokeDetector->smde_yunchuang_id ? "是" : '否',
-                    "虚拟心跳时间"     => $smokeDetector->smde_fake_heart_beat,
+                    "虚拟心跳时间"     => $smokeDetector->smde_fake_heart_beat ?? '空',
                 ];
             } else {
                 $deviceDetail = [

@@ -19,13 +19,13 @@ class OneNet extends BaseIoTClient
 
     public function __construct($objId = null, $objInstId = null, $resId = null)
     {
-        if($objId !== null) {
+        if ($objId !== null) {
             $this->objId = $objId;
         }
-        if($objInstId !== null) {
+        if ($objInstId !== null) {
             $this->objInstId = $objInstId;
         }
-        if($resId !== null) {
+        if ($resId !== null) {
             $this->resId = $resId;
         }
         $this->client = new Client([
@@ -158,7 +158,7 @@ class OneNet extends BaseIoTClient
         try {
             $response = $this->client->request('POST', 'https://iot-api.heclouds.com/thingmodel/call-service', [
                 'query'   => [
-//                    'timeout'        => 30,
+                    //                    'timeout'        => 30,
                 ],
                 'json'    => $data,
                 'headers' => ['authorization' => $this->getSign()],
@@ -174,16 +174,16 @@ class OneNet extends BaseIoTClient
     }
 
     /**
-     * 缓存写设备资源（烟感用这个）
+     * 缓存写设备资源（海康烟感用这个）
      * @param $imei
      * @param string $command
      * @param string $dwPackageNo
      * @param string $cmd
      * @return mixed|void
      */
-    public function writeResource($imei, string $command = self::LONG_SILENCE, string $dwPackageNo = '00000001', $cmd = '')
+    public function customWriteResource($imei, string $command = self::LONG_SILENCE, string $dwPackageNo = '00000001')
     {
-        $cmd  = empty($cmd) ? $this->generateCommand($command, $dwPackageNo, false) : $cmd;
+        $cmd  = $this->generateCommand($command, $dwPackageNo, false);
         $time = time() + 1000;
         try {
             $response = $this->client->request('POST', self::HOST . '/offline', [
@@ -212,6 +212,38 @@ class OneNet extends BaseIoTClient
         } catch (GuzzleException $e) {
             Log::info($e);
         }
+    }
+
+    public function writeResource($imei, $cmd, $objId = 8000, $objInstId = 0)
+    {
+        $time = time() + 3600;
+
+        $response = $this->client->request('POST', self::HOST . '/offline', [
+            'query'   => [
+                "imei"         => $imei,
+                "obj_id"       => $objId,
+                "obj_inst_id"  => $objInstId,
+                'mode'         => 2, // 1：直接替换；2：局部更新
+                'expired_time' => date('Y-m-d', $time) . 'T' . date('H:i:s', $time),
+                'trigger_msg' => 7,
+            ],
+            'json'    => [
+                'data' => [
+                    [
+                        'res_id' => 9001,
+                        // 'type'   => 1,
+                        'val'    => $cmd,
+                    ],
+                ],
+            ],
+            'headers' => ['authorization' => $this->getSign()],
+        ]);
+
+        if ($response->getStatusCode() === 200) {
+            return json_decode($response->getBody()->getContents(), true);
+        }
+
+        return $response;
     }
 
     public function createGasSettingCommand($imei, int $gasAlarmCorrection = 0)
@@ -375,13 +407,12 @@ class OneNet extends BaseIoTClient
         }
     }
 
-
-    public function deviceInfo($projectId,$imei)
+    public function deviceInfo($projectId, $imei)
     {
         try {
             $response = $this->client->request('GET', 'https://iot-api.heclouds.com/device/detail', [
                 'query'   => [
-                    "product_id" => $projectId,
+                    "product_id"  => $projectId,
                     "device_name" => $imei,
                 ],
                 'headers' => ['authorization' => $this->getSign()],
@@ -402,7 +433,7 @@ class OneNet extends BaseIoTClient
             $response = $this->client->request('GET', 'https://iot-api.heclouds.com/device/detail', [
                 'query'   => [
                     'product_id' => 0,
-                    "imei" => $imei,
+                    "imei"       => $imei,
                 ],
                 'headers' => ['authorization' => $this->getSign()],
             ]);

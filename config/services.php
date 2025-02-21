@@ -46,4 +46,9 @@ return [
         'user_id'    => env("ONE_NET_USERID"),
         'access_key' => env('ONE_NET_ACCESS_KEY'),
     ],
+    // 海康
+    'hikvision'        => [
+        'app_key' => env('HIK_KEY', ''),
+        'app_secret' => env('HIK_SECRET', ''),
+    ],
 ];
