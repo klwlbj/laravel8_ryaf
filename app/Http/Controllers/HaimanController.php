@@ -18,6 +18,11 @@ class HaimanController extends BaseController
     public const CONVERT_TYPE_ENUM     = 4;
     public const CONVERT_TYPE_ORIGINAL = 5;
 
+    public const ONENET_4G_PRODUCT_ID       = 'E2dMYR85jh';
+    public const ONENET_INFRARED_PRODUCT_ID = 'O9nyomBJ89';
+
+    public const CTWING_INFRARED_PRODUCT_ID = '17189257';
+
     public array $struct = [
         '1f46' => ['name' => 'signal', 'convertType' => self::CONVERT_TYPE_NUMBER], // 信号
         '1f49' => ['name' => 'IMEI', 'convertType' => self::CONVERT_TYPE_SPECIAL_CODE],
@@ -69,8 +74,8 @@ class HaimanController extends BaseController
         16 => ['name' => '防拆恢复', 'iono_type' => 16],
         17 => ['name' => '烟雾板连接断开', 'iono_type' => 17],
         18 => ['name' => '烟雾板连接恢复', 'iono_type' => 18],
-        19 => ['name' => '红外有人报警', 'iono_type' => 222],
-        20 => ['name' => '红外无人报警', 'iono_type' => 223],
+        19 => ['name' => '红外有人报警', 'iono_type' => 101], // 和张明总做的红外烟感类型冲突
+        20 => ['name' => '红外无人报警', 'iono_type' => 102],
     ];
 
     public function mufflingByOneNet($imei)
@@ -78,7 +83,7 @@ class HaimanController extends BaseController
         // 拼接json数据
         $json = json_encode([
             "device_name" => $imei,
-            "product_id"  => 'E2dMYR85jh', // 写死
+            "product_id"  => self::ONENET_4G_PRODUCT_ID, // 写死
             'identifier'  => 'set_mute',
             'params'      => [
                 'mute' => 1,
@@ -117,7 +122,7 @@ class HaimanController extends BaseController
             ->table('smoke_detector')
             ->where('smde_imei', $imei)
             ->value('smde_ctwing_device_id');
-        if(empty($deviceId)){
+        if (empty($deviceId)) {
             return [];
         }
         #获取结果日志
@@ -146,7 +151,7 @@ class HaimanController extends BaseController
     public function hmOneNet4GWarm(Request $request)
     {
         $data         = $request->input();
-        $msg          = json_decode($data['msg'], true);
+        $msg          = config('app.debug') === 'true' ? json_decode(json_encode($data['msg']), true) : json_decode($data['msg'], true);// 正式环境和测试环境数据格式不一样，测试时需要转换
         $data['msg']  = $msg;
         $nonce        = $data['nonce'];
         $ionoPlatform = 'ONENET';
@@ -170,9 +175,9 @@ class HaimanController extends BaseController
             if (isset($msg['notifyType']) && $msg['notifyType'] === 'property' && isset($msg['deviceName'], $msg['data']['params']) && count($msg['data']['params']) !== 5) {
                 // 设备属性变更
                 $time      = time();
-                $productId = 'E2dMYR85jh'; // 写死，海曼烟感产品id
+                $productId = self::ONENET_4G_PRODUCT_ID; // 写死，海曼烟感产品id
 
-                $alarmStatus[]                = 21; // 默认心跳包
+                $alarmStatus                  = []; // 默认心跳包
                 $heartbeatTime                = date("Y-m-d H:i:s.Y", (int) ($data['msg']['data']['params']['heartbeat_time']['time'] ?? microtime()) / 1000);
                 $ionoMazePollution            = $data['msg']['data']['params']['MazePollution']['value'] ?? '';
                 $ionoSmokeScope               = ($data['msg']['data']['params']['smoke_value']['value'] ?? 0);
@@ -192,10 +197,10 @@ class HaimanController extends BaseController
                 $ionoAlarmStaList = [
                     // ['comment', 'iono_type'],
                     ['保留', 0],
-                    ['自检', 13],
-                    ['烟雾告警', 1],
-                    ['高温告警', 3],
-                    ['防拆告警', 15],
+                    ['自检', 13, 14],
+                    ['烟雾告警', 1, 2],
+                    ['高温告警', 3, 4],
+                    ['防拆告警', 15, 16],
                     ['低压', 7],
                 ];
 
@@ -203,7 +208,7 @@ class HaimanController extends BaseController
                 $ionoAlarmSta = strrev($ionoAlarmSta);
                 // 示例$ionoAlarmSta = '001'; 反转后变成'100'
                 if ((int) $ionoAlarmSta == '0') {
-                    $alarmStatus = [];
+                    $alarmStatus = [0];
                 } else {
                     // 把字符串转换为数组
                     $ionoAlarmSta = str_split($ionoAlarmSta);
@@ -303,7 +308,7 @@ class HaimanController extends BaseController
     {
         // 设备属性变更
         $time      = time();
-        $productId = $platform === 1 ? 'O9nyomBJ89' : '17189257'; // 写死，海曼红外烟感产品id
+        $productId = $platform === 1 ? self::ONENET_INFRARED_PRODUCT_ID : self::CTWING_INFRARED_PRODUCT_ID; // 写死，海曼红外烟感产品id，移动和电信不一样
 
         $alarmStatus                  = []; // 默认心跳包
         $heartbeatTime                = date("Y-m-d H:i:s.Y", (int) ($data['time'] ?? microtime()) / 1000);
@@ -323,7 +328,7 @@ class HaimanController extends BaseController
         $ionoPlatform                 = $platform === 1 ? 'ONENET' : 'CTWING_AEP';
 
         if (isset($decodedMsg['alarm_status'])) {
-            $alarmStatus[] = $decodedMsg['alarm_status']['iono_type'] ?? 21;
+            $alarmStatus[] = $decodedMsg['alarm_status']['iono_type'] ?? 0;
         }
         $this->insertWarm($heartbeatTime, $ionoMazePollution, $ionoSmokeScope, $ionoRsrp, $ionoTemperture, $ionoIMSI, $ionoThresholdTemperature, $ionoThresholdSmokeScope, $ionoBattery, $ionoICCID, $ionoPlatform, $data, $time, $ionoIMEI, $ionoThresholdNbModuleBattery, $imei, $ionoRsrq, $ionoSnr, $productId, $alarmStatus, $ionoMsgValueHex, $deviceId);
     }

@@ -140,29 +140,12 @@ class BaseController extends \Illuminate\Routing\Controller
                 $smdeId = $device->smde_id;
                 $device->update($deviceUpdateData);
 
-                // 如果$alarmStatus为空，说明是自检
-
-                if (empty($alarmStatus)) {
-                    DB::connection('mysql2')->table('iot_notification_alert')
-                        ->where('iono_imei', $imei)
-                        ->where('iono_type', 15)
-                        ->where('iono_status', '')
-                        ->update([
-                            'iono_status' => '已恢复',
-                        ]);
-                }
-                // Log::info('ionoId failed3:' . json_encode($alarmStatus));
-
-                // 查找之前的防拆恢复告警，如果有，恢复之前的告警
                 foreach ($alarmStatus as $ionoType) {
                     unset($notificationInsertData['iono_id']);
                     $notificationInsertData['iono_type']    = $ionoType;
                     $notificationInsertData['iono_smde_id'] = $smdeId;
 
-                    // $ionoId = DB::connection('mysql2')->table('iot_notification')->max('iono_id') + 1;
-                    // $notificationInsertData['iono_id'] = $ionoId;
                     $ionoId = DB::connection('mysql2')->table('iot_notification')->insertGetId($notificationInsertData);
-                    // Log::info('ionoId failed1:' . $ionoId);
 
                     $notificationInsertData['iono_id'] = $ionoId;
                     $orderId                           = $device->smde_order_id;
@@ -170,17 +153,32 @@ class BaseController extends \Illuminate\Routing\Controller
                     if (empty($orderId)) {
                         return;
                     }
-                    // Log::info('ionoId failed2:' . $ionoId);
 
-                    // 自检
                     switch($ionoType) {
-                        case 21:
+                        // 自检
+                        case 0:
+                            DB::connection('mysql2')->table('iot_notification_self_check')->insert($notificationInsertData);
+                            // 防拆恢复
+                            // 查找之前的防拆恢复告警，如果有，恢复之前的告警
+                            DB::connection('mysql2')->table('iot_notification_pull_fix')
+                                ->where('iono_imei', $imei)
+                                ->where('iono_type', 15)
+                                ->where('iono_status', '')
+                                ->update([
+                                    'iono_status'      => '已恢复',
+                                    'iono_handle_time' => $notificationInsertData['iono_crt_time'],
+                                ]);
+                            break;
                         case 13:
                             DB::connection('mysql2')->table('iot_notification_self_check')->insert($notificationInsertData);
                             break;
                         case 15:// 防拆
+                            $notificationInsertData['iono_status'] = '';
+                            DB::connection('mysql2')->table('iot_notification_pull_fix')->insert($notificationInsertData);
+                            break;
                         case 1:
-                            $notificationInsertData['iono_status'] = $ionoType == 15 ? '' : '待处理';
+                            // case 3: todo 温度报警张明说先不做
+                            $notificationInsertData['iono_status'] = '待处理';
                             // 查找报警人电话
                             $phone = DB::connection('mysql2')
                                 ->table('order')
@@ -200,8 +198,8 @@ class BaseController extends \Illuminate\Routing\Controller
                             }
                             DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
                             break;
-                        case 222:
-                        case 223:
+                        case 101:
+                        case 102:
                             $timestamp = $notificationInsertData['iono_msg_at'];
 
                             $currentTime = Carbon::createFromTimestamp($timestamp)->format('H:i');
@@ -209,6 +207,7 @@ class BaseController extends \Illuminate\Routing\Controller
                             // 定义时间范围
                             $timeRanges = [
                                 ['start' => '06:00', 'end' => '09:00'],
+                                // ['start' => '09:30', 'end' => '10:45'], // todo 待删，测试用
                                 ['start' => '11:00', 'end' => '14:00'],
                                 ['start' => '17:00', 'end' => '20:00'],
                             ];
@@ -221,15 +220,17 @@ class BaseController extends \Illuminate\Routing\Controller
                                 }
                             }
                             if (isset($currentStart, $currentEnd)) {
-                                // 查找出iot_notification_alert表是否有iono_type为222的报警，在当前时间范围内
+                                // 查找出iot_notification_alert表是否有iono_type为101的报警，在当前时间范围内
+                                // 如果检测到有人，整个时间段停止检测
                                 $infraredRecord = DB::connection('mysql2')->table('iot_notification_alert')
-                                    ->where('iono_type', 222)
+                                    ->where('iono_type', 101)
                                     ->where('iono_smde_id', $smdeId)
                                     ->where('iono_msg_at', '>=', strtotime($currentStart))
                                     ->where('iono_msg_at', '<=', strtotime($currentEnd))
                                     ->exists();
                                 // 不存在才插入
                                 if (!$infraredRecord) {
+                                    $notificationInsertData['iono_status'] = ''; // todo 测试时暂时留空
                                     DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
                                 }
                             }

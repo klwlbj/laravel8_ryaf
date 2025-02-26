@@ -196,7 +196,8 @@ class HikvisionCloudController
                 }
 
                 $resourceSerial = $jsonData['fps']['msgList'][0]['body']['data'][0]['resourceSerial'] ?? ($jsonData['fps']['msgList'][0]['body']['data'][0]['deviceSerial'] ?? '');
-                if (!empty($resourceSerial) && $resourceSerial == 'F17986910') { // 指定摄像头型号设备
+                $dataType       = $jsonData['fps']['msgList'][0]['body']['dataType'] ?? 0;
+                if (!empty($resourceSerial) && $resourceSerial == 'F17986910' && in_array($dataType, [980002101, 980003101])) { // 指定摄像头型号设备,指定消息类型
                     $this->receiveAlarm($request);
                     Tools::deviceLog('camera-' . $code, $resourceSerial, 'hikvision', $jsonData);
                 }
@@ -442,9 +443,9 @@ class HikvisionCloudController
     {
         $json          = empty($json) ? json_decode($request->getContent()) : $json;
         $alarmTypeList = [
-            200014 => [3, 4], // 温度报警及恢复
-            200017 => [202, 203], // 视频火焰报警及恢复
-            200001 => [1, 2], // 烟感报警及恢复
+            '200001' => [1, 2], // 烟感报警及恢复
+            '200014' => [3, 4], // 温度报警及恢复
+            '200017' => [121, 122], // 视频火焰报警及恢复
         ];
 
         try {
@@ -453,10 +454,11 @@ class HikvisionCloudController
             Log::info('海热成像摄像头Data:' . json_encode($dataList));
 
             foreach ($dataList as $data) {
-                $data = (object) $data;
-                $alarmState   = $data->alarmState;
-                $alarmType    = $data->alarmType;
-                if(!in_array($alarmType, array_keys($alarmTypeList))) {
+                $data       = (object) $data;
+                $alarmState = $data->alarmState;
+                $alarmType  = $data->alarmType;
+                $alarmID    = $data->alarmID ?? '';
+                if (!in_array($alarmType, array_keys($alarmTypeList))) {
                     // 跳出当前foreach
                     continue;
                 }
@@ -465,7 +467,8 @@ class HikvisionCloudController
                 $ionoPlatform = 'HIKVISION';
                 $ionoCameraId = DB::table('camera')->where('came_imei', $imei)->value('came_id');
                 $ionoMafrId   = DB::table('camera')->where('came_imei', $imei)->value('came_mafr_id');
-                $alarmURLs    = $data->alarmURLs->alarmURLs;
+                // $alarmURLs    = optional($data?->alarmURLs)->alarmURLs ?? [];
+                $alarmURLs = $data->alarmURLs->alarmURLs ?? [];
 
                 $notificationInsertData = [
                     'iono_platform'      => $ionoPlatform,
@@ -484,7 +487,10 @@ class HikvisionCloudController
                     'iono_device_status' => -1,
                     'iono_came_id'       => $ionoCameraId,
                     'iono_mafr_id'       => $ionoMafrId,
+                    'iono_alarm_id'      => $alarmID,
                 ];
+                // 插入事务
+                DB::beginTransaction();
                 $ionoId = DB::table('iot_notification')->insertGetId($notificationInsertData);
 
                 $picUrl = [];
@@ -496,6 +502,7 @@ class HikvisionCloudController
                     'verify' => false, // 禁用 SSL 验证
                 ]);
 
+                $promises = [];
                 foreach ($picUrl as $url) {
                     $promises[] = $client->requestAsync('GET', $url);
                 }
@@ -525,10 +532,20 @@ class HikvisionCloudController
                     DB::table('attachment')->insert($attachmentInsertData);
                 }
 
+                if (!empty($alarmID)) {
+                    // 更新原来的报警记录
+                    DB::table('iot_notification_alert')
+                        ->where('iono_alarm_id', $alarmID)
+                        ->where('iono_cancel_iono_id', 0)
+                        ->update([
+                            'iono_cancel_iono_id' => $ionoId,
+                        ]);
+                }
                 $notificationInsertData['iono_id'] = $ionoId;
                 DB::table('iot_notification_alert')->insert($notificationInsertData);
+
+                DB::commit();
             }
-            print_r($ionoId);
         } catch (Exception $e) {
             // 在异常情况下报错
             Log::info('海热成像摄像头 insert failed:' . $e->getLine() . ':' . $e->getMessage());
