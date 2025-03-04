@@ -265,7 +265,8 @@ class HaimanController extends BaseController
             // 将二进制数据转换为十六进制
             $ionoMsgValueHex = bin2hex($base64DecodedData);
             // $ionoMsgValueHex = base64ToHex($jsonData['payload']['APPdata']);
-            $decodedMsg = $this->decode($ionoMsgValueHex);
+            $decodedMsg                     = $this->decode($ionoMsgValueHex);
+            $jsonData['payload']['APPdata'] = $decodedMsg;
 
             $this->insertInfraredWarm($decodedMsg, $jsonData, $ionoMsgValueHex, $imei, 2, $deviceId);
         }
@@ -472,7 +473,7 @@ class HaimanController extends BaseController
      * @param string $deviceId
      * @return void
      */
-    private function insertWarm($heartbeatTime, $ionoMazePollution, $ionoSmokeScope, $ionoRsrp, $ionoTemperture, $ionoIMSI, $ionoThresholdTemperature, $ionoThresholdSmokeScope, $ionoBattery, $ionoICCID, $ionoPlatform, $data, int $time, $ionoIMEI, $ionoThresholdNbModuleBattery, $imei, $ionoRsrq, $ionoSnr, string $productId, array $alarmStatus, $ionoMsgValueHex = '', $deviceId = ''): void
+    private function insertWarm($heartbeatTime, $ionoMazePollution, $ionoSmokeScope, $ionoRsrp, $ionoTemperture, $ionoIMSI, $ionoThresholdTemperature, $ionoThresholdSmokeScope, $ionoBattery, $ionoICCID, $ionoPlatform, $data, int $time, $ionoIMEI, $ionoThresholdNbModuleBattery, $imei, $ionoRsrq, $ionoSnr, string $productId, array $alarmStatus, string $ionoMsgValueHex = '', string $deviceId = ''): void
     {
         $deviceUpdateData = [
             'smde_last_heart_beat'           => $heartbeatTime,

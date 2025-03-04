@@ -480,7 +480,7 @@ class HikvisionCloudController
                     'iono_type'          => $ionoType ?? '',
                     'iono_imei'          => $imei,
                     'iono_category'      => '热成像摄像头',
-                    'iono_status'        => '待处理',
+                    'iono_status'        => in_array($ionoType, [2, 4]) ? '' : '待处理',
                     // 'iono_smde_id' => $smdeId,
                     'iono_crt_time'      => date("Y-m-d H:i:s.u"), // like 2025-01-09 16:38:45.098261
                     'iono_alert_status'  => -1,
@@ -498,9 +498,7 @@ class HikvisionCloudController
                     $picUrl[] = $alarmURL->picURL;
                 }
                 // 创建 Guzzle 客户端
-                $client = new Client([
-                    'verify' => false, // 禁用 SSL 验证
-                ]);
+                $client = new Client(['verify' => false]);// 禁用 SSL 验证
 
                 $promises = [];
                 foreach ($picUrl as $url) {
@@ -532,7 +530,7 @@ class HikvisionCloudController
                     DB::table('attachment')->insert($attachmentInsertData);
                 }
 
-                if (!empty($alarmID)) {
+                if (!empty($alarmID) && $ionoType == 122) { //只有火焰报警和火焰报警解除，才做这个逻辑，其他的不做
                     // 更新原来的报警记录
                     DB::table('iot_notification_alert')
                         ->where('iono_alarm_id', $alarmID)
@@ -542,7 +540,7 @@ class HikvisionCloudController
                         ]);
                 }
                 $notificationInsertData['iono_id'] = $ionoId;
-                DB::table('iot_notification_alert')->insert($notificationInsertData);
+                in_array($ionoType, [2, 4]) ? null : DB::table('iot_notification_alert')->insert($notificationInsertData);
 
                 DB::commit();
             }

@@ -158,21 +158,15 @@ class BaseController extends \Illuminate\Routing\Controller
                         // 自检
                         case 0:
                             DB::connection('mysql2')->table('iot_notification_self_check')->insert($notificationInsertData);
-                            // 防拆恢复
-                            // 查找之前的防拆恢复告警，如果有，恢复之前的告警
-                            DB::connection('mysql2')->table('iot_notification_pull_fix')
-                                ->where('iono_imei', $imei)
-                                ->where('iono_type', 15)
-                                ->where('iono_status', '')
-                                ->update([
-                                    'iono_status'      => '已恢复',
-                                    'iono_handle_time' => $notificationInsertData['iono_crt_time'],
-                                ]);
+                            // 防拆恢复（针对物模型）
+                            $this->insertPullFixFinished($imei, $notificationInsertData);
                             break;
                         case 13:
                             DB::connection('mysql2')->table('iot_notification_self_check')->insert($notificationInsertData);
                             break;
                         case 15:// 防拆
+                        case 16:// 防拆恢复(针对透传)
+                            $ionoType == 16 ?  $this->insertPullFixFinished($imei, $notificationInsertData) : null;
                             $notificationInsertData['iono_status'] = '';
                             DB::connection('mysql2')->table('iot_notification_pull_fix')->insert($notificationInsertData);
                             break;
@@ -194,14 +188,13 @@ class BaseController extends \Illuminate\Routing\Controller
                                 $notificationInsertData['iono_remark'] = '之前15秒内发送过报警，不发送报警电话和短信。';
                             } else {
                                 // 正常发报警；
-                                $url = $notificationInsertData['iono_status'] == '待处理' ? 'https://pingansuiyue.crzfxjzn.com/async.php?oper=send_alert&iono_id=' . $ionoId : '';
+                                $url = 'https://pingansuiyue.crzfxjzn.com/async.php?oper=send_alert&iono_id=' . $ionoId;
                             }
                             DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
                             break;
-                        case 101:
+                        case 101:// 红外
                         case 102:
-                            $timestamp = $notificationInsertData['iono_msg_at'];
-
+                            $timestamp   = $notificationInsertData['iono_msg_at'];
                             $currentTime = Carbon::createFromTimestamp($timestamp)->format('H:i');
 
                             // 定义时间范围
@@ -248,5 +241,18 @@ class BaseController extends \Illuminate\Routing\Controller
             // 在异常情况下报错
             Log::info('海曼4g 移动 insert failed:' . $e->getLine() . ':' . $e->getMessage());
         }
+    }
+
+    public function insertPullFixFinished($imei, $notificationInsertData)
+    {
+        // 查找之前的防拆恢复告警，如果有，恢复之前的告警
+        DB::connection('mysql2')->table('iot_notification_pull_fix')
+            ->where('iono_imei', $imei)
+            ->where('iono_type', 15)
+            ->where('iono_status', '')
+            ->update([
+                'iono_status'      => '已恢复',
+                'iono_handle_time' => $notificationInsertData['iono_crt_time'],
+            ]);
     }
 }
