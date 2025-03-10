@@ -51,7 +51,7 @@ Route::prefix('onenet')->group(function () {
     Route::get('/cancelAllCacheCommand/{imei}', [OneNetController::class, 'cancelAllCacheCommand']);
     Route::get('/issueCacheCommand/{imei}/{args}/{dwPackageNo}', [OneNetController::class, 'issueCacheCommand']);
     Route::get('/createGasSettingCommand/{imei}/{gasAlarmCorrection}', [OneNetController::class, 'createGasSettingCommand']);
-    Route::get('/writeResource/{imei}/{args}/{dwPackageNo}', [OneNetController::class, 'writeResource']);
+    Route::get('/writeResource/{imei}/{args}/{dwPackageNo}', [OneNetController::class, 'customWriteResource']);
     Route::get('/execute/{imei}/{args}/{dwPackageNo}', [OneNetController::class, 'execute']);
     Route::get('/realTimewriteResource/{imei}/{args}/{dwPackageNo}', [OneNetController::class, 'realTimewriteResource']);
     Route::get('/logQuery/{imei}/{uuid}', [OneNetController::class, 'logQuery']);
@@ -84,13 +84,18 @@ Route::prefix('ctwing')->group(function () {
 Route::get('/nbWarm', [NBController::class, 'nbWarm']);
 Route::get('/hkWarm', [NBController::class, 'nbWarm']);
 Route::get('/hmOneNet4GWarm', [NBController::class, 'nbWarm']);
+Route::get('/hmOneNetInfraredWarm', [NBController::class, 'nbWarm']);
 Route::post('/nbWarm', [NBController::class, 'nbReceived']);
 
 // 海康烟感回调
 Route::post('/hkWarm', [HikvisionSmoke::class, 'hkOnenetWarm']);// 移动
 Route::post('/hkCTWingWarm', [HikvisionSmoke::class, 'hkCTWingWarm']);
 Route::post('/hkCTWing4GWarm', [HikvisionSmoke::class, 'hkCTWing4GWarm']);
+// 海曼烟感回调
+Route::post('/hmCTWingInfraredWarm', [HaimanController::class, 'hmCTWingInfraredWarm']);
 Route::post('/hmOneNet4GWarm', [HaimanController::class, 'hmOneNet4GWarm']);
+Route::post('/hmOneNetInfraredWarm', [HaimanController::class, 'hmOneNetInfraredWarm']);
+Route::post('/insertSmokeDetector/{imei}', [HaimanController::class, 'insertSmokeDetector']);
 
 Route::post('/dhCTWingWarm', [DaHuaController::class, 'dhCTWingWarm']);
 
@@ -121,6 +126,7 @@ Route::post('hikvision/getCameraPlayURL', [HikvisionCloudController::class, 'get
 Route::post('hikvision/getAlarm', [HikvisionCloudController::class, 'getAlarm']);
 Route::post('hikvision/getCamera', [HikvisionCloudController::class, 'getCamera']);
 Route::post('hikvision/getVideoDevice', [HikvisionCloudController::class, 'getVideoDevice']);
+Route::post('hikvision/receiveAlarm', [HikvisionCloudController::class, 'receiveAlarm']);
 
 Route::post('hikvision/callback/{code}', [HikvisionCloudController::class, 'callback']);
 
@@ -167,10 +173,20 @@ Route::post('/haoen2Ctwing', [HaoenController::class, 'haoenManualAlarm']);
 
 Route::get('/xiaohui/toDecrypt/{string}', [LiuRuiController::class, 'xiaohuiToDecrypt']);
 
-
 Route::post('/queryImei', [\App\Http\Controllers\IMEICheckController::class, 'queryImei'])->name('submit.form');
 
 Route::prefix('haiman')->group(function () {
     Route::any('/mufflingByOneNet/{imei}', [HaimanController::class, 'mufflingByOneNet']);
     Route::get('/mufflingByCTWing/{productId}/{deviceId}/{masterKey}', [HaimanController::class, 'mufflingByCTWing']);
+
+    // 电信NB下发命令
+    // 示例：http://ryaf.laravel.com/api/haiman/createCMDByCTWing/17189257/868550069363245/5e9dffc817974731a3b610e6c5ca6e51/1F5E00020019
+    Route::get('/createCMDByCTWing/{productId}/{imei}/{masterKey}/{cmd}', [HaimanController::class, 'createCMDByCTWing']);
+    Route::get('/decode/{code}', [HaimanController::class, 'decode']);
+    // 1F5F000400000500 布防时间,0点到5点
+    // 1F5D000101 高灵敏度
+    // 1F650001 一直布防
+    // 1F5E00020019 上报无人时间，0.25小时
+    Route::get('/writeResource/{imei}/{cmd}', [OneNetController::class, 'writeResource']);
+
 });

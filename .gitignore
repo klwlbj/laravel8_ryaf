@@ -13,3 +13,5 @@ yarn-error.log
 /doc/
 .idea/
 /public/phpinfo.php
+public/.htaccess
+public/nginx.htaccess

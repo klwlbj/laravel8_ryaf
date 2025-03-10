@@ -4,6 +4,7 @@ namespace App\Utils;
 
 use App\Utils\Apis\Aep_device_event;
 use App\Utils\Apis\Aep_device_command;
+use App\Utils\Apis\Aep_device_management;
 use App\Utils\Apis\Aep_nb_device_management;
 use App\Utils\Apis\Aep_subscribe_north;
 use App\Utils\Apis\Core\返回响应：bool;
@@ -65,6 +66,24 @@ class CTWing extends BaseIoTClient
                 "startTime" => strtotime('-30 day') * 1000, //必填,30天内
                 "endTime"   => time() * 1000, //必填
             ])
+        );
+        return $result;
+    }
+
+    /**
+     * @param $productId
+     * @param $deviceId
+     * @param $masterKey
+     * @return 返回响应：bool|null
+     */
+    public function QueryDevice($productId, $deviceId, $masterKey)
+    {
+        $result = Aep_device_management::QueryDevice(
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
+            $masterKey,
+            $deviceId,
+            $productId
         );
         return $result;
     }

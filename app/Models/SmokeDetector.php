@@ -8,4 +8,7 @@ class SmokeDetector extends BaseModel
     public $timestamps = null;
 
     public $primaryKey = 'smde_id';
+
+    // 不允许批量赋值的字段
+    protected $guarded = [];
 }
