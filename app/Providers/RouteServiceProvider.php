@@ -66,6 +66,10 @@ class RouteServiceProvider extends ServiceProvider
                 ->middleware('api')
                 ->namespace($this->namespace)
                 ->group(base_path('routes/admin.php'));
+
+            Route::middleware('api')
+                ->namespace($this->namespace)
+                ->group(base_path('routes/liangxin.php'));
         });
     }
 
