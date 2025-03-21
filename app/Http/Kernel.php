@@ -69,5 +69,6 @@ class Kernel extends HttpKernel
         'platformCheckToken' => CheckToken::class,
         'platformCheckSign' => CheckSign::class,
         'checkIp' => CheckIp::class,
+        'liangXinCheckSign' => \App\Http\Middleware\LiangXin\CheckSign::class,
     ];
 }

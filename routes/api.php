@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\HaimanController;
 use App\Http\Controllers\TpsonController;
+use App\Http\Controllers\LiangXinController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NBController;

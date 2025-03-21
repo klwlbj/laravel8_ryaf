@@ -6,8 +6,10 @@ use App\Utils\Tools;
 use App\Utils\YuanLiu;
 use Illuminate\Http\Request;
 
-class YuanLiuController
+class YuanLiuController extends BaseController
 {
+    protected $productIdByOneNet = 'HzFl9NvY5q';
+
     public function report(Request $request){
         $params = $request->all();
 
@@ -117,10 +119,16 @@ class YuanLiuController
         if(!isset($params['msg'])){
             return true;
         }
+
         $params['msg'] = Tools::jsonDecode($params['msg']);
+//        Tools::writeLog('$params','yuanliutest',$params);
         $yuanLiu = (new YuanLiu());
         try {
             $imei = $params['msg']['deviceName'] ?? '';
+
+            if($imei == 863705079999280){
+                return $params['msg'];
+            }
             $params = $yuanLiu->handleOneNetReport($params);
             if(!empty($imei) && !empty($params['msg']['analyze_data'])){
                 $arr = [
@@ -159,15 +167,7 @@ class YuanLiuController
 //                }
             }else{
                 if(isset($params['msg']['type']) && isset($params['msg']['status']) && $params['msg']['status'] == 1 && isset($params['msg']['dev_name'])){
-                    $commandList = $yuanLiu->getCommandByOneNet($params['msg']['dev_name']);
-                    if(!empty($commandList)){
-                        sleep(1);
-                        Tools::writeLog('onenet','yuanliutest',$params);
-                        Tools::writeLog('command','yuanliutest',$commandList);
-                        foreach ($commandList as $command){
-                            $yuanLiu->sendCommandByOneNet($params['msg']['dev_name'],$command['identifier'],$command['params']);
-                        }
-                    }
+//                    $this->getAndSendDeviceCacheCMD($params['msg']['dev_name'],$params['id'] ?? '');
                 }
             }
         } catch (\Exception $e) {
@@ -204,21 +204,50 @@ class YuanLiuController
 
     public function mufflingByOneNet($imei)
     {
-        return (new YuanLiu())->mufflingByOneNet($imei);
+        return $this->insertDeviceCacheCMD($imei,Tools::jsonEncode([
+            "device_name"        => $imei,
+            "product_id"      => $this->productIdByOneNet,
+            'identifier' => 'cmd',
+            'params' => [
+                'muffling' => 1
+            ]
+        ]));
     }
 
     public function setThresholdByOneNet($imei,$alarmValue)
     {
-        return (new YuanLiu())->setThresholdByOneNet($imei,$alarmValue);
+        $realValue = (new YuanLiu())->convertValue($alarmValue);
+        return $this->insertDeviceCacheCMD($imei,Tools::jsonEncode([
+            "device_name"        => $imei,
+            "product_id"      => $this->productIdByOneNet,
+            'identifier' => 'Smoke_Value_down',
+            'params' => [
+                'Smoke_Alarm_Value' => $realValue
+            ]
+        ]));
     }
 
     public function setDetectionTimeByOneNet($imei,$time)
     {
-        return (new YuanLiu())->setDetectionTimeByOneNet($imei,$time);
+        return $this->insertDeviceCacheCMD($imei,Tools::jsonEncode([
+            "device_name"        => $imei,
+            "product_id"      => $this->productIdByOneNet,
+            'identifier' => 'Detection_Timer_down',
+            'params' => [
+                'Smoke_Detection_Timer' => $time
+            ]
+        ]));
     }
 
     public function setTempThresholdByOneNet($imei,$value)
     {
-        return (new YuanLiu())->setTempThresholdByOneNet($imei,$value);
+        return $this->insertDeviceCacheCMD($imei,Tools::jsonEncode([
+            "device_name"        => $imei,
+            "product_id"      => $this->productIdByOneNet,
+            'identifier' => 'High_Temp_down',
+            'params' => [
+                'High_Temperature' => $value
+            ]
+        ]));
     }
 }
