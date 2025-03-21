@@ -453,6 +453,7 @@ class HikvisionCloudController
             $dataList = $json->fps->msgList[0]->body->data;
             Log::info('海热成像摄像头Data:' . json_encode($dataList));
 
+                // dd(21);
             foreach ($dataList as $data) {
                 $data       = (object) $data;
                 $alarmState = $data->alarmState;
@@ -490,8 +491,8 @@ class HikvisionCloudController
                     'iono_alarm_id'      => $alarmID,
                 ];
                 // 插入事务
-                DB::beginTransaction();
-                $ionoId = DB::table('iot_notification')->insertGetId($notificationInsertData);
+                DB::connection('mysql2')->beginTransaction();
+                $ionoId = DB::connection('mysql2')->table('iot_notification')->insertGetId($notificationInsertData);
 
                 $picUrl = [];
                 foreach ($alarmURLs as $alarmURL) {
@@ -527,12 +528,12 @@ class HikvisionCloudController
                         'atta_crt_time' => date("Y-m-d H:i:s.u"), // like 2025-01-09 16:38:45.098261
                     ];
 
-                    DB::table('attachment')->insert($attachmentInsertData);
+                    DB::connection('mysql2')->table('attachment')->insert($attachmentInsertData);
                 }
 
                 if (!empty($alarmID) && $ionoType == 122) { //只有火焰报警和火焰报警解除，才做这个逻辑，其他的不做
                     // 更新原来的报警记录
-                    DB::table('iot_notification_alert')
+                    DB::connection('mysql2')->table('iot_notification_alert')
                         ->where('iono_alarm_id', $alarmID)
                         ->where('iono_cancel_iono_id', 0)
                         ->update([
@@ -540,9 +541,10 @@ class HikvisionCloudController
                         ]);
                 }
                 $notificationInsertData['iono_id'] = $ionoId;
-                in_array($ionoType, [2, 4]) ? null : DB::table('iot_notification_alert')->insert($notificationInsertData);
+                in_array($ionoType, [2, 4]) ? null : DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
 
-                DB::commit();
+                DB::connection('mysql2')->commit();
+                // return 111;
             }
         } catch (Exception $e) {
             // 在异常情况下报错
