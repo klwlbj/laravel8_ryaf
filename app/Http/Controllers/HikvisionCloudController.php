@@ -481,7 +481,7 @@ class HikvisionCloudController
                     'iono_type'          => $ionoType ?? '',
                     'iono_imei'          => $imei,
                     'iono_category'      => '热成像摄像头',
-                    'iono_status'        => in_array($ionoType, [2, 4]) ? '' : '待处理',
+                    'iono_status'        => in_array($ionoType, config('alarm_setting.pending_alarm.type')) ? config('alarm_setting.pending_alarm.status'): config('alarm_setting.other_alarm.status') ,
                     // 'iono_smde_id' => $smdeId,
                     'iono_crt_time'      => date("Y-m-d H:i:s.u"), // like 2025-01-09 16:38:45.098261
                     'iono_alert_status'  => -1,
@@ -541,10 +541,10 @@ class HikvisionCloudController
                         ]);
                 }
                 $notificationInsertData['iono_id'] = $ionoId;
-                in_array($ionoType, [2, 4]) ? null : DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
+
+                in_array($ionoType, [2, 4, 122]) ? null : DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
 
                 DB::connection('mysql2')->commit();
-                // return 111;
             }
         } catch (Exception $e) {
             // 在异常情况下报错

@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HaimanController;
+use App\Http\Controllers\HaiZhuangController;
 use App\Http\Controllers\TpsonController;
 use App\Http\Controllers\LiangXinController;
 use Illuminate\Http\Request;
@@ -104,6 +105,7 @@ Route::prefix('transfer')->name('tpson')->group(function () {
 // 海曼烟感回调
 Route::post('/hmCTWingInfraredWarm', [HaimanController::class, 'hmCTWingInfraredWarm']);
 Route::post('/hmOneNet4GWarm', [HaimanController::class, 'hmOneNet4GWarm']);
+Route::post('/hmOneNet4GWarmReturnJson', [HaimanController::class, 'hmOneNet4GWarmReturnJson']);
 Route::post('/hmOneNetInfraredWarm', [HaimanController::class, 'hmOneNetInfraredWarm']);
 Route::post('/insertSmokeDetector/{imei}', [HaimanController::class, 'insertSmokeDetector']);
 
@@ -204,4 +206,8 @@ Route::prefix('haiman')->group(function () {
 });
 
 Route::get('/migrationTest', [\App\Http\Controllers\BaseController::class, 'migrationTest']);
+
+Route::prefix('haizhuang')->group(function (){
+    Route::get('/pushAlarm/{ionoId}', [HaiZhuangController::class, 'pushAlarm']);
+});
 

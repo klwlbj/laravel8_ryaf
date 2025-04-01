@@ -11,11 +11,20 @@ class TpsonController extends BaseController
     public function data(Request $request)
     {
         $jsonData = $request->all();
-        Log::info('Tpson Warm ' . url()->current() . json_encode($jsonData));
+        Log::info('Tpson data' . url()->current() . json_encode($jsonData));
         (new TpsonServer())->createDeviceLastData($jsonData);
         return response('', 200);
     }
 
+    public function alarm(Request $request)
+    {
+        $jsonData = $request->all();
+        Log::info('Tpson alarm' . url()->current() . json_encode($jsonData));
+        (new TpsonServer())->createNotification($jsonData);
+        return response('200', 200);
+    }
+
+    // 手动导入设备
     public function importDevice($imei, $nodeId)
     {
         return (new TpsonServer())->createDevice($imei, $nodeId);

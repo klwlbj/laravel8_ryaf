@@ -29,10 +29,9 @@ class TpsonServer extends BaseServer
 
     public function createDevice($imei, $nodeId = 0)
     {
-        $placeId      = $this->createPlace(8);
-        $placeNodeIds = Node::getParentIds(8) . ',' . $nodeId . ',';
-        $this->createDeviceLastData(['deviceCode' => $imei]);
-        return SmokeDetector::query()->insert([
+        $placeId      = $this->createPlace($nodeId);
+        $placeNodeIds = Node::getParentIds($nodeId) . ',' . $nodeId . ',';
+        $deviceId = SmokeDetector::query()->insertGetId([
             'smde_type'       => '智能空开',
             'smde_brand_name' => 'TPSON',
             'smde_model_name' => 'MCB1000',
@@ -42,11 +41,11 @@ class TpsonServer extends BaseServer
             'smde_lng'        => '0',
             'smde_lat'        => '0',
         ]);
+        return $this->createDeviceLastData([], $deviceId);
     }
 
-    public function createDeviceLastData(array $json = [])
+    public function createDeviceLastData(array $json = [], $deviceId = 0)
     {
-        $deviceId = SmokeDetector::query()->where('smde_imei', $json['deviceCode'] ?? 0)->value('smde_id');
         // dd($deviceId);
         $data     = $json['data'] ?? [];
         foreach ($data as $item) {
@@ -60,32 +59,38 @@ class TpsonServer extends BaseServer
                 case 'temperature':
                     $temperature = $item['value'];
                     break;
+                case 'current_Aleakage':
+                    $leakCurrent = $item['value'];
+                    break;
                 default:
                     break;
             }
         }
-        $leakCurrent = $json['leakCurrent'] ?? 0;// 剩余电流缺少 todo
-        if(empty($json)){ // todo 有问题
+        if(!empty($deviceId) && empty($json)){ //
             return DeviceLastestData::query()->insert([
                 'dld_smde_id'      => $deviceId,
                 'dld_upd_time'     => date('Y-m-d H:i:s'),
                 'dld_current'      => $current ?? 0,
                 'dld_voltage'      => $voltage ?? 0,
                 'dld_temperature'  => $temperature ?? 0,
-                'dld_leak_current' => $leakCurrent,
+                'dld_leak_current' => $leakCurrent ?? 0,
                 'dld_other_params' => json_encode($json),
             ]);
         }
+        else{
+            $deviceId = SmokeDetector::query()->where('smde_imei', $json['deviceCode'] ?? 0)->value('smde_id');
+            return DeviceLastestData::query()->where('dld_smde_id', $deviceId)->update([
+                // 'dld_smde_id'      => $deviceId,
+                'dld_upd_time'     => date('Y-m-d H:i:s'),
+                'dld_current'      => $current ?? 0,
+                'dld_voltage'      => $voltage ?? 0,
+                'dld_temperature'  => $temperature ?? 0,
+                'dld_leak_current' => $leakCurrent ?? 0,
+                'dld_other_params' => json_encode($json),
+            ]);
 
-        return DeviceLastestData::query()->where('dld_smde_id', $deviceId)->update([
-            // 'dld_smde_id'      => $deviceId,
-            'dld_upd_time'     => date('Y-m-d H:i:s'),
-            'dld_current'      => $current ?? 0,
-            'dld_voltage'      => $voltage ?? 0,
-            'dld_temperature'  => $temperature ?? 0,
-            'dld_leak_current' => $leakCurrent,
-            'dld_other_params' => json_encode($json),
-        ]);
+        }
+
     }
 
     public function createNotification($json)
@@ -99,12 +104,13 @@ class TpsonServer extends BaseServer
             return false;
         }
         return ThirdpartyNotification::insert([
+            'thno_imei'         => $deviceId,
             'thno_thpl_id'      => self::THIRD_PLATFORM_ID,
             'thno_type'         => $json['alarmType'] ?? 0,
             'thno_alarm_status' => 1,
-            'thno_raw'          => json_decode($json),
-            'thno_node_id'      => $device->node_id,
-            'thno_nodes_id'     => $device->nodes_id,
+            'thno_raw'          => json_encode($json),
+            'thno_node_id'      => $device->smde_node_id,
+            'thno_node_ids'     => $device->smde_nodes_id,
             'thno_status'       => 1,
             'thno_conclusion'   => '',
         ]);

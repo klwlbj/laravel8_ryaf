@@ -185,15 +185,15 @@ class BaseController extends \Illuminate\Routing\Controller
                                 break;
                             case 1:
                                 // case 3: todo 温度报警张明说先不做
-                                $notificationInsertData['iono_status'] = '待处理';
+                                $notificationInsertData['iono_status'] = config('alarm_setting.pending_alarm.status');
                                 // 查找报警人电话
                                 $phone = DB::connection('mysql2')
                                     ->table('order')
                                     ->where('order_id', $orderId)
                                     ->value('order_user_mobile');
-                                if($device->alert_ignore_until > date( "Y-m-d H:i:s" )){
+                                if($device->smde_alert_ignore_until > date( "Y-m-d H:i:s" )){
                                     $notificationInsertData['iono_status']  = '已忽略';
-                                    $notificationInsertData['iono_remark'] = "根据设备忽略时间【".$device->smde_alert_ignore_until."】自动忽略。";
+                                    $notificationInsertData['iono_remark'] = "根据设备设置的忽略报警时间段自动忽略";
                                 }else{
                                     // 之前15秒内发送过报警，不发送报警电话和短信。
                                     if (DB::connection('mysql2')->table('alert')->where('alert_smde_imei', $imei)
