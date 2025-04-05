@@ -48,7 +48,12 @@ return [
     ],
     // 海康
     'hikvision'        => [
-        'app_key' => env('HIK_KEY', ''),
+        'app_key'    => env('HIK_KEY', ''),
         'app_secret' => env('HIK_SECRET', ''),
+    ],
+    // 海幢街道
+    'haizhuang'        => [
+        'account'  => env('HAIZHUANG_ACCOUNT', ),
+        'password' => env('HAIZHUANG_APPSECRET'),
     ],
 ];

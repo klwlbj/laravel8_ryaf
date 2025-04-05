@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\HaimanController;
+use App\Http\Controllers\HaiZhuangController;
+use App\Http\Controllers\TpsonController;
 use App\Http\Controllers\LiangXinController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -91,9 +93,19 @@ Route::post('/nbWarm', [NBController::class, 'nbReceived']);
 Route::post('/hkWarm', [HikvisionSmoke::class, 'hkOnenetWarm']);// 移动
 Route::post('/hkCTWingWarm', [HikvisionSmoke::class, 'hkCTWingWarm']);
 Route::post('/hkCTWing4GWarm', [HikvisionSmoke::class, 'hkCTWing4GWarm']);
+// 拓深智慧用电平台
+Route::prefix('transfer')->name('tpson')->group(function () {
+    Route::post('/device/data', [TpsonController::class, 'data']);
+    Route::post('/device/fault', [TpsonController::class, 'fault']);
+    Route::post('/device/alarm ', [TpsonController::class, 'alarm']);
+    Route::post('/device/config', [TpsonController::class, 'config']);
+    Route::post('/insert/{imei}/{nodeId}', [TpsonController::class, 'importDevice']);
+
+});
 // 海曼烟感回调
 Route::post('/hmCTWingInfraredWarm', [HaimanController::class, 'hmCTWingInfraredWarm']);
 Route::post('/hmOneNet4GWarm', [HaimanController::class, 'hmOneNet4GWarm']);
+Route::post('/hmOneNet4GWarmReturnJson', [HaimanController::class, 'hmOneNet4GWarmReturnJson']);
 Route::post('/hmOneNetInfraredWarm', [HaimanController::class, 'hmOneNetInfraredWarm']);
 Route::post('/insertSmokeDetector/{imei}', [HaimanController::class, 'insertSmokeDetector']);
 
@@ -177,6 +189,8 @@ Route::get('/xiaohui/toDecrypt/{string}', [LiuRuiController::class, 'xiaohuiToDe
 Route::post('/queryImei', [\App\Http\Controllers\IMEICheckController::class, 'queryImei'])->name('submit.form');
 
 Route::prefix('haiman')->group(function () {
+    Route::get('/insertSmokeDetector/{imei}', [HaimanController::class, 'insertSmokeDetector']);
+    Route::get('/insertGasDetector/{imei}', [HaimanController::class, 'insertGasDetector']);
     Route::any('/mufflingByOneNet/{imei}', [HaimanController::class, 'mufflingByOneNet']);
     Route::get('/mufflingByCTWing/{productId}/{deviceId}/{masterKey}', [HaimanController::class, 'mufflingByCTWing']);
 
@@ -191,3 +205,10 @@ Route::prefix('haiman')->group(function () {
     Route::get('/writeResource/{imei}/{cmd}', [OneNetController::class, 'writeResource']);
 
 });
+
+Route::get('/migrationTest', [\App\Http\Controllers\BaseController::class, 'migrationTest']);
+
+Route::prefix('haizhuang')->group(function (){
+    Route::get('/pushAlarm/{ionoId}', [HaiZhuangController::class, 'pushAlarm']);
+});
+

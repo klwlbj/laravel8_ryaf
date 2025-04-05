@@ -453,6 +453,7 @@ class HikvisionCloudController
             $dataList = $json->fps->msgList[0]->body->data;
             Log::info('海热成像摄像头Data:' . json_encode($dataList));
 
+                // dd(21);
             foreach ($dataList as $data) {
                 $data       = (object) $data;
                 $alarmState = $data->alarmState;
@@ -480,7 +481,7 @@ class HikvisionCloudController
                     'iono_type'          => $ionoType ?? '',
                     'iono_imei'          => $imei,
                     'iono_category'      => '热成像摄像头',
-                    'iono_status'        => in_array($ionoType, [2, 4]) ? '' : '待处理',
+                    'iono_status'        => in_array($ionoType, config('alarm_setting.pending_alarm.type')) ? config('alarm_setting.pending_alarm.status'): config('alarm_setting.other_alarm.status') ,
                     // 'iono_smde_id' => $smdeId,
                     'iono_crt_time'      => date("Y-m-d H:i:s.u"), // like 2025-01-09 16:38:45.098261
                     'iono_alert_status'  => -1,
@@ -490,8 +491,8 @@ class HikvisionCloudController
                     'iono_alarm_id'      => $alarmID,
                 ];
                 // 插入事务
-                DB::beginTransaction();
-                $ionoId = DB::table('iot_notification')->insertGetId($notificationInsertData);
+                DB::connection('mysql2')->beginTransaction();
+                $ionoId = DB::connection('mysql2')->table('iot_notification')->insertGetId($notificationInsertData);
 
                 $picUrl = [];
                 foreach ($alarmURLs as $alarmURL) {
@@ -527,12 +528,12 @@ class HikvisionCloudController
                         'atta_crt_time' => date("Y-m-d H:i:s.u"), // like 2025-01-09 16:38:45.098261
                     ];
 
-                    DB::table('attachment')->insert($attachmentInsertData);
+                    DB::connection('mysql2')->table('attachment')->insert($attachmentInsertData);
                 }
 
                 if (!empty($alarmID) && $ionoType == 122) { //只有火焰报警和火焰报警解除，才做这个逻辑，其他的不做
                     // 更新原来的报警记录
-                    DB::table('iot_notification_alert')
+                    DB::connection('mysql2')->table('iot_notification_alert')
                         ->where('iono_alarm_id', $alarmID)
                         ->where('iono_cancel_iono_id', 0)
                         ->update([
@@ -540,9 +541,10 @@ class HikvisionCloudController
                         ]);
                 }
                 $notificationInsertData['iono_id'] = $ionoId;
-                in_array($ionoType, [2, 4]) ? null : DB::table('iot_notification_alert')->insert($notificationInsertData);
 
-                DB::commit();
+                in_array($ionoType, [2, 4, 122]) ? null : DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
+
+                DB::connection('mysql2')->commit();
             }
         } catch (Exception $e) {
             // 在异常情况下报错

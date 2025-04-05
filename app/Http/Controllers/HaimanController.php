@@ -143,15 +143,26 @@ class HaimanController extends BaseController
         );
     }
 
+    public function hmOneNet4GWarmReturnJson(Request $request)
+    {
+        return $this->hmOneNet4GWarm($request, 1);
+    }
+
     /**
      * 移动海曼烟感4G回调地址
      * @param Request $request
      * @return Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
-    public function hmOneNet4GWarm(Request $request)
+    public function hmOneNet4GWarm(Request $request, $isZhangMing = 0)
     {
-        $data         = $request->input();
-        $msg          = config('app.debug') === 'true' ? json_decode(json_encode($data['msg']), true) : json_decode($data['msg'], true);// 正式环境和测试环境数据格式不一样，测试时需要转换
+        $data = $request->input();
+        if (empty($data)) {
+            return response()->json(['message' => 'Fail']);
+        }
+        // dd (json_decode(json_encode($data['msg']), true));
+
+        $msg = config('app.debug') ? json_decode(json_encode($data['msg']), true) : json_decode($data['msg'], true);// 正式环境和测试环境数据格式不一样，测试时需要转换
+        // dd($msg);
         $data['msg']  = $msg;
         $nonce        = $data['nonce'];
         $ionoPlatform = 'ONENET';
@@ -220,7 +231,10 @@ class HaimanController extends BaseController
                     }
                 }
 
-                $this->insertWarm($heartbeatTime, $ionoMazePollution, $ionoSmokeScope, $ionoRsrp, $ionoTemperture, $ionoIMSI, $ionoThresholdTemperature, $ionoThresholdSmokeScope, $ionoBattery, $ionoICCID, $ionoPlatform, $data, $time, $ionoIMEI, $ionoThresholdNbModuleBattery, $imei, $ionoRsrq, $ionoSnr, $productId, $alarmStatus);
+                $insertWarm = $this->insertWarm($heartbeatTime, $ionoMazePollution, $ionoSmokeScope, $ionoRsrp, $ionoTemperture, $ionoIMSI, $ionoThresholdTemperature, $ionoThresholdSmokeScope, $ionoBattery, $ionoICCID, $ionoPlatform, $data, $time, $ionoIMEI, $ionoThresholdNbModuleBattery, $imei, $ionoRsrq, $ionoSnr, $productId, $alarmStatus, '', '', $isZhangMing);
+                if ($insertWarm && $isZhangMing) {
+                    return response()->json(['message' => 'Success', 'data' => $insertWarm]);
+                }
             }
             // 从命令缓存表中，获取命令，马上下发
             $this->getAndSendDeviceCacheCMD($imei, $data['id'] ?? '', 3);
@@ -471,9 +485,8 @@ class HaimanController extends BaseController
      * @param array $alarmStatus
      * @param string $ionoMsgValueHex
      * @param string $deviceId
-     * @return void
      */
-    private function insertWarm($heartbeatTime, $ionoMazePollution, $ionoSmokeScope, $ionoRsrp, $ionoTemperture, $ionoIMSI, $ionoThresholdTemperature, $ionoThresholdSmokeScope, $ionoBattery, $ionoICCID, $ionoPlatform, $data, int $time, $ionoIMEI, $ionoThresholdNbModuleBattery, $imei, $ionoRsrq, $ionoSnr, string $productId, array $alarmStatus, string $ionoMsgValueHex = '', string $deviceId = ''): void
+    private function insertWarm($heartbeatTime, $ionoMazePollution, $ionoSmokeScope, $ionoRsrp, $ionoTemperture, $ionoIMSI, $ionoThresholdTemperature, $ionoThresholdSmokeScope, $ionoBattery, $ionoICCID, $ionoPlatform, $data, int $time, $ionoIMEI, $ionoThresholdNbModuleBattery, $imei, $ionoRsrq, $ionoSnr, string $productId, array $alarmStatus, string $ionoMsgValueHex = '', string $deviceId = '', $isZhangMing = 0)
     {
         $deviceUpdateData = [
             'smde_last_heart_beat'           => $heartbeatTime,
@@ -516,14 +529,19 @@ class HaimanController extends BaseController
             'iono_rsrq'                        => $ionoRsrq ?? '',
             'iono_snr'                         => $ionoSnr ?? '',
             'iono_category'                    => '烟感',
-            'iono_status'                      => '待处理',
+            'iono_status'                      => config('alarm_setting.other_alarm.status'),
             // 'iono_smde_id' => $smdeId,
             'iono_crt_time'                    => date("Y-m-d H:i:s.u"), // like 2025-01-09 16:38:45.098261
             'iono_alert_status'                => -1,
             'iono_device_status'               => -1,
             'iono_product_id'                  => $productId,
             'iono_msg_value_hex'               => $ionoMsgValueHex,
+            // 'iono_type_list'                   => $alarmStatus,
         ];
+        if ($isZhangMing) {
+            $notificationInsertData['iono_type_list'] = $alarmStatus;
+            return $notificationInsertData;
+        }
 
         $this->insertIOT($deviceUpdateData, $notificationInsertData, $alarmStatus, $imei);
     }

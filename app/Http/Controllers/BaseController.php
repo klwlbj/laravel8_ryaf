@@ -12,10 +12,16 @@ use Illuminate\Support\Facades\DB;
 use App\Models\DeviceCacheCommands;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Validator;
 
 class BaseController extends \Illuminate\Routing\Controller
 {
+    public function migrationTest()
+    {
+        return Artisan::call("config:cache");
+    }
+
     /**
      * 生成json格式响应结果
      *
@@ -128,118 +134,144 @@ class BaseController extends \Illuminate\Routing\Controller
     {
         // $time = time();
         // inno_type 类型：0：无报警；1：烟雾报警；2：烟雾报警解除；3：温度报警；4：温度报警解除；5：烟感低电量报警；6：烟感低电量报警解除；7：NB低电量报警；8：NB低电量报警解除；9：烟雾传感器故障；10：烟雾传感器故障解除；11：温湿度传感器故障；12：温湿度传感器故障解除；13：自检测试开始；14：自检测试完成；15：防拆触发；16：防拆恢复；17：烟雾板连接断开；18：烟雾板连接恢复；；组包时高字节在前 ，低字节在后。201-电流过大；
+        $maxRetries = 3; // 最大重试次数
+        $delay      = 200; // 每次重试之间的延迟（毫秒）
 
-        $url = '';
-        try {
-            // laravel事务代码
-            DB::connection('mysql2')->transaction(function () use ($deviceUpdateData, $notificationInsertData, $alarmStatus, $imei, &$url) {
-                $device = SmokeDetector::on('mysql2')->where('smde_imei', $imei)->first();
-                if (!$device) {
-                    return;
-                }
-                $smdeId = $device->smde_id;
-                $device->update($deviceUpdateData);
+        // 定义一个重试机制
+        $attempt = 0;
+        $success = false;
 
-                foreach ($alarmStatus as $ionoType) {
-                    unset($notificationInsertData['iono_id']);
-                    $notificationInsertData['iono_type']    = $ionoType;
-                    $notificationInsertData['iono_smde_id'] = $smdeId;
-
-                    $ionoId = DB::connection('mysql2')->table('iot_notification')->insertGetId($notificationInsertData);
-
-                    $notificationInsertData['iono_id'] = $ionoId;
-                    $orderId                           = $device->smde_order_id;
-
-                    if (empty($orderId)) {
+        while ($attempt < $maxRetries && !$success) {
+            $url = '';
+            try {
+                // laravel事务代码
+                DB::connection('mysql2')->transaction(function () use ($deviceUpdateData, $notificationInsertData, $alarmStatus, $imei, &$url) {
+                    $device = SmokeDetector::on('mysql2')->where('smde_imei', $imei)->first();
+                    if (!$device) {
                         return;
                     }
+                    $smdeId = $device->smde_id;
+                    $device->update($deviceUpdateData);
 
-                    switch($ionoType) {
-                        // 自检
-                        case 0:
-                            DB::connection('mysql2')->table('iot_notification_self_check')->insert($notificationInsertData);
-                            // 防拆恢复（针对物模型）
-                            $this->insertPullFixFinished($imei, $notificationInsertData);
-                            break;
-                        case 13:
-                            DB::connection('mysql2')->table('iot_notification_self_check')->insert($notificationInsertData);
-                            break;
-                        case 15:// 防拆
-                        case 16:// 防拆恢复(针对透传)
-                            $ionoType == 16 ?  $this->insertPullFixFinished($imei, $notificationInsertData) : null;
-                            $notificationInsertData['iono_status'] = '';
-                            DB::connection('mysql2')->table('iot_notification_pull_fix')->insert($notificationInsertData);
-                            break;
-                        case 1:
-                            // case 3: todo 温度报警张明说先不做
-                            $notificationInsertData['iono_status'] = '待处理';
-                            // 查找报警人电话
-                            $phone = DB::connection('mysql2')
-                                ->table('order')
-                                ->where('order_id', $orderId)
-                                ->value('order_user_mobile');
-                            // 之前15秒内发送过报警，不发送报警电话和短信。
-                            if (DB::connection('mysql2')->table('alert')->where('alert_smde_imei', $imei)
-                                ->where('alert_type', 'voice')
-                                ->where('alert_mobile', $phone)
-                                ->where('alert_crt_time', '>', date("Y-m-d H:i:s", strtotime('-15 seconds')))
-                                ->exists()) {
-                                //不发报警
-                                $notificationInsertData['iono_remark'] = '之前15秒内发送过报警，不发送报警电话和短信。';
-                            } else {
-                                // 正常发报警；
-                                $url = 'https://pingansuiyue.crzfxjzn.com/async.php?oper=send_alert&iono_id=' . $ionoId;
-                            }
-                            DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
-                            break;
-                        case 101:// 红外
-                        case 102:
-                            $timestamp   = $notificationInsertData['iono_msg_at'];
-                            $currentTime = Carbon::createFromTimestamp($timestamp)->format('H:i');
+                    foreach ($alarmStatus as $ionoType) {
+                        unset($notificationInsertData['iono_id']);
+                        $notificationInsertData['iono_type']    = $ionoType;
+                        $notificationInsertData['iono_smde_id'] = $smdeId;
 
-                            // 定义时间范围
-                            $timeRanges = [
-                                ['start' => '06:00', 'end' => '09:00'],
-                                // ['start' => '09:30', 'end' => '10:45'], // todo 待删，测试用
-                                ['start' => '11:00', 'end' => '14:00'],
-                                ['start' => '17:00', 'end' => '20:00'],
-                            ];
+                        $ionoId = DB::connection('mysql2')->table('iot_notification')->insertGetId($notificationInsertData);
 
-                            // 检查当前时间是否在某个时间范围内
-                            foreach ($timeRanges as $range) {
-                                if ($currentTime >= $range['start'] && $currentTime <= $range['end']) {
-                                    $currentStart = date('Y-m-d ') . $range['start'] . ':00';
-                                    $currentEnd   = date('Y-m-d ') . $range['end'] . ':00';
+                        $notificationInsertData['iono_id'] = $ionoId;
+                        $orderId                           = $device->smde_order_id;
+
+                        if (empty($orderId)) {
+                            return;
+                        }
+
+                        switch($ionoType) {
+                            // 自检
+                            case 0:
+                                DB::connection('mysql2')->table('iot_notification_self_check')->insert($notificationInsertData);
+                                // 防拆恢复（针对物模型）
+                                $this->insertPullFixFinished($imei, $notificationInsertData);
+                                break;
+                            case 13:
+                                DB::connection('mysql2')->table('iot_notification_self_check')->insert($notificationInsertData);
+                                break;
+                            case 15:// 防拆
+                            case 16:// 防拆恢复(针对透传)
+                                $ionoType == 16 ? $this->insertPullFixFinished($imei, $notificationInsertData) : null;
+                                $notificationInsertData['iono_status'] = '';
+                                DB::connection('mysql2')->table('iot_notification_pull_fix')->insert($notificationInsertData);
+                                break;
+                            case 1:
+                                // case 3: todo 温度报警张明说先不做
+                                $notificationInsertData['iono_status'] = config('alarm_setting.pending_alarm.status');
+                                // 查找报警人电话
+                                $phone = DB::connection('mysql2')
+                                    ->table('order')
+                                    ->where('order_id', $orderId)
+                                    ->value('order_user_mobile');
+                                if($device->smde_alert_ignore_until > date( "Y-m-d H:i:s" )){
+                                    $notificationInsertData['iono_status']  = '已忽略';
+                                    $notificationInsertData['iono_remark'] = "根据设备设置的忽略报警时间段自动忽略";
+                                }else{
+                                    // 之前15秒内发送过报警，不发送报警电话和短信。
+                                    if (DB::connection('mysql2')->table('alert')->where('alert_smde_imei', $imei)
+                                        ->where('alert_type', 'voice')
+                                        ->where('alert_mobile', $phone)
+                                        ->where('alert_crt_time', '>', date("Y-m-d H:i:s", strtotime('-15 seconds')))
+                                        ->exists()) {
+                                        //不发报警
+                                        $notificationInsertData['iono_remark'] = '之前15秒内发送过报警，不发送报警电话和短信。';
+                                    }
+                                    else {
+                                            // 正常发报警；
+                                            $url = 'https://pingansuiyue.crzfxjzn.com/async.php?oper=send_alert&iono_id=' . $ionoId;
+                                        }
                                 }
-                            }
-                            if (isset($currentStart, $currentEnd)) {
-                                // 查找出iot_notification_alert表是否有iono_type为101的报警，在当前时间范围内
-                                // 如果检测到有人，整个时间段停止检测
-                                $infraredRecord = DB::connection('mysql2')->table('iot_notification_alert')
-                                    ->where('iono_type', 101)
-                                    ->where('iono_smde_id', $smdeId)
-                                    ->where('iono_msg_at', '>=', strtotime($currentStart))
-                                    ->where('iono_msg_at', '<=', strtotime($currentEnd))
-                                    ->exists();
-                                // 不存在才插入
-                                if (!$infraredRecord) {
-                                    $notificationInsertData['iono_status'] = ''; // todo 测试时暂时留空
-                                    DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
+
+                                DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
+                                break;
+                            case 101:// 红外
+                            case 102:
+                                $timestamp   = $notificationInsertData['iono_msg_at'];
+                                $currentTime = Carbon::createFromTimestamp($timestamp)->format('H:i');
+
+                                // 定义时间范围
+                                $timeRanges = [
+                                    ['start' => '06:00', 'end' => '09:00'],
+                                    // ['start' => '09:30', 'end' => '10:45'], // todo 待删，测试用
+                                    ['start' => '11:00', 'end' => '14:00'],
+                                    ['start' => '17:00', 'end' => '20:00'],
+                                ];
+
+                                // 检查当前时间是否在某个时间范围内
+                                foreach ($timeRanges as $range) {
+                                    if ($currentTime >= $range['start'] && $currentTime <= $range['end']) {
+                                        $currentStart = date('Y-m-d ') . $range['start'] . ':00';
+                                        $currentEnd   = date('Y-m-d ') . $range['end'] . ':00';
+                                    }
                                 }
-                            }
-                            break;
-                        default:
-                            break;
+                                if (isset($currentStart, $currentEnd)) {
+                                    // 查找出iot_notification_alert表是否有iono_type为101的报警，在当前时间范围内
+                                    // 如果检测到有人，整个时间段停止检测
+                                    $infraredRecord = DB::connection('mysql2')->table('iot_notification_alert')
+                                        ->where('iono_type', 101)
+                                        ->where('iono_smde_id', $smdeId)
+                                        ->where('iono_msg_at', '>=', strtotime($currentStart))
+                                        ->where('iono_msg_at', '<=', strtotime($currentEnd))
+                                        ->exists();
+                                    // 不存在才插入
+                                    if (!$infraredRecord) {
+                                        $notificationInsertData['iono_status'] = ''; // todo 测试时暂时留空
+                                        DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
+                                    }
+                                }
+                                break;
+                            default:
+                                break;
+                        }
                     }
+                });
+                // 如果到这里没有异常，说明事务提交成功
+                $success = true;
+                // 发送告警电话和短信
+                if (!empty($url)) {
+                    Http::withOptions(['verify' => false])->get($url);
                 }
-            });
-            // 发送告警电话和短信
-            if (!empty($url)) {
-                Http::withOptions(['verify' => false])->get($url);
+            } catch (Exception $e) {
+                // 在异常情况下报错
+                Log::info('海曼4g 移动 insert failed:' . $e->getLine() . ':' . $e->getMessage());
+                $attempt++;
+
+                // 如果超过最大重试次数，则抛出异常
+                if ($attempt >= $maxRetries) {
+                    throw new \Exception('操作失败，已超过最大重试次数');
+                }
+
+            // 延迟一段时间再重试
+                usleep($delay * 1000); // usleep接受的是微秒，乘以1000转换为毫秒
             }
-        } catch (Exception $e) {
-            // 在异常情况下报错
-            Log::info('海曼4g 移动 insert failed:' . $e->getLine() . ':' . $e->getMessage());
         }
     }
 
