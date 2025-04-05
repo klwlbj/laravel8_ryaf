@@ -5,6 +5,7 @@ namespace App\Utils;
 use App\Http\Logic\ToolsLogic;
 use App\Utils\Apis\Aep_device_command;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\DB;
 
 class YuanLiu
 {
@@ -134,6 +135,23 @@ class YuanLiu
             }
 
             $analyzeData['RSSI'] = ($analyzeData['rsrp'] ?: 0) + 10;
+
+            $analyzeData['signalPower'] = $analyzeData['rsrp'];
+
+            if(isset($data['deviceName']) && !empty($data['deviceName'])){
+                DB::connection('mysql2')->table('smoke_detector')
+                    ->where('smde_imei',$data['deviceName'])
+                    ->update([
+                        'smde_last_smokescope' => floatval($analyzeData['smoke_concentration']) * 100,
+                        'smde_last_temperature' => floatval($analyzeData['temperature']) * 100,
+                        'smde_last_humidity' => $analyzeData['humility'],
+//                        'smde_last_signal_intensity' => $analyzeData['rsrp'],
+                        'smde_last_maze_pollution' => $analyzeData['Maze_pollution_level'],
+                        'smde_threshold_smoke_scope' => floatval($analyzeData['Smoke_Alarm_Value']) * 100,
+                        'smde_threshold_temperature' => floatval($analyzeData['High_Temperature']) * 100,
+                    ]);
+            }
+
 
             $params['msg']['serviceId'] = 'heartbeat';
         }elseif ($data['notifyType'] == 'event' && isset($data['data']['params']['tamper_report'])){

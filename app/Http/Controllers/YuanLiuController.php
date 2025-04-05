@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Utils\Tools;
 use App\Utils\YuanLiu;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class YuanLiuController extends BaseController
 {
@@ -67,7 +68,12 @@ class YuanLiuController extends BaseController
                         if(isset($params['analyze_data']['rsrp']) && is_numeric($params['analyze_data']['rsrp'])){
                             $params['analyze_data']['rsrp'] = $params['analyze_data']['rsrp'] / 10;
                         }
-
+                        $params['analyze_data']['High_Temperature'] = 0;
+                        $params['analyze_data']['Smoke_Alarm_Value'] = 0;
+                        $params['analyze_data']['humility'] = 0;
+                        $params['analyze_data']['smoke_concentration'] = 0;
+                        $params['analyze_data']['temperature'] = 0;
+                        $params['analyze_data']['signalPower'] = $params['analyze_data']['rsrp'];
                     }else{
                         #第二版
                         #处理烟雾阈值转换
@@ -83,6 +89,21 @@ class YuanLiuController extends BaseController
                             $params['analyze_data']['RSRQ'] = $params['analyze_data']['RSRQ']/2 - 19.5;
                         }
 
+                        $params['analyze_data']['signalPower'] = $params['analyze_data']['rsrp'];
+
+                        if(!empty($imei)){
+                            DB::connection('mysql2')->table('smoke_detector')
+                                ->where('smde_imei',$imei)
+                                ->update([
+                                    'smde_last_smokescope' => floatval($params['analyze_data']['smoke_concentration']) * 100,
+                                    'smde_last_temperature' => floatval($params['analyze_data']['temperature']) * 100,
+                                    'smde_last_humidity' => $params['analyze_data']['humility'],
+//                                    'smde_last_signal_intensity' => $params['analyze_data']['rsrp'],
+                                    'smde_last_maze_pollution' => $params['analyze_data']['Maze_pollution_level'],
+                                    'smde_threshold_smoke_scope' => floatval($params['analyze_data']['Smoke_Alarm_Value']) * 100,
+                                    'smde_threshold_temperature' => floatval($params['analyze_data']['High_Temperature']) * 100,
+                                ]);
+                        }
 //                        $params['analyze_data']['signal_score'] = (new YuanLiu())->calculateSignalScore($params['analyze_data']['RSSI'],$params['analyze_data']['CSQ'],$params['analyze_data']['RSRQ'],$params['analyze_data']['rsrp']);
 
                     }
@@ -249,5 +270,13 @@ class YuanLiuController extends BaseController
                 'High_Temperature' => $value
             ]
         ]));
+    }
+
+    public function gasReport(Request $request)
+    {
+        $params = $request->all();
+        Tools::writeLog('gasReport','yuanliugas',$params);
+
+        return response()->json(['code' => 0, 'message' => 0]);
     }
 }

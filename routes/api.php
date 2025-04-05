@@ -151,6 +151,7 @@ Route::prefix('yuanliu')->group(function () {
     #设置温度阈值
     Route::get('/setTempThreshold/{productId}/{deviceId}/{masterKey}/{value}', [YuanLiuController::class, 'setTempThreshold']);
     Route::any('/report', [YuanLiuController::class, 'report']);
+    Route::any('/gasReport', [YuanLiuController::class, 'gasReport']);
     Route::any('/oneNetReport', [YuanLiuController::class, 'oneNetReport']);
     Route::get('/mufflingByOneNet/{imei}', [YuanLiuController::class, 'mufflingByOneNet']);
     Route::get('/setThresholdByOneNet/{imei}/{alarmValue}', [YuanLiuController::class, 'setThresholdByOneNet']);

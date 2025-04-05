@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Validator;
 
 class LiangXinController extends BaseController
 {
+    public function __construct()
+    {
+        DB::setDefaultConnection('mysql2');
+    }
     public function getTown(Request $request)
     {
         $params = $request->all();

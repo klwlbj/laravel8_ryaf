@@ -307,6 +307,7 @@ class LiangXin
 
     public function unregisterUnit($params)
     {
+        Tools::writeLog('unregisterUnit','liangxin',$params);
         if(!Place::query()->where(['plac_id' => $params['unitId'],'plac_thpl_id' => self::$thplId])->exists()){
             self::setMsg('点位数据不存在');
             return false;
@@ -485,6 +486,7 @@ class LiangXin
 
     public function unregisterDevice($params)
     {
+        Tools::writeLog('unregisterDevice','liangxin',$params);
         if(!SmokeDetector::query()->where(['smde_id' => $params['deviceId'],'smde_thpl_id' => self::$thplId])->exists()){
             self::setMsg('设备数据不存在');
             return false;
