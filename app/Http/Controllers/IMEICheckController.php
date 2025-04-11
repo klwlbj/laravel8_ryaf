@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use App\Models\SmokeDetector;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class IMEICheckController extends BaseController
 {
@@ -235,7 +236,7 @@ class IMEICheckController extends BaseController
                     "appid"     => (string) env('NB_CARD_PLATFORM_APPID'),
                     "appsecret" => (string) env('NB_CARD_PLATFORM_APPSECTRET'),
                     "name"      => "api.v2.card.info",
-                    "iccid"     => $iccid,
+                    "iccid"     => Str::limit($iccid, 19, ''),
                 ],
             ]);
             $platformReturn = json_decode($response->getBody(), true);

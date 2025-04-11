@@ -1,9 +1,5 @@
 <?php
 
-use App\Http\Controllers\HaimanController;
-use App\Http\Controllers\HaiZhuangController;
-use App\Http\Controllers\TpsonController;
-use App\Http\Controllers\LiangXinController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NBController;
@@ -11,10 +7,14 @@ use App\Http\Controllers\HikvisionSmoke;
 use App\Http\Controllers\DaHuaController;
 use App\Http\Controllers\ExcelController;
 use App\Http\Controllers\HaoenController;
+use App\Http\Controllers\TpsonController;
 use App\Http\Controllers\CTWingController;
+use App\Http\Controllers\HaimanController;
 use App\Http\Controllers\LiuRuiController;
 use App\Http\Controllers\OneNetController;
 use App\Http\Controllers\YuanLiuController;
+use App\Http\Controllers\ChangpingController;
+use App\Http\Controllers\HaiZhuangController;
 use App\Http\Controllers\WanLinYunController;
 use App\Http\Controllers\LiuRuiCloudController;
 use App\Http\Controllers\HikvisionCloudController;
@@ -100,9 +100,11 @@ Route::prefix('transfer')->name('tpson')->group(function () {
     Route::post('/device/alarm ', [TpsonController::class, 'alarm']);
     Route::post('/device/config', [TpsonController::class, 'config']);
     Route::post('/insert/{imei}/{nodeId}', [TpsonController::class, 'importDevice']);
-
 });
+// 大华雷达烟感回调
+Route::post('/dhCTWingRadarWarm', [DaHuaController::class, 'dhCTWingRadarWarm']);
 // 海曼烟感回调
+Route::post('/hmCTWingTemperatureSensorWarm', [HaimanController::class, 'hmCTWingTemperatureSensorWarm']);
 Route::post('/hmCTWingInfraredWarm', [HaimanController::class, 'hmCTWingInfraredWarm']);
 Route::post('/hmOneNet4GWarm', [HaimanController::class, 'hmOneNet4GWarm']);
 Route::post('/hmOneNet4GWarmReturnJson', [HaimanController::class, 'hmOneNet4GWarmReturnJson']);
@@ -116,10 +118,15 @@ Route::any('/hmCTWing4GWarm/{string}', [NBController::class, 'hmCTWing4GWarm']);
 // 海康指令解析测试
 Route::get('hikvision/analyze/{string}', [HikvisionSmoke::class, 'analyze']);
 
-// 大华指令解析测试
-Route::get('dahua/analyze/{string}', [DaHuaController::class, 'analyze']);
-Route::get('dahua/analyze2/{string}', [DaHuaController::class, 'analyze2']);
-Route::get('dahua/analyze3/{string}', [DaHuaController::class, 'analyze3']);
+
+Route::prefix('dahua')->group(function () {
+    // 大华指令解析测试
+    Route::get('analyze/{string}', [DaHuaController::class, 'analyze']);
+    Route::get('analyze2/{string}', [DaHuaController::class, 'analyze2']);
+    Route::get('analyze3/{string}', [DaHuaController::class, 'analyze3']);
+    // http://ryaf.laravel.com/api/dahua/muffling/17207128/1F5E00020019/865665053801837/832d3dfe36b548b0b3117a5678653c8d
+    Route::get('muffling/{productId}/{imei}/{masterKey}', [DaHuaController::class, 'muffling']);
+});
 
 Route::post('excel', [ExcelController::class, 'handleImportExport']);
 
@@ -203,12 +210,14 @@ Route::prefix('haiman')->group(function () {
     // 1F650001 一直布防
     // 1F5E00020019 上报无人时间，0.25小时
     Route::get('/writeResource/{imei}/{cmd}', [OneNetController::class, 'writeResource']);
-
 });
 
 Route::get('/migrationTest', [\App\Http\Controllers\BaseController::class, 'migrationTest']);
 
-Route::prefix('haizhuang')->group(function (){
+Route::prefix('haizhuang')->group(function () {
     Route::get('/pushAlarm/{ionoId}', [HaiZhuangController::class, 'pushAlarm']);
 });
 
+Route::prefix('changping')->group(function () {
+    Route::get('/pushAlarm/{ionoId}', [ChangpingController::class, 'pushAlarm']);
+});

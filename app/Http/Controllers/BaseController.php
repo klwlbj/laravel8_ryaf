@@ -143,9 +143,10 @@ class BaseController extends \Illuminate\Routing\Controller
 
         while ($attempt < $maxRetries && !$success) {
             $url = '';
+            $ionoAlertId = null;
             try {
                 // laravel事务代码
-                DB::connection('mysql2')->transaction(function () use ($deviceUpdateData, $notificationInsertData, $alarmStatus, $imei, &$url) {
+                DB::connection('mysql2')->transaction(function () use ($deviceUpdateData, $notificationInsertData, $alarmStatus, $imei, &$url, &$ionoAlertId) {
                     $device = SmokeDetector::on('mysql2')->where('smde_imei', $imei)->first();
                     if (!$device) {
                         return;
@@ -184,7 +185,7 @@ class BaseController extends \Illuminate\Routing\Controller
                                 DB::connection('mysql2')->table('iot_notification_pull_fix')->insert($notificationInsertData);
                                 break;
                             case 1:
-                                // case 3: todo 温度报警张明说先不做
+                            case 3: // 温度报警
                                 $notificationInsertData['iono_status'] = config('alarm_setting.pending_alarm.status');
                                 // 查找报警人电话
                                 $phone = DB::connection('mysql2')
@@ -211,6 +212,7 @@ class BaseController extends \Illuminate\Routing\Controller
                                 }
 
                                 DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
+                                $ionoAlertId = $ionoId;
                                 break;
                             case 101:// 红外
                             case 102:
@@ -258,6 +260,12 @@ class BaseController extends \Illuminate\Routing\Controller
                 // 发送告警电话和短信
                 if (!empty($url)) {
                     Http::withOptions(['verify' => false])->get($url);
+                }
+                if(isset($ionoAlertId)){
+                    // 推送区平台
+                    $yunchuang = Http::withOptions(['verify' => false])->get('https://pingansuiyue2.crzfxjzn.com/api/yunChuang/pushAlert/'.$ionoAlertId.'/'.$imei);
+                    Log::info("区平台返回{$imei}.{$ionoAlertId}" . json_encode($yunchuang->json()));
+
                 }
             } catch (Exception $e) {
                 // 在异常情况下报错

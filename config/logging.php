@@ -100,6 +100,12 @@ return [
             'level'  => env('LOG_LEVEL', 'debug'),
             'days'   => 60,
         ],
+        'dahua'          => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/dahua/dahua.log'),
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => 60,
+        ],
 
         // 'my_custom_log' => [
         //     'driver' => 'single',

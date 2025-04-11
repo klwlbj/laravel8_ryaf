@@ -8,7 +8,8 @@ use Carbon\Carbon;
 
 class ChangpingServer extends BaseServer
 {
-    public string $url = 'http://beijing.xfwlw119.com:8980/openapitest/v2/gateway';
+    // public string $url = 'http://beijing.xfwlw119.com:8980/openapitest/v2/gateway';
+    public string $url = 'http://beijing.xfwlw119.com:8980/openapi/v2/gateway';
     public function sendRequest($method, $data)
     {
         // 第三方平台要求的参数

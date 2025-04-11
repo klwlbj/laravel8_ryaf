@@ -49,7 +49,7 @@ class PushChangPingSmokeDetectors extends Command
     {
         $this->pushPlace();
         $imeis = $this->pushDevice();
-        $this->pushAlarm($imeis);
+        // $this->pushAlarm($imeis);
         $this->line('推送完成');
     }
 
@@ -59,6 +59,8 @@ class PushChangPingSmokeDetectors extends Command
         // 查找出昌平节点下的所有place
         $places = Place::on('mysql2')
             ->where('plac_node_id', '462')
+            ->where('plac_user_id', '<>', 0)
+            // ->where('plac_id', 351784)
             ->leftJoin('user', 'user.user_id', '=', 'place.plac_user_id')
             ->leftJoin('order', 'order.order_id', '=', 'place.plac_order_id')
             ->get();
@@ -71,7 +73,7 @@ class PushChangPingSmokeDetectors extends Command
             $list[]     = [
                 "companyName"   => $item->plac_name,
                 "address"       => $item->plac_address,
-                "areaCode"      => '110114001', // 区域编码未确定，暂时写死 todo
+                "areaCode"      => '110114111', // 区域编码全是“南邵镇”，暂时写死 todo
                 "lng"           => $item->plac_lng,
                 "lat"           => $item->plac_lat,
                 'corporator'    => $userName,
@@ -82,18 +84,32 @@ class PushChangPingSmokeDetectors extends Command
         $data = [
             "validates" => $list,
         ];
+        $this->line(json_encode($list, JSON_UNESCAPED_UNICODE));
+
         $res = json_decode((new ChangpingServer())->sendRequest($method, $data), true);
 
         // dd($res);
         if ($res['success']) {
-            $this->info('推送成功');
             $keyValue = $res['data'];
-            foreach ($keyValue as $key => $value) {
-                DB::connection('mysql2')->table('changping_key_value')->insert([
-                    'cp_key'   => $key,
-                    'cp_value' => $value,
-                ]);
+            // dd($keyValue);
+            $this->info('推送成功' . json_encode($keyValue, JSON_UNESCAPED_UNICODE));
+
+            // 将数据转换为集合并合并所有项
+            // 使用 merge 保持键名
+            $flattened = collect($keyValue)->reduce(function ($carry, $item) {
+                return $carry + $item; // 保持键名不丢失
+            }, []);
+
+            $insertData = [];
+            foreach ($flattened as $key =>  $value) {
+                $insertData[] = [
+                    'cp_key'   => (int) $key,
+                    'cp_value' => (int) $value,
+                ];
             }
+            // 清空表数据
+            DB::connection('mysql2')->table('changping_key_value')->truncate();
+            DB::connection('mysql2')->table('changping_key_value')->insert($insertData);
         } else {
             $this->error(json_encode($res, JSON_UNESCAPED_UNICODE));
         }
@@ -105,6 +121,7 @@ class PushChangPingSmokeDetectors extends Command
         // 查找出昌平节点下的所有烟感
         $devices = SmokeDetector::on('mysql2')
             ->where('smde_node_ids', 'like', '%' . '462' . '%')
+            ->where('smde_user_id', '<>', 0)
             ->leftJoin('place', 'place.plac_id', '=', 'smoke_detector.smde_place_id')
             ->get();
 
@@ -132,7 +149,7 @@ class PushChangPingSmokeDetectors extends Command
         $data = [
             "validates" => $list,
         ];
-        // $this->line(json_encode($list, JSON_UNESCAPED_UNICODE));
+        $this->line('推送设备中：'.json_encode($list, JSON_UNESCAPED_UNICODE));
 
         $this->line((new ChangpingServer())->sendRequest($method, $data));
 
@@ -151,7 +168,6 @@ class PushChangPingSmokeDetectors extends Command
             ->get();
 
         foreach ($alarms as $alarm) {
-
             $data = [
                 'monitorCode'     => $alarm->iono_imei,
                 'nodeCode'        => $alarm->iono_imei,

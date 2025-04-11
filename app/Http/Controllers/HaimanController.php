@@ -23,6 +23,8 @@ class HaimanController extends BaseController
 
     public const CTWING_INFRARED_PRODUCT_ID = '17189257';
 
+    public const CTWING_TEMPERATURE_PRODUCT_ID = '17194112';
+
     public array $struct = [
         '1f46' => ['name' => 'signal', 'convertType' => self::CONVERT_TYPE_NUMBER], // 信号
         '1f49' => ['name' => 'IMEI', 'convertType' => self::CONVERT_TYPE_SPECIAL_CODE],
@@ -261,6 +263,77 @@ class HaimanController extends BaseController
         ]);
     }
 
+    public function insertGasDetector(string $imei)
+    {
+        // 事务开始
+        DB::beginTransaction();
+        // 插入订单Order表
+        $orderId = DB::connection('mysql2')->table('order')->insertGetId([
+            'order_iid'                  => 2025040810099, // like 2022020310001
+            'order_node_id'              => 89,
+            'order_node_ids'             => ',3,4,5,7,21,10,47,89,',
+            'order_user_name'            => '测试订单',
+            'order_user_mobile'          => '18178115351',
+            'order_place_name'           => '泰沙路测试',
+            'order_remark'               => '测试订单',
+            'order_contract_type'        => '购买',
+            'order_status'               => '交付完成',
+            'order_user_id'              => 1251,
+            'order_prospecter_date'      => date('Y-m-d H:i:s'),
+            'order_actual_delivery_date' => date('Y-m-d H:i:s'),
+            'order_service_date'         => date('2027-m-d'),
+            'order_service_month_count'  => 12,
+        ]);
+        // 插入place表
+        $placeId = DB::connection('mysql2')->table('place')->insertGetId([
+            'plac_name'     => '测试地点',
+            'plac_address'  => '测试地址',
+            'plac_order_id' => $orderId,
+            'plac_node_id'  => 1,
+            'plac_node_ids' => ',3,4,5,7,21,10,',
+            'plac_user_id'  => 1251,
+        ]);
+
+        DB::connection('mysql2')->table('smoke_detector')->insert([
+            "smde_type"         => '燃气探测器',
+            "smde_brand_name"   => '海曼',
+            "smde_model_name"   => 'JT-720NM-NB',
+            "smde_imei"         => $imei,
+            "smde_model_tag"    => '',
+            'smde_iot_platform' => 'ONENET',
+            "smde_part_id"      => 1, // 如约自己的设备
+            'smde_status'       => '已交付',
+            'smde_order_id'     => $orderId,
+            'smde_node_ids'     => ',3,4,5,7,21,10,',
+            'smde_user_id'      => 1251,
+            'smde_user_ids'     => ',1251,',
+            'smde_place_id'     => $placeId,
+        ]);
+        // 事务提交
+        DB::commit();
+        return;
+    }
+
+    /**
+     * 电信海曼温感NB回调地址
+     * @param Request $request
+     * @return Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
+    public function hmCTWingTemperatureSensorWarm(Request $request)
+    {
+        $jsonData = $request->all();
+        Log::channel('haiman')->info("海曼电信温感:" . json_encode($jsonData));
+        if (isset($jsonData['payload']) || isset($jsonData['eventContent'])) {
+            $imei     = $jsonData['IMEI']; // 设备imei
+            $deviceId = $jsonData['deviceId'] ?? '';
+
+            $payload = $jsonData['payload'] ?? $jsonData['eventContent'];
+
+            return $this->insertTemperatureWarm($payload, $jsonData, '', $imei, 2, $deviceId);
+        }
+        return response('', 200);
+    }
+
     /**
      * 电信海曼烟感红外NB回调地址
      * @param Request $request
@@ -317,6 +390,62 @@ class HaimanController extends BaseController
         ]));
 
         return response()->json(['message' => 'Success']);
+    }
+
+    public function insertTemperatureWarm(array $payload, array $data, string $ionoMsgValueHex, string $imei)
+    {
+        // 设备属性变更
+        $time      = time();
+        $productId = self::CTWING_TEMPERATURE_PRODUCT_ID; // 写死，海曼红外烟感产品id，移动和电信不一样
+
+        // $heartbeatTime            = date("Y-m-d H:i:s.Y", (int) ($data['time'] ?? microtime()) / 1000);
+        $ionoThresholdTemperature = $payload['temperature_threshold'] ?? '';
+        $ionoTemperture           = $payload['temp'] ?? 0;
+        $ionoIMEI                 = $data['IMEI'] ?? '';
+        $ionoBattery              = $payload['battery_value'] ?? '';
+        $ionoICCID                = $payload['ICCID'] ?? '';
+        $ionoPlatform             = 'CTWING_AEP';
+        $temperatureAlarmList     = [
+            0 => 0,
+            1 => 3,
+            2 => 4,
+        ];
+        $tamperAlarmList = [
+            0 => 16,
+            1 => 15,
+        ];
+        if (isset($temperatureAlarmList[$payload['temperature_state'] ?? -1])) {
+            $alarmStatus[] = $temperatureAlarmList[$payload['temperature_state']];
+        }
+        if (isset($tamperAlarmList[$payload['tamper_state'] ?? -1])) {
+            $alarmStatus[] = $tamperAlarmList[$payload['tamper_state']];
+        }
+
+        $notificationInsertData = [
+            'iono_platform'              => $ionoPlatform,
+            'iono_body'                  => json_encode($data),
+            'iono_timestamp'             => $time,
+            'iono_msg_at'                => $data['time'] ?? $time,
+            'iono_msg_imei'              => $ionoIMEI ?? '',
+            'iono_msg_type'              => 1,
+            'iono_threshold_temperature' => $ionoThresholdTemperature ?? '',
+            'iono_temperature'           => $ionoTemperture * 100 ?? '',
+            'iono_smoke_module_battery'  => $ionoBattery ?? '',
+            'iono_nb_module_battery'     => $ionoBattery ?? '',
+            // 'iono_type' => $ionoType ?? '',
+            'iono_imei'                  => $imei,
+            'iono_category'              => '温感',
+            'iono_status'                => config('alarm_setting.other_alarm.status'),
+            // 'iono_smde_id' => $smdeId,
+            'iono_crt_time'              => date("Y-m-d H:i:s.u"), // like 2025-01-09 16:38:45.098261
+            'iono_alert_status'          => -1,
+            'iono_device_status'         => -1,
+            'iono_nb_iccid'              => $ionoICCID ?? '',
+            'iono_product_id'            => $productId,
+            'iono_msg_value_hex'         => $ionoMsgValueHex,
+        ];
+        $notificationInsertData['iono_type_list'] = $alarmStatus ?? [0];
+        return $notificationInsertData;
     }
 
     public function insertInfraredWarm(array $decodedMsg, array $data, string $ionoMsgValueHex, string $imei, $platform = 1, $deviceId = '')

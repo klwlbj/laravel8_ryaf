@@ -3,17 +3,17 @@
 namespace App\Http\Server;
 
 use App\Models\SmokeDetector;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class HaizhuangServer
 {
     public const LOOP_TYPES = [
-        'smoke' => 'V608', // 烟雾
+        'smoke'       => 'V608', // 烟雾
         'temperature' => 'V602', // 温度
-        'battery' => 'V607', // 电量
+        'battery'     => 'V607', // 电量
     ];
 
     public const MSG_TYPES = [
@@ -38,7 +38,6 @@ class HaizhuangServer
         '18' => '01',
     ];
 
-
     public const MONITOR_TYPES = [
         'HM-618PH-4G' => 1901549230328725505,
         'YL-IOT-YW03' => 1901549715760693250,
@@ -52,9 +51,9 @@ class HaizhuangServer
 
     public function __construct()
     {
+        DB::setDefaultConnection('mysql2');
         $this->token = $this->getToken();
     }
-
 
     /**
      * 获取第三方 Token 并缓存
@@ -67,7 +66,6 @@ class HaizhuangServer
 
         if ($cachedToken) {
             // 如果缓存中有 Token，直接返回
-            dd($cachedToken);
             return $cachedToken;
         }
 
@@ -106,7 +104,8 @@ class HaizhuangServer
             ->get();
         // dd(BaseModel::printSql($list)); // 打印SQL语句 todo
         $imeis = $list->pluck('smde_imei')->toArray();
-        Log::info('token:'.$this->token);
+        Log::info('token:' . $this->token);
+        // dd(count($list));
         if ($onlyReturn) {
             return $imeis;
         }
@@ -164,11 +163,12 @@ class HaizhuangServer
         return $imeis;
     }
 
-    public function pushAlarm($imeis = [] ,$ionoId=0)
+    public function pushAlarm($imeis = [], $ionoId = 0)
     {
         $alarms = DB::connection('mysql2')->table('iot_notification')
+            ->where('iono_type', '!=', -1)
             // ->whereIn('iono_type', [0, -1])
-            ->whereIn('iono_type', [1, 2])
+            // ->whereIn('iono_type', [1, 2])
             ->when($imeis, function ($query) use ($imeis) {
                 return $query->whereIn('iono_imei', $imeis);
             })
@@ -179,42 +179,47 @@ class HaizhuangServer
             ->orderBy('iono_id', 'desc')
             ->get();
         // dd($alarms);
+        if (empty($alarms)) {
+            return ['msg' => '没有报警数据'];
+        }
 
-        $success  = $fail = 0;
+        $success = $fail = 0;
         foreach ($alarms as $alarm) {
+            $dataPack = [];
+            if (isset($alarm->iono_temperature)) {
+                $dataPack[] = [
+                    "loopType"   => self::LOOP_TYPES['temperature'],
+                    'currentVal' => $alarm->iono_temperature,
+                    "limitHigh"  => empty($alarm->iono_threshold_temperature) ? 6000 : ($alarm->iono_threshold_temperature == 60 ? $alarm->iono_threshold_temperature * 100 : $alarm->iono_threshold_temperature),
+                    "limitLow"   => 0,
+                ];
+            }
+            if (isset($alarm->iono_smoke_scope)) {
+                $dataPack[] = [
+                    "loopType"   => self::LOOP_TYPES['smoke'],
+                    "currentVal" => $alarm->iono_smoke_scope,
+                    "limitHigh"  => empty($alarm->iono_threshold_smoke_scope) ? 40 : $alarm->iono_threshold_smoke_scope,
+                    "limitLow"   => 0,
+                ];
+            }
+            if (isset($alarm->iono_nb_module_battery)) {
+                $dataPack[] = [
+                    "loopType"   => self::LOOP_TYPES['battery'],
+                    'currentVal' => $alarm->iono_nb_module_battery,
+                    "limitHigh"  => 100,
+                    "limitLow"   => empty($alarm->iono_threshold_nb_module_battery) ? 20 : $alarm->iono_threshold_nb_module_battery,
+                ];
+            }
             $data = [
                 "accessWay"     => "SQ",
                 'deviceAreaNum' => 0,
-                'deviceId'      => '865257066372905', //$alarm->iono_imei,
+                'deviceId'      => $alarm->iono_imei,
                 'deviceLoopNum' => 0,
                 'msgType'       => self::MSG_TYPES[$alarm->iono_type] ?? '01',
                 'gatherTime'    => date('Y-m-d H:i:s', strtotime($alarm->iono_crt_time)),
                 // 'loopType'      => self::LOOP_TYPES[$alarm->iono_type] ?? 'V604',
-                "dataPack"      => [
-                    // 烟雾
-                    [
-                        "loopType"   => self::LOOP_TYPES['smoke'],
-                        "currentVal" => $alarm->iono_smoke_scope,
-                        "limitHigh"  => empty($alarm->iono_threshold_smoke_scope) ? 40 : $alarm->iono_threshold_smoke_scope,
-                        "limitLow"   => 0,
-                    ],
-                    // 温度
-                    [
-                        "loopType"   => self::LOOP_TYPES['temperature'],
-                        'currentVal' => $alarm->iono_temperature,
-                        "limitHigh"  => empty($alarm->iono_threshold_temperature) ? 6000 : ($alarm->iono_threshold_temperature == 60 ? $alarm->iono_threshold_temperature * 100 : $alarm->iono_threshold_temperature),
-                        "limitLow"   => "0",
-                    ],
-                    // 电量
-                    [
-                        "loopType"   => self::LOOP_TYPES['battery'],
-                        'currentVal' => $alarm->iono_nb_module_battery ?? 0,
-                        "limitHigh"  => 100,
-                        "limitLow"   => empty($alarm->iono_threshold_nb_module_battery) ? 20 : $alarm->iono_threshold_nb_module_battery,
-                    ],
-                ],
+                "dataPack"      => $dataPack,
             ];
-            // dd($data);
 
             // 发送 POST 请求
             $response = Http::withOptions([
@@ -235,7 +240,7 @@ class HaizhuangServer
             $fail++;
             Log::info($alarm->iono_imei . 'Push alarm failed' . $response->body());
         }
-        return ['success' => $success , 'fail'=> $fail];
+        return ['success' => $success, 'fail' => $fail];
     }
 
     /** GCJ-02(火星，高德)坐标转换成BD-09(百度)坐标

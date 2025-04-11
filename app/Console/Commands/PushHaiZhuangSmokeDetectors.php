@@ -51,7 +51,7 @@ class PushHaiZhuangSmokeDetectors extends Command
      */
     public function handle()
     {
-        $imeis = $this->client->pushDevice(1);
-        $this->client->pushAlarm($imeis);
+        $imeis = $this->client->pushDevice(0);
+        // $this->client->pushAlarm($imeis);
     }
 }
