@@ -56,4 +56,8 @@ return [
         'account'  => env('HAIZHUANG_ACCOUNT', ),
         'password' => env('HAIZHUANG_APPSECRET'),
     ],
+    'changping'        => [
+        'account'  => env('CHANGPING_APPID'),
+        'password' => env('CHANGPING_APPKEY'),
+    ],
 ];

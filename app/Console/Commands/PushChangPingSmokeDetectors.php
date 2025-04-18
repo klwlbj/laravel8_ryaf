@@ -101,15 +101,19 @@ class PushChangPingSmokeDetectors extends Command
             }, []);
 
             $insertData = [];
-            foreach ($flattened as $key =>  $value) {
+            foreach ($flattened as $key => $value) {
                 $insertData[] = [
-                    'cp_key'   => (int) $key,
-                    'cp_value' => (int) $value,
+                    'tuk_plac_id'       => (int) $key,
+                    'tuk_thirdparty_uk' => (int) $value,
+                    'tuk_thpl_id'       => 9,
                 ];
             }
             // 清空表数据
-            DB::connection('mysql2')->table('changping_key_value')->truncate();
-            DB::connection('mysql2')->table('changping_key_value')->insert($insertData);
+            DB::connection('mysql2')->table('thirdparty_unique_key')
+                ->where('tuk_thpl_id', 9)
+                ->whereNotNull('tuk_plac_id')
+                ->delete();
+            DB::connection('mysql2')->table('thirdparty_unique_key')->insert($insertData);
         } else {
             $this->error(json_encode($res, JSON_UNESCAPED_UNICODE));
         }
@@ -130,7 +134,9 @@ class PushChangPingSmokeDetectors extends Command
         $list = [];
 
         foreach ($devices as $item) {
-            $companyCode = DB::connection('mysql2')->table('changping_key_value')->where('cp_key', $item->smde_place_id)->value('cp_value');
+            $companyCode = DB::connection('mysql2')->table('thirdparty_unique_key')
+                ->where('tuk_plac_id', $item->smde_place_id)
+                ->value('tuk_thirdparty_uk');
             if (!empty($companyCode)) {
                 $list[] = [
                     "companyCode"    => $companyCode,
@@ -140,8 +146,8 @@ class PushChangPingSmokeDetectors extends Command
                     'installDate'    => $item->smde_deliver_time,
                     'installAddress' => $item->plac_address,
                     'networkDate'    => $item->smde_deliver_time,
-                    'runState'       => 0,
-                    'monitorState'   => 0,
+                    'runState'       => 0,// 运行状态（0正常 1故障 2报警）
+                    'monitorState'   => 0, // 0在线 1离线
                     'dataId'         => $item->smde_id,
                 ];
             }
@@ -149,7 +155,7 @@ class PushChangPingSmokeDetectors extends Command
         $data = [
             "validates" => $list,
         ];
-        $this->line('推送设备中：'.json_encode($list, JSON_UNESCAPED_UNICODE));
+        $this->line('推送设备中：' . json_encode($list, JSON_UNESCAPED_UNICODE));
 
         $this->line((new ChangpingServer())->sendRequest($method, $data));
 

@@ -106,6 +106,12 @@ return [
             'level'  => env('LOG_LEVEL', 'debug'),
             'days'   => 60,
         ],
+        'changping'          => [
+            'driver' => 'daily',
+            'path'   => storage_path('logs/changping/changping.log'),
+            'level'  => env('LOG_LEVEL', 'debug'),
+            'days'   => 60,
+        ],
 
         // 'my_custom_log' => [
         //     'driver' => 'single',
