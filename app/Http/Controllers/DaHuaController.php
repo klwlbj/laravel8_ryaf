@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Utils\CTWing;
 use App\Utils\DaHua;
+use App\Utils\CTWing;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -69,10 +69,10 @@ class DaHuaController extends BaseController
         $jsonData = $request->all();
         Log::channel('dahua')->info('dhctwingRadarWarm:' . json_encode($jsonData));
 
-        if (isset($jsonData['payload']) || isset($jsonData['moduleParams'])) {
+        if (isset($jsonData['payload']) || isset($jsonData['moduleParams']) || isset($jsonData['eventContent'])) {
             $imei       = $jsonData['IMEI']; // 设备imei
             $deviceId   = $jsonData['deviceId'] ?? '';
-            $decodedMsg = $jsonData['payload'] ?? $jsonData['moduleParams'];
+            $decodedMsg = $jsonData['payload'] ?? ($jsonData['moduleParams'] ?? $jsonData['eventContent']);
 
             $this->insertRadarWarm($decodedMsg, $jsonData, $imei, $deviceId);
         }
@@ -114,7 +114,7 @@ class DaHuaController extends BaseController
         if (!empty($decodedMsg['move_state'])) {
             $alarmStatus[] = 101; // 移动报警
         }
-        if(empty($alarmStatus)){
+        if (empty($alarmStatus)) {
             $alarmStatus[] = 0; // 默认心跳包
         }
         $this->insertWarm($heartbeatTime, $ionoHumidity, $ionoSmokeScope, $ionoRsrp, $ionoTemperture, $ionoIMSI, $ionoBattery, $ionoICCID, $ionoPlatform, $jsonData, $time, $ionoIMEI, $imei, $ionoSnr, $productId, $alarmStatus, '', $deviceId);
@@ -169,7 +169,7 @@ class DaHuaController extends BaseController
         ];
 
         Log::channel('dahua')->info('大华雷达烟感insert' . json_encode($notificationInsertData));
-        return ;
+        return;
 
         $this->insertIOT($deviceUpdateData, $notificationInsertData, $alarmStatus, $imei);
     }
@@ -178,10 +178,25 @@ class DaHuaController extends BaseController
     public function muffling($productId, $imei, $masterKey)
     {
         $client = new CTWing();
+        // 通过imei查询deviceId todo
         $deviceId = 'c6cf6f487cd24e8cbd3bed7daf0f4dbf';// 先写死$deviceId
 
-        return $client->createNTTCommand($productId, $deviceId, $masterKey, 120);
+        return $client->createNTTMufflingCommand($productId, $deviceId, $masterKey, 120);
+    }
 
-        // return $client->CreateCommandLwm2mProfileByIMEI($productId, $imei, $masterKey);
+    public function deploymentSetting($productId, $imei, $masterKey)
+    {
+        $client = new CTWing();
+        // 通过imei查询deviceId todo
+        $deviceId = 'c6cf6f487cd24e8cbd3bed7daf0f4dbf';// 先写死$deviceId
+
+        $serviceIdentifier = 'Conf_Ex';
+        $params            = [
+            'cmd_EX'  => 1,
+            'Opt_EX'  => 1,
+            'para_EX' => '00061418000614180006141800061418000614180006141800061418',
+        ];
+
+        return $client->createCustomCommand($productId, $deviceId, $masterKey, $serviceIdentifier, $params);
     }
 }

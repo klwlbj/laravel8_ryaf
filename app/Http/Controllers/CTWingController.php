@@ -49,10 +49,10 @@ class CTWingController extends BaseController
     }
 
 
-    public function createNTTCommand($productId, $deviceId, $masterKey, $second)
+    public function createNTTMufflingCommand($productId, $deviceId, $masterKey, $second)
     {
         $client = new CTWing();
-        return $client->createNTTCommand($productId, $deviceId, $masterKey, $second);
+        return $client->createNTTMufflingCommand($productId, $deviceId, $masterKey, $second);
     }
 
     public function createCommandLwm2mProfile($productId, $deviceId, $masterKey, $command, $dwPackageNo)

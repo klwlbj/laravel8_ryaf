@@ -2,19 +2,20 @@
 
 namespace App\Http\Server;
 
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class ChangpingServer extends BaseServer
 {
     // public string $url = 'http://beijing.xfwlw119.com:8980/openapitest/v2/gateway';
     public string $url = 'http://beijing.xfwlw119.com:8980/openapi/v2/gateway';
+
     public function sendRequest($method, $data)
     {
         // 第三方平台要求的参数
-        $appId = 'b98543e13bfb46db98784eb18eee14ee'; // 替换为实际的appId
-        $appKey = 'ZAIT/D5BpdZVwX5AmSkOm9uuIjM='; // 替换为实际的appKey
+        $appId     = config('services.changping.account');
+        $appKey    = config('services.changping.password');
         $timestamp = Carbon::now()->timestamp; // 获取当前 Unix 时间戳
 
         // 定义缓存的键名
@@ -25,7 +26,7 @@ class ChangpingServer extends BaseServer
 
         // 如果是第一次访问，初始化计数器
         if ($random === 1) {
-            Cache::put($key, 1, 60); // 默认缓存 1 分钟
+            Cache::put($key, 1); // 默认缓存 1 分钟
         }
 
         // 计算 sign
@@ -33,12 +34,12 @@ class ChangpingServer extends BaseServer
 
         // 请求参数
         $params = [
-            'appId' => $appId,
-            'method' => $method,
+            'appId'     => $appId,
+            'method'    => $method,
             'timestamp' => $timestamp,
-            'random' => $random,
-            'sign' => $sign,
-            'data' => $data,
+            'random'    => $random,
+            'sign'      => $sign,
+            'data'      => $data,
         ];
 
         // 发送请求到第三方接口
@@ -49,9 +50,8 @@ class ChangpingServer extends BaseServer
         // 处理响应
         if ($response->successful()) {
             return $response->body();
-        } else {
-            // 请求失败，处理错误信息
-            return 222;
         }
+        // 请求失败，处理错误信息
+        return 222;
     }
 }

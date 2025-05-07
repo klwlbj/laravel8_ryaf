@@ -4,9 +4,9 @@ namespace App\Utils;
 
 use App\Utils\Apis\Aep_device_event;
 use App\Utils\Apis\Aep_device_command;
+use App\Utils\Apis\Aep_subscribe_north;
 use App\Utils\Apis\Aep_device_management;
 use App\Utils\Apis\Aep_nb_device_management;
-use App\Utils\Apis\Aep_subscribe_north;
 use App\Utils\Apis\Core\返回响应：bool;
 use App\Utils\Apis\Aep_device_command_cancel;
 use App\Utils\Apis\Aep_device_command_lwm_profile;
@@ -122,7 +122,6 @@ class CTWing extends BaseIoTClient
 
     public function createCmdCommand($productId, $deviceId, $masterKey, $cmdType)
     {
-
         $result = Aep_device_command::CreateCommand(
             config('services.ctwing.key'),
             config('services.ctwing.secret'),
@@ -130,9 +129,38 @@ class CTWing extends BaseIoTClient
             json_encode([
                 "content"   => [
                     "params"            => [
-                        "alarm_mode" => $cmdType,// 0解除报警,1火警,2紧急情况报警
+                        "alarm_mode" => $cmdType, // 0解除报警,1火警,2紧急情况报警
                     ],
                     'serviceIdentifier' => "alarm_cmd",
+                ],
+                "deviceId"  => $deviceId,
+                "operator"  => "ryaf", // 操作者，暂时写死
+                "productId" => $productId,
+                // "ttl"           => 7200,
+            ])
+        );
+        return $result;
+    }
+
+    /**
+     * 非透传设备下发自定义命令
+     * @param $productId
+     * @param $deviceId
+     * @param $masterKey
+     * @param string $serviceIdentifier
+     * @param $params
+     * @return 返回响应：bool|null
+     */
+    public function createCustomCommand($productId, $deviceId, $masterKey, string $serviceIdentifier, $params = [])
+    {
+        $result = Aep_device_command::CreateCommand(
+            config('services.ctwing.key'),
+            config('services.ctwing.secret'),
+            $masterKey,
+            json_encode([
+                "content"   => [
+                    "params"            => $params,
+                    'serviceIdentifier' => $serviceIdentifier,
                 ],
                 "deviceId"  => $deviceId,
                 "operator"  => "ryaf", // 操作者，暂时写死
@@ -151,7 +179,7 @@ class CTWing extends BaseIoTClient
      * @param int $second
      * @return 返回响应：bool|null
      */
-    public function createNTTCommand($productId, $deviceId, $masterKey, int $second = 120)
+    public function createNTTMufflingCommand($productId, $deviceId, $masterKey, int $second = 120)
     {
         $result = Aep_device_command::CreateCommand(
             config('services.ctwing.key'),
@@ -206,7 +234,6 @@ class CTWing extends BaseIoTClient
         );
     }
 
-
     /**
      * lwm2m协议有profile指令下发接口
      * @param $productId
@@ -228,7 +255,7 @@ class CTWing extends BaseIoTClient
                     "method"    => "CMD",
                     "paras"     => [
                         // 'val'=> "1F5600021C84" // 写死命令 todo
-                        "muffling"=> 1,// 消声时间
+                        "muffling" => 1, // 消声时间
                     ],
                 ],
                 "deviceId"  => $deviceId,

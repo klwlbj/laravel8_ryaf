@@ -80,7 +80,7 @@ Route::prefix('ctwing')->group(function () {
     Route::get('/createMicrowaveSettingCommand/{productId}/{deviceId}/{masterKey}', [CTWingController::class, 'createMicrowaveSettingCommand']);
     Route::get('/createGasSettingCommand/{productId}/{deviceId}/{masterKey}/{gasAlarmCorrection}', [CTWingController::class, 'createGasSettingCommand']);
     Route::get('/createCommand/{productId}/{deviceId}/{masterKey}/{command}/{dwPackageNo}', [CTWingController::class, 'createCommand']);// 4g用
-    Route::get('/createNTTCommand/{productId}/{deviceId}/{masterKey}/{second}', [CTWingController::class, 'createNTTCommand']);
+    Route::get('/createNTTMufflingCommand/{productId}/{deviceId}/{masterKey}/{second}', [CTWingController::class, 'createNTTMufflingCommand']);
 });
 
 // http回调
@@ -125,8 +125,11 @@ Route::prefix('dahua')->group(function () {
     Route::get('analyze/{string}', [DaHuaController::class, 'analyze']);
     Route::get('analyze2/{string}', [DaHuaController::class, 'analyze2']);
     Route::get('analyze3/{string}', [DaHuaController::class, 'analyze3']);
-    // http://ryaf.laravel.com/api/dahua/muffling/17207128/1F5E00020019/865665053801837/832d3dfe36b548b0b3117a5678653c8d
+    // 消音：http://ryaf.laravel.com/api/dahua/muffling/17207128/1F5E00020019/865665053801837/832d3dfe36b548b0b3117a5678653c8d
     Route::get('muffling/{productId}/{imei}/{masterKey}', [DaHuaController::class, 'muffling']);
+    // 下发配置：http://ryaf.laravel.com/api/dahua/deploymentSetting/17207128/865665053801837/832d3dfe36b548b0b3117a5678653c8d
+    Route::get('deploymentSetting/{productId}/{imei}/{masterKey}', [DaHuaController::class, 'deploymentSetting']);
+
 });
 
 Route::post('excel', [ExcelController::class, 'handleImportExport']);
@@ -220,7 +223,8 @@ Route::prefix('haizhuang')->group(function () {
 });
 
 Route::prefix('changping')->group(function () {
-    Route::get('/pushAlarm/{ionoId}', [ChangpingController::class, 'pushAlarm']);
+    Route::get('/pushAlarm/{ionoId}/{typeId}', [ChangpingController::class, 'pushAlarm']);
+    Route::get('/addHeartBeat/{imei}', [ChangpingController::class, 'addHeartBeat']);
 });
 
 Route::prefix('xiaoan')->group(function () {
