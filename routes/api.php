@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\XiaoAnController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NBController;
@@ -220,4 +221,11 @@ Route::prefix('haizhuang')->group(function () {
 
 Route::prefix('changping')->group(function () {
     Route::get('/pushAlarm/{ionoId}', [ChangpingController::class, 'pushAlarm']);
+});
+
+Route::prefix('xiaoan')->group(function () {
+    Route::any('/report', [XiaoAnController::class, 'report']);
+    Route::any('/muffling', [XiaoAnController::class, 'muffling']);
+    Route::any('/setGuardTime', [XiaoAnController::class, 'setGuardTime']);
+    Route::any('/setGuardSensitivity', [XiaoAnController::class, 'setGuardSensitivity']);
 });

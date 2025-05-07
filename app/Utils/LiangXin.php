@@ -88,7 +88,6 @@ class LiangXin
             return false;
         }
 
-
         $urlPath = '/' . Request::path();
 
         $sign = md5($urlPath . $timestamp . self::$deviceSecret);

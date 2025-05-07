@@ -12,6 +12,7 @@ class CheckSign
     public function handle($request, Closure $next)
     {
         Tools::writeLog('params','liangxin',$request->all());
+
         if(!LiangXin::checkSign()){
             return LiangXin::errorRes();
         }

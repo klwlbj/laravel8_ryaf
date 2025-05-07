@@ -181,10 +181,10 @@ class OneNet extends BaseIoTClient
      * @param string $cmd
      * @return mixed|void
      */
-    public function customWriteResource($imei, string $command = self::LONG_SILENCE, string $dwPackageNo = '00000001')
+    public function customWriteResource($imei, string $command = self::LONG_SILENCE, string $dwPackageNo = '00000001', string $cmd = '')
     {
-        $cmd  = $this->generateCommand($command, $dwPackageNo, false);
-        $time = time() + 1000;
+        $cmd  = empty($cmd) ? $this->generateCommand($command, $dwPackageNo, false) : $cmd;
+        $time = time() + 10000;
         try {
             $response = $this->client->request('POST', self::HOST . '/offline', [
                 'query'   => [

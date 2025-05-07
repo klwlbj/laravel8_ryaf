@@ -188,7 +188,7 @@ class YuanLiuController extends BaseController
 //                }
             }else{
                 if(isset($params['msg']['type']) && isset($params['msg']['status']) && $params['msg']['status'] == 1 && isset($params['msg']['dev_name'])){
-//                    $this->getAndSendDeviceCacheCMD($params['msg']['dev_name'],$params['id'] ?? '');
+                    $this->getAndSendDeviceCacheCMD($params['msg']['dev_name'],$params['id'] ?? '');
                 }
             }
         } catch (\Exception $e) {
