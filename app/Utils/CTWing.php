@@ -165,7 +165,7 @@ class CTWing extends BaseIoTClient
                 "deviceId"  => $deviceId,
                 "operator"  => "ryaf", // 操作者，暂时写死
                 "productId" => $productId,
-                // "ttl"           => 7200,
+                "ttl"           => 7200,
             ])
         );
         return $result;

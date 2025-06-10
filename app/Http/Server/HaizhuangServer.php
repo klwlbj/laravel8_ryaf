@@ -44,8 +44,8 @@ class HaizhuangServer
         'HM-608PH-NB' => 1904368738677837825,
     ];
 
-    protected $url = 'https://test.xfirecloud.com:1099'; // 测试环境
-    // protected $url = 'https://www.xfirecloud.com:1099'; // 正式环境
+    // protected $url = 'https://test.xfirecloud.com:1099'; // 测试环境
+    protected $url = 'https://www.xfirecloud.com:1099'; // 正式环境
 
     protected $token = '';
 
@@ -83,7 +83,7 @@ class HaizhuangServer
             $token = $response->json()['token'];
 
             // 将获取到的 Token 缓存 3000 分钟
-            Cache::put('xfirecloud_token', $token, 3000);
+            Cache::put('xfirecloud_token', $token, 30);
             // dd($token);
             return $token;
         }
@@ -94,9 +94,12 @@ class HaizhuangServer
 
     public function pushDevice($onlyReturn = 0)
     {
-        $list = SmokeDetector::query()->where('smde_status', '已交付')
+        DB::setDefaultConnection('mysql2');
+
+        $list = SmokeDetector::query()->where('order_status', '交付完成')
             ->where('smde_node_ids', 'like', '%,106,%')
             ->where('smde_imei', '!=', '868550060116550')// 缺少地址不推送
+            ->where('smde_imei', '!=', '865665053801837')// 红外烟感不推送
             ->leftJoin('place', 'smde_place_id', '=', 'plac_id')
             ->leftJoin('order', 'smde_order_id', '=', 'order_id')
             ->leftJoin('user', 'plac_user_id', '=', 'user_id')
@@ -111,6 +114,7 @@ class HaizhuangServer
         }
 
         Log::info('Total: ' . count($list));
+        // die;
         foreach ($list as $item) {
             $coordinate = $this->transformCoordinate(floatval($item->plac_lng), floatval($item->plac_lat));
             // 定义请求参数
@@ -163,23 +167,65 @@ class HaizhuangServer
         return $imeis;
     }
 
-    public function pushAlarm($imeis = [], $ionoId = 0)
+    public function pushFakeAlarm($imeis = [], $dataPack = [])
     {
+        $success = $fail = 0;
+
+        foreach ($imeis as $imei) {
+            $data = [
+                "accessWay"     => "SQ",
+                'deviceAreaNum' => 0,
+                'deviceId'      => $imei,
+                'deviceLoopNum' => 0,
+                'msgType'       => '01',
+                'gatherTime'    => date('Y-m-d H:i:s'),
+                "dataPack"      => $dataPack,
+            ];
+            // 发送 POST 请求
+            $response = Http::withOptions([
+                'verify' => false,  // 禁用 SSL 验证
+            ])
+                ->withHeaders([
+                    'token' => $this->token, // 将 Token 添加到 header 中
+                ])->post($this->url . '/api/iff/gather/msg', $data);
+
+            Log::info('海幢推送消息' . json_encode($data));
+            if ($response->successful() && !empty($response->json()['msg'] === '成功!')) {
+                $success++;
+                Log::info($imei . 'Push fake alarm successed' . $response->body());
+            } else {
+                $fail++;
+                Log::info($imei . 'Push fake alarm failed' . $response->body());
+            }
+        }
+        return ['success' => $success, 'fail' => $fail];
+    }
+
+    public function pushAlarm($ionoId = 0, $imeis = [])
+    {
+        $imeis = empty($imeis) ? SmokeDetector::on('mysql2')
+            ->where('smde_user_id', '<>', 0)
+            ->where('smde_node_ids', 'like', '%,106,%')
+            ->where('smde_imei', '!=', '868550060116550')// 缺少地址不推送
+            ->where('smde_imei', '!=', '865665053801837')// 红外烟感不推送
+            ->pluck('smde_imei') : $imeis;
+        $date = '-1 minute';
+        // $date = '-1 days';
+
         $alarms = DB::connection('mysql2')->table('iot_notification')
-            ->where('iono_type', '!=', -1)
-            // ->whereIn('iono_type', [0, -1])
-            // ->whereIn('iono_type', [1, 2])
+            // ->whereIn('iono_type', [-1, 0, 1, 2, 3, 4, 13, 15, 16])
             ->when($imeis, function ($query) use ($imeis) {
                 return $query->whereIn('iono_imei', $imeis);
             })
-            ->limit(100)
+            ->where('iono_crt_time', '>=', date('Y-m-d H:i:s.Y', strtotime($date)))
             ->when($ionoId, function ($query) use ($ionoId) {
                 return $query->where('iono_id', $ionoId);
             })
+            // ->limit(100)
             ->orderBy('iono_id', 'desc')
             ->get();
         // dd($alarms);
-        if (empty($alarms)) {
+        if (empty($alarms) || count($alarms) == 0) {
             return ['msg' => '没有报警数据'];
         }
 
@@ -229,9 +275,96 @@ class HaizhuangServer
                     'token' => $this->token, // 将 Token 添加到 header 中
                 ])->post($this->url . '/api/iff/gather/msg', $data);
 
+            Log::info('海幢推送消息' . json_encode($data));
+            if ($response->successful() && !empty($response->json()['msg'] === '成功!')) {
+                $success++;
+                Log::info($alarm->iono_imei . 'Push alarm successed' . $response->body());
+            } else {
+                $fail++;
+                Log::info($alarm->iono_imei . 'Push alarm failed' . $response->body());
+            }
+        }
+        return ['success' => $success, 'fail' => $fail];
+    }
+
+    public function pushHandledAlarm($ionoId = 0)
+    {
+        $imeis = SmokeDetector::on('mysql2')
+            ->where('smde_user_id', '<>', 0)
+            ->where('smde_node_ids', 'like', '%,106,%')
+            ->where('smde_imei', '!=', '868550060116550')// 缺少地址不推送
+            ->where('smde_imei', '!=', '865665053801837')// 红外烟感不推送
+            ->pluck('smde_imei');
+        $date = '-1 minute';
+
+        $alarms = DB::connection('mysql2')->table('iot_notification_alert')
+            ->whereIn('iono_type', [0, 1, 2, 3, 4])
+            ->when($imeis, function ($query) use ($imeis) {
+                return $query->whereIn('iono_imei', $imeis);
+            })
+            ->whereNotNull('iono_handle_time')
+
+            // ->where('iono_crt_time', '>=', date('Y-m-d H:i:s.Y', strtotime('-1 minute')))
+            ->when($ionoId, function ($query) use ($ionoId) {
+                return $query->where('iono_id', $ionoId);
+            })
+            // ->limit(100)
+            ->orderBy('iono_id', 'desc')
+            ->get();
+        // dd(count($alarms));
+        if (empty($alarms) || count($alarms) == 0) {
+            return ['msg' => '没有报警数据'];
+        }
+
+        $success = $fail = 0;
+        foreach ($alarms as $alarm) {
+            $dataPack = [];
+            if (isset($alarm->iono_temperature)) {
+                $dataPack[] = [
+                    "loopType"   => self::LOOP_TYPES['temperature'],
+                    'currentVal' => $alarm->iono_temperature,
+                    "limitHigh"  => empty($alarm->iono_threshold_temperature) ? 6000 : ($alarm->iono_threshold_temperature == 60 ? $alarm->iono_threshold_temperature * 100 : $alarm->iono_threshold_temperature),
+                    "limitLow"   => 0,
+                ];
+            }
+            if (isset($alarm->iono_smoke_scope)) {
+                $dataPack[] = [
+                    "loopType"   => self::LOOP_TYPES['smoke'],
+                    "currentVal" => $alarm->iono_smoke_scope,
+                    "limitHigh"  => empty($alarm->iono_threshold_smoke_scope) ? 40 : $alarm->iono_threshold_smoke_scope,
+                    "limitLow"   => 0,
+                ];
+            }
+            if (isset($alarm->iono_nb_module_battery)) {
+                $dataPack[] = [
+                    "loopType"   => self::LOOP_TYPES['battery'],
+                    'currentVal' => $alarm->iono_nb_module_battery,
+                    "limitHigh"  => 100,
+                    "limitLow"   => empty($alarm->iono_threshold_nb_module_battery) ? 20 : $alarm->iono_threshold_nb_module_battery,
+                ];
+            }
+            $data = [
+                "accessWay"     => "SQ",
+                'deviceAreaNum' => 0,
+                'deviceId'      => $alarm->iono_imei,
+                'deviceLoopNum' => 0,
+                'msgType'       => self::MSG_TYPES[$alarm->iono_type] ?? '01',
+                'gatherTime'    => date('Y-m-d H:i:s', strtotime($alarm->iono_handle_time)),
+                // 'loopType'      => self::LOOP_TYPES[$alarm->iono_type] ?? 'V604',
+                "dataPack"      => $dataPack,
+            ];
+
+            // 发送 POST 请求
+            $response = Http::withOptions([
+                'verify' => false,  // 禁用 SSL 验证
+            ])
+                ->withHeaders([
+                    'token' => $this->token, // 将 Token 添加到 header 中
+                ])->post($this->url . '/api/iff/gather/msg', $data);
+
             // dd($response->body());
             // 检查请求是否成功
-            if ($response->successful()) {
+            if ($response->successful() && !empty($response->json()['msg'] === '成功!')) {
                 $success++;
                 Log::info(json_encode($data));
                 Log::info($alarm->iono_imei . $response->body());

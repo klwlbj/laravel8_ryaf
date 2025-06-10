@@ -177,13 +177,20 @@ class HaimanController extends BaseController
         ]));
 
         $imei = $msg['deviceName'] ?? ($msg['dev_name'] ?? 0); // 设备imei
+
+        if (DB::connection('mysql2')->table('iot_notification')->where('iono_imei', $imei)
+            ->where('iono_nonce', $nonce)
+            ->exists()) {
+            // 已存在 todo
+            return response()->json(['message' => 'Success']);
+        }
         if (!empty($imei) /*&& $type == 2*/) { // 心跳包时才下发 todo
             // 区分消息类型
             if (isset($msg['dev_name']) && $msg['type'] == 2) {
-                // 在离线状态 不处理
+                // 在离线状态 不处理 todo
             }
             if (isset($msg['notifyType']) && $msg['notifyType'] === 'event' && isset($msg['deviceName'])) {
-                // 事件上报 不处理
+                // 事件上报 不处理 todo
             }
             if (isset($msg['notifyType']) && $msg['notifyType'] === 'property' && isset($msg['deviceName'], $msg['data']['params']) && count($msg['data']['params']) !== 5) {
                 // 设备属性变更
@@ -238,8 +245,8 @@ class HaimanController extends BaseController
                     return response()->json(['message' => 'Success', 'data' => $insertWarm]);
                 }
             }
-            // 从命令缓存表中，获取命令，马上下发
-            $this->getAndSendDeviceCacheCMD($imei, $data['id'] ?? '', 3);
+            // 从命令缓存表中，获取命令，马上下发 todo 暂时没有命令会下发
+            // $this->getAndSendDeviceCacheCMD($imei, $data['id'] ?? '', 3);
         }
 
         return response()->json(['message' => 'Success']);

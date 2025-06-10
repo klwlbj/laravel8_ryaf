@@ -1,24 +1,24 @@
 <?php
 
-use App\Http\Controllers\XiaoAnController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\NBController;
-use App\Http\Controllers\HikvisionSmoke;
+use App\Http\Controllers\ChangpingController;
+use App\Http\Controllers\CTWingController;
 use App\Http\Controllers\DaHuaController;
 use App\Http\Controllers\ExcelController;
-use App\Http\Controllers\HaoenController;
-use App\Http\Controllers\TpsonController;
-use App\Http\Controllers\CTWingController;
 use App\Http\Controllers\HaimanController;
-use App\Http\Controllers\LiuRuiController;
-use App\Http\Controllers\OneNetController;
-use App\Http\Controllers\YuanLiuController;
-use App\Http\Controllers\ChangpingController;
 use App\Http\Controllers\HaiZhuangController;
-use App\Http\Controllers\WanLinYunController;
-use App\Http\Controllers\LiuRuiCloudController;
+use App\Http\Controllers\HaoenController;
 use App\Http\Controllers\HikvisionCloudController;
+use App\Http\Controllers\HikvisionSmoke;
+use App\Http\Controllers\LiuRuiCloudController;
+use App\Http\Controllers\LiuRuiController;
+use App\Http\Controllers\NBController;
+use App\Http\Controllers\OneNetController;
+use App\Http\Controllers\TpsonController;
+use App\Http\Controllers\WanLinYunController;
+use App\Http\Controllers\XiaoAnController;
+use App\Http\Controllers\YuanLiuController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -128,7 +128,10 @@ Route::prefix('dahua')->group(function () {
     // 消音：http://ryaf.laravel.com/api/dahua/muffling/17207128/1F5E00020019/865665053801837/832d3dfe36b548b0b3117a5678653c8d
     Route::get('muffling/{productId}/{imei}/{masterKey}', [DaHuaController::class, 'muffling']);
     // 下发配置：http://ryaf.laravel.com/api/dahua/deploymentSetting/17207128/865665053801837/832d3dfe36b548b0b3117a5678653c8d
-    Route::get('deploymentSetting/{productId}/{imei}/{masterKey}', [DaHuaController::class, 'deploymentSetting']);
+    Route::get('deploymentTimeSetting/{productId}/{imei}/{masterKey}', [DaHuaController::class, 'deploymentTimeSetting']);
+    Route::get('sensitivityStting/{productId}/{imei}/{masterKey}', [DaHuaController::class, 'sensitivityStting']);
+    Route::get('insertRadarDetector/{imei}', [DaHuaController::class, 'insertRadarDetector']);
+    Route::get('percentToDbm/{percent}', [DaHuaController::class, 'percentToDbm']);
 
 });
 
@@ -220,6 +223,8 @@ Route::get('/migrationTest', [\App\Http\Controllers\BaseController::class, 'migr
 
 Route::prefix('haizhuang')->group(function () {
     Route::get('/pushAlarm/{ionoId}', [HaiZhuangController::class, 'pushAlarm']);
+    Route::get('/batchPushAlarm', [HaiZhuangController::class, 'batchPushAlarm']);
+    Route::get('/batchPushHandledAlarm', [HaiZhuangController::class, 'batchPushHandledAlarm']);
 });
 
 Route::prefix('changping')->group(function () {
@@ -233,3 +238,6 @@ Route::prefix('xiaoan')->group(function () {
     Route::any('/setGuardTime', [XiaoAnController::class, 'setGuardTime']);
     Route::any('/setGuardSensitivity', [XiaoAnController::class, 'setGuardSensitivity']);
 });
+
+Route::post('/yuean', [\App\Http\Controllers\YueanController::class, 'alarm']);
+

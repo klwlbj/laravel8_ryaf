@@ -84,6 +84,7 @@ class BaseController extends \Illuminate\Routing\Controller
      * 获取设备缓存命令并下发
      * @param $imei
      * @param string $msgId
+     * @param int $sleepSecond
      * @return void
      */
     public function getAndSendDeviceCacheCMD($imei, string $msgId = '', $sleepSecond = 1)
@@ -141,8 +142,11 @@ class BaseController extends \Illuminate\Routing\Controller
         $attempt = 0;
         $success = false;
 
+        if ($imei == '865665053801837') {
+            Log::info('雷达报警：' . json_encode([$deviceUpdateData, $notificationInsertData, $alarmStatus]));
+        }
         while ($attempt < $maxRetries && !$success) {
-            $url = '';
+            $url         = '';
             $ionoAlertId = null;
             try {
                 // laravel事务代码
@@ -192,10 +196,10 @@ class BaseController extends \Illuminate\Routing\Controller
                                     ->table('order')
                                     ->where('order_id', $orderId)
                                     ->value('order_user_mobile');
-                                if($device->smde_alert_ignore_until > date( "Y-m-d H:i:s" )){
-                                    $notificationInsertData['iono_status']  = '已忽略';
+                                if ($device->smde_alert_ignore_until > date("Y-m-d H:i:s")) {
+                                    $notificationInsertData['iono_status'] = '已忽略';
                                     $notificationInsertData['iono_remark'] = "根据设备设置的忽略报警时间段自动忽略";
-                                }else{
+                                } else {
                                     // 之前15秒内发送过报警，不发送报警电话和短信。
                                     if (DB::connection('mysql2')->table('alert')->where('alert_smde_imei', $imei)
                                         ->where('alert_type', 'voice')
@@ -204,11 +208,10 @@ class BaseController extends \Illuminate\Routing\Controller
                                         ->exists()) {
                                         //不发报警
                                         $notificationInsertData['iono_remark'] = '之前15秒内发送过报警，不发送报警电话和短信。';
+                                    } else {
+                                        // 正常发报警；
+                                        $url = 'https://pingansuiyue.crzfxjzn.com/async.php?oper=send_alert&iono_id=' . $ionoId;
                                     }
-                                    else {
-                                            // 正常发报警；
-                                            $url = 'https://pingansuiyue.crzfxjzn.com/async.php?oper=send_alert&iono_id=' . $ionoId;
-                                        }
                                 }
 
                                 DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
@@ -222,8 +225,9 @@ class BaseController extends \Illuminate\Routing\Controller
                                 // 定义时间范围
                                 $timeRanges = [
                                     ['start' => '06:00', 'end' => '09:00'],
-                                    // ['start' => '09:30', 'end' => '10:45'], // todo 待删，测试用
+                                    ['start' => '09:30', 'end' => '10:45'], // todo 待删，测试用
                                     ['start' => '11:00', 'end' => '14:00'],
+                                    ['start' => '14:10', 'end' => '16:45'], // todo 待删，测试用
                                     ['start' => '17:00', 'end' => '20:00'],
                                 ];
 
@@ -237,7 +241,7 @@ class BaseController extends \Illuminate\Routing\Controller
                                 if (isset($currentStart, $currentEnd)) {
                                     // 查找出iot_notification_alert表是否有iono_type为101的报警，在当前时间范围内
                                     // 如果检测到有人，整个时间段停止检测
-                                    $infraredRecord = DB::connection('mysql2')->table('iot_notification_alert')
+                                    $infraredRecord = DB::connection('mysql2')->table('iot_notification_infrared_appear')
                                         ->where('iono_type', 101)
                                         ->where('iono_smde_id', $smdeId)
                                         ->where('iono_msg_at', '>=', strtotime($currentStart))
@@ -246,7 +250,7 @@ class BaseController extends \Illuminate\Routing\Controller
                                     // 不存在才插入
                                     if (!$infraredRecord) {
                                         $notificationInsertData['iono_status'] = ''; // todo 测试时暂时留空
-                                        DB::connection('mysql2')->table('iot_notification_alert')->insert($notificationInsertData);
+                                        DB::connection('mysql2')->table('iot_notification_infrared_appear')->insert($notificationInsertData);
                                     }
                                 }
                                 break;
@@ -259,13 +263,16 @@ class BaseController extends \Illuminate\Routing\Controller
                 $success = true;
                 // 发送告警电话和短信
                 if (!empty($url)) {
+                    // 推送数据到其他 URL
                     Http::withOptions(['verify' => false])->get($url);
                 }
-                if(isset($ionoAlertId)){
+                if (isset($ionoAlertId)) {
                     // 推送区平台
-                    $yunchuang = Http::withOptions(['verify' => false])->get('https://pingansuiyue2.crzfxjzn.com/api/yunChuang/pushAlert/'.$ionoAlertId.'/'.$imei);
+                    $yunchuang = Http::withOptions([
+                        'timeout' => 1,
+                        'verify'  => false,
+                    ])->get('https://pingansuiyue2.crzfxjzn.com/api/yunChuang/pushAlert/' . $ionoAlertId . '/' . $imei);
                     Log::info("区平台返回{$imei}.{$ionoAlertId}" . json_encode($yunchuang->json()));
-
                 }
             } catch (Exception $e) {
                 // 在异常情况下报错
@@ -279,6 +286,7 @@ class BaseController extends \Illuminate\Routing\Controller
 
             // 延迟一段时间再重试
                 usleep($delay * 1000); // usleep接受的是微秒，乘以1000转换为毫秒
+            } catch (\Throwable $e) {
             }
         }
     }

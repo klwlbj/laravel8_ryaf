@@ -56,6 +56,7 @@ return [
         'account'  => env('HAIZHUANG_ACCOUNT', ),
         'password' => env('HAIZHUANG_APPSECRET'),
     ],
+    // 昌平街道
     'changping'        => [
         'account'  => env('CHANGPING_APPID'),
         'password' => env('CHANGPING_APPKEY'),

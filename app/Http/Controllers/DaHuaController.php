@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Utils\DaHua;
 use App\Utils\CTWing;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class DaHuaController extends BaseController
@@ -85,11 +86,11 @@ class DaHuaController extends BaseController
     {
         // 设备属性变更
         $time      = time();
-        $productId = 17207128; // 写死，海曼红外烟感产品id，移动和电信不一样
+        $productId = 17207128;
 
         $alarmStatus    = []; // 默认心跳包
-        $heartbeatTime  = date("Y-m-d H:i:s.Y", (int) ($data['time'] ?? microtime()) / 1000);
-        $ionoSmokeScope = ($decodedMsg['smoke_value'] ?? 0) * 100;
+        $heartbeatTime  = date("Y-m-d H:i:s.Y", (int) ($data['timestamp'] ?? microtime()) / 1000);
+        $ionoSmokeScope = percentToDbm($decodedMsg['smoke_value'] ?? 0) * 100;
         $ionoIMSI       = $jsonData['IMSI'] ?? '';
 
         // $ionoBatteryVoltage = $decodedMsg['battery_voltage'] ?? '';
@@ -165,11 +166,12 @@ class DaHuaController extends BaseController
             'iono_device_status'        => -1,
             'iono_product_id'           => $productId,
             'iono_msg_value_hex'        => $ionoMsgValueHex,
-            'iono_type_list'            => $alarmStatus,
+            // 'iono_type_list'            => $alarmStatus,
         ];
 
         Log::channel('dahua')->info('大华雷达烟感insert' . json_encode($notificationInsertData));
-        return;
+
+        // return;
 
         $this->insertIOT($deviceUpdateData, $notificationInsertData, $alarmStatus, $imei);
     }
@@ -184,7 +186,8 @@ class DaHuaController extends BaseController
         return $client->createNTTMufflingCommand($productId, $deviceId, $masterKey, 120);
     }
 
-    public function deploymentSetting($productId, $imei, $masterKey)
+    // 布防时间设置
+    public function deploymentTimeSetting($productId, $imei, $masterKey)
     {
         $client = new CTWing();
         // 通过imei查询deviceId todo
@@ -192,11 +195,55 @@ class DaHuaController extends BaseController
 
         $serviceIdentifier = 'Conf_Ex';
         $params            = [
-            'cmd_EX'  => 1,
-            'Opt_EX'  => 1,
-            'para_EX' => '00061418000614180006141800061418000614180006141800061418',
+            'cmd_EX'  => "1",
+            'Opt_EX'  => "1",
+            'para_EX' => '01001a1a18001a1a18001a1a18001a1a18001a1a18001a1a18001a1a18',
         ];
 
         return $client->createCustomCommand($productId, $deviceId, $masterKey, $serviceIdentifier, $params);
+    }
+
+    // 灵敏度设置
+    public function sensitivityStting($productId, $imei, $masterKey)
+    {
+        $client = new CTWing();
+        // 通过imei查询deviceId todo
+        $deviceId = 'c6cf6f487cd24e8cbd3bed7daf0f4dbf';// 先写死$deviceId
+
+        $serviceIdentifier = 'Conf_Ex';
+        $params            = [
+            'cmd_EX'  => "2",
+            'Opt_EX'  => "1",
+            'para_EX' => '00', // 00高，01中，02低
+        ];
+
+        return $client->createCustomCommand($productId, $deviceId, $masterKey, $serviceIdentifier, $params);
+    }
+
+    public function insertRadarDetector(string $imei)
+    {
+        // return;
+        $smde_type       = "雷达烟感";
+        $smde_brand_name = "大华";
+        $smde_model_name = "DH-HY-SAR4NA";
+        $smde_model_tag  = "";
+        $smde_part_id    = 1; // 如约自己的设备
+        return DB::connection('mysql2')->table('smoke_detector')->insert([
+            "smde_type"       => $smde_type,
+            "smde_brand_name" => $smde_brand_name,
+            "smde_model_name" => $smde_model_name,
+            "smde_imei"       => $imei,
+            "smde_model_tag"  => $smde_model_tag,
+            "smde_part_id"    => $smde_part_id,
+        ]);
+    }
+
+    // 将百分比转换为dBm
+    public function percentToDbm($percent)
+    {
+        if ($percent === 100) {
+            return 100;
+        }
+        return 10 * log10(1 / (1 - $percent / 100));
     }
 }
