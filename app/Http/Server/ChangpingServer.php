@@ -42,6 +42,8 @@ class ChangpingServer extends BaseServer
             'data'      => $data,
         ];
 
+        // dd(json_encode($params));
+
         // 发送请求到第三方接口
         $response = Http::withHeaders([
             'Content-Type' => 'application/json; charset=utf-8',
@@ -52,6 +54,7 @@ class ChangpingServer extends BaseServer
             return $response->body();
         }
         // 请求失败，处理错误信息
-        return 222;
+        dd($response->status(), $response->body());
+        // return $response->body();
     }
 }

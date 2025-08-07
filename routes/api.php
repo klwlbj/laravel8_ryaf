@@ -230,6 +230,8 @@ Route::prefix('haizhuang')->group(function () {
 Route::prefix('changping')->group(function () {
     Route::get('/pushAlarm/{ionoId}/{typeId}', [ChangpingController::class, 'pushAlarm']);
     Route::get('/addHeartBeat/{imei}', [ChangpingController::class, 'addHeartBeat']);
+    Route::get('/queryDevice', [ChangpingController::class, 'queryDevice']);
+    Route::get('/deleteDevice', [ChangpingController::class, 'deleteDevice']);
 });
 
 Route::prefix('xiaoan')->group(function () {

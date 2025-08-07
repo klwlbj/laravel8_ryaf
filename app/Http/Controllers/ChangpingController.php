@@ -153,4 +153,105 @@ class ChangpingController extends BaseController
         }
         return $this->response([], '位置不存在');
     }
+
+    public function queryDevice()
+    {
+        $imeis = [
+            864440068733370,
+            864440068680605,
+            864440068162448,
+            864440068314999,
+            863758072281792,
+            864440068525586,
+            866330078367590,
+            863758072568123,
+            863758072849994,
+            866330078497207,
+            864440068218679,
+            864440068523987,
+            864440068029050,
+            861877076595445,
+            863758072886723,
+            863758072205668,
+            861346078506396,
+            861346079257049,
+            867945070705767,
+            867945070559578,
+            863182070098209,
+            863758073030768,
+            863182070497765,
+            861346078801854,
+            864982073730958,
+            862041079768553,
+            865777075174133,
+            862361072596185,
+            862361072772422,
+            866960076277712,
+            866960076855384,
+            866960076441078,
+            862361072680328,
+            866960076102845,
+            866960076302452,
+            866960076455409,
+            862752073373048,
+            862752073958038,
+            862752071472321,
+            862752073373337,
+            862752073925953,
+            862752073926563,
+            863758072557092,
+            863758072820789,
+            862752073983846,
+        ];
+        foreach ($imeis as $imei) {
+            $data = [
+                'monitorCode' => $imei,
+                "pageNo"      => 1,
+            ];
+            $method = 'api.v2.unit.selectUserMonitorInfo';
+            $res    = (new ChangpingServer())->sendRequest($method, $data);
+            // dd($res);
+            $resList = json_decode($res, true);
+            // dd($resList);
+            if ($resList['success']) {
+                $resData = json_decode($resList['data'], true);
+                if (count($resData) > 0) {
+                    $item = $resData[0];
+                    // 更新thirdparty_unique_key表
+
+                    $smdeId = DB::connection('mysql2')->table('smoke_detector')
+                        ->where('smde_imei', $imei)
+                        ->value('smde_id');
+
+                    if ($smdeId) {
+                        DB::connection('mysql2')->table('thirdparty_unique_key')->Insert(
+                            [
+                                'tuk_smde_id'       => $smdeId,
+                                'tuk_thirdparty_uk' => $item['id'],
+                                'tuk_thpl_id'       => 9, // 昌平
+                            ],
+                        );
+                    }
+                }
+            } else {
+                $res = [];
+            }
+            Log::channel('changping')->info('昌平查询设备推送内容：' . json_encode($data));
+            Log::channel('changping')->info('昌平查询设备推送返回：' . json_encode($res));
+        }
+            return 1;
+    }
+
+
+    public function deleteDevice()
+    {
+        $data = [
+            'ids' => "1942797957089259524,1950368744144388097,1927991877877915650,1927991877869527067",
+        ];
+        $method = 'api.v2.unit.delUserMonitorInfo';
+        $res    = (new ChangpingServer())->sendRequest($method, $data);
+        Log::channel('changping')->info('昌平删除设备推送返回：' . json_encode($res));
+        return 2;
+
+    }
 }
